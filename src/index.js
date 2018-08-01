@@ -3,7 +3,7 @@ const defaultAwesomeFunction = name => {
   return returnStr
 }
 
-let test
+let testa
 const awesomeFunction = () => 'I am just an Awesome Function'
 
 export default defaultAwesomeFunction
