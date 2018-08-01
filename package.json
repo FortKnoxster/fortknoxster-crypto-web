@@ -7,7 +7,11 @@
     "start": "webpack -w -d",
     "build": "webpack -p",
     "lint": "eslint src/**/*.js",
+    "precommit": "lint-staged",
     "test": "test"
+  },
+  "lint-staged": {
+    "src/**/*.js": "eslint"
   },
   "author": "FortKnoxster",
   "license": "ISC",
