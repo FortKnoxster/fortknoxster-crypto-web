@@ -1,8 +1,8 @@
 {
-  "name": "fkx-web-crypto",
+  "name": "fkx-crypto-web",
   "version": "0.0.1",
   "description": "FortKnoxsters encryption algorithms used in the web app.",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
     "start": "webpack -w -d",
     "build": "webpack -p",
