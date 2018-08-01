@@ -1,3 +1,20 @@
 {
-  "presets": ["env"]
+  "presets": [
+    [ "env", { "modules": false } ],
+    "stage-2"
+  ],
+
+  "env": {
+    "test": {
+      "presets": [
+        "env"
+      ]
+    }
+  },
+
+  "plugins": [
+    ["module-resolver", {
+      "root": ["./src"]
+    }]
+  ]
 }
