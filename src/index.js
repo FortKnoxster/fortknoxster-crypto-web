@@ -1,1 +1,1 @@
-export * from './kryptos/derive'
+export { deriveAccountPassword } from './kryptos/derive'

@@ -14,4 +14,25 @@ export const utils = {
     }
     return buf
   },
+
+  /**
+   * Converts an ArrayBuffer to a string of hexadecimal numbers.
+   *
+   * @param {ArrayBuffer} arrayBuffer
+   * @returns {String}
+   */
+  arrayBufferToHex(arrayBuffer) {
+    const byteArray = new Uint8Array(arrayBuffer)
+    let hexString = ''
+    let nextHexByte
+
+    for (let i = 0; i < byteArray.byteLength; i += 1) {
+      nextHexByte = byteArray[i].toString(16) // Integer to base 16
+      if (nextHexByte.length < 2) {
+        nextHexByte = `0${nextHexByte}` // Otherwise 10 becomes just a instead of 0a
+      }
+      hexString += nextHexByte
+    }
+    return hexString
+  },
 }
