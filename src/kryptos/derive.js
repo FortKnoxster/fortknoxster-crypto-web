@@ -3,25 +3,22 @@ import { AES_KW, PBKDF2, deriveKeyPBKDF2 } from './algorithms'
 import { DERIVE, WRAP } from './usages'
 import { RAW } from './formats'
 import { EXTRACTABLE, NONEXTRACTABLE } from './constants'
-// DEPRECATED
-import { KRYPTOS } from '../kryptos.core'
 
 export async function deriveAccountPassword(username, password, domain) {
   const { subtle } = window.crypto
   const salt = utils.stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
-  const deriveKeyAlgo = deriveKeyPBKDF2(salt)
-  const keydata = utils.stringToArrayBuffer(password)
+  const bufferedPassword = utils.stringToArrayBuffer(password)
 
   try {
     const key = await subtle.importKey(
       RAW,
-      keydata,
+      bufferedPassword,
       PBKDF2,
       NONEXTRACTABLE,
       DERIVE,
     )
     const derivedKey = await subtle.deriveKey(
-      deriveKeyAlgo,
+      deriveKeyPBKDF2(salt),
       key,
       AES_KW,
       EXTRACTABLE,
@@ -31,7 +28,7 @@ export async function deriveAccountPassword(username, password, domain) {
 
     return utils.arrayBufferToHex(exportedKey)
   } catch (e) {
-    console.log(e)
-    return KRYPTOS.getDerivedPassword(salt, password)
+    return e
+    // TODO ?? return KRYPTOS.getDerivedPassword(salt, password)
   }
 }
