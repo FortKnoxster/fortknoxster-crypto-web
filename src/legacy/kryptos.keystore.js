@@ -1,4 +1,5 @@
-/* global KRYPTOS, Promise, Token, Contacts, CryptoKey */
+import { KRYPTOS } from './kryptos.core'
+/* global Promise, Token, Contacts, CryptoKey */
 
 /**
  * KRYPTOS is a cryptographic library wrapping and implementing the
@@ -26,7 +27,6 @@
  */
 export const KeyStore = function(service, containerPDK, containerPSK) {
   const KU = KRYPTOS.utils
-
   var service = service
 
   //    var lookupQueue = new Queue(5);

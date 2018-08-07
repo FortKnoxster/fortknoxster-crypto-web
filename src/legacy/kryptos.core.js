@@ -16,7 +16,7 @@
 /**
  * The KRYPTOS Core module.
  */
-var KRYPTOS = KRYPTOS || {
+export const KRYPTOS = {
   /**
    * 256 bytes length
    */
@@ -751,6 +751,8 @@ var KRYPTOS = KRYPTOS || {
  * KRYPTOS utilities.
  * Contains varios utility and conversions functions.
  */
+export const KU = KRYPTOS.utils
+
 KRYPTOS.utils = {
   logContainer: '#logContainer',
   logType: 3,
@@ -1241,7 +1243,7 @@ KRYPTOS.utils = {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      '\'': '&#39;',
+      "'": '&#39;',
       '/': '&#x2F;',
     }
     return String(s).replace(/[&<>"'\/]/g, s => entityMap[s])
@@ -1297,7 +1299,7 @@ KRYPTOS.utils = {
     return s
       .replace(/\r?\n/g, '\\n')
       .replace(/"/g, '"')
-      .replace(/'/g, '\'')
+      .replace(/'/g, "'")
       .replace(/“/g, '“')
       .replace(/”/g, '”')
       .replace(/’/g, '’')
@@ -1308,7 +1310,7 @@ KRYPTOS.utils = {
       return s
         .replace(/\\n/g, '<br />')
         .replace(/\"/g, '"')
-        .replace(/\'/g, '\'')
+        .replace(/\'/g, "'")
         .replace(/\“/g, '“')
         .replace(/\”/g, '”')
         .replace(/\’/g, '’')
