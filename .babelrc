@@ -1,3 +1,32 @@
 {
-  "presets": ["env"]
+  "presets": [
+    [ "env", { 
+      "modules": false,
+        "targets": {
+          "browsers": [
+            "chrome > 39"
+          ]
+        }
+    } ],
+    "stage-2"
+  ],
+
+  "env": {
+    "test": {
+      "presets": [
+        "env"
+      ]
+    }
+  },
+
+  "plugins": [
+    ["module-resolver", {
+      "root": ["./src"]
+    }
+    ],
+    ["transform-runtime", {
+      "polyfill": true,
+      "regenerator": true
+    }]
+  ]
 }
