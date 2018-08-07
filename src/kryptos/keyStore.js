@@ -1,5 +1,5 @@
 import { KeyStore } from '../legacy/kryptos.keystore'
-// TODO move to crypto lib
+
 export function unlockKeyStores(keys, password) {
   const json = JSON.parse(keys)
   const promises = Object.keys(json).map(key =>
