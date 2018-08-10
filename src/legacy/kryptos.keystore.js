@@ -1275,7 +1275,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
         .then(() =>
           unlockPdk(protector)
             .then(() => {
-              resolve({ success: true })
+              resolve({ success: true, keyStore: this })
             })
             .catch(error => {
               KU.log(error)
@@ -1459,7 +1459,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       case 'EC':
         break
       default:
-        throw new Error('Invalid algorithm2')
+        throw new Error('Invalid algorithm3')
         break
     }
     mode = keyStoreMode
@@ -1522,5 +1522,6 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     deriveKeyFromPassword,
     addMemberProtector,
     unlockFromDerivedKey,
+    id: service,
   }
 }

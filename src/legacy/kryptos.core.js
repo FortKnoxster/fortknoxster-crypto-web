@@ -1,4 +1,4 @@
-/* global sjcl, ES6Promise, Uint8Array, Token, Contacts, jsxc */
+/* global Uint8Array, Token, Contacts, jsxc */
 
 /**
  * KRYPTOS is a cryptographic library wrapping and implementing the
