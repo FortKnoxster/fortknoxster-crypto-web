@@ -35,4 +35,24 @@ export const utils = {
     }
     return hexString
   },
+
+  base64ToArrayBuffer(base64, base64Url) {
+    let base64String = base64
+    if (base64Url) {
+      base64String = base64
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .replace(/=/g, '')
+    }
+    if (!base64String) {
+      base64String = ''
+    }
+    const binaryString = window.atob(base64String)
+    const len = binaryString.length
+    const bytes = new Uint8Array(len)
+    for (let i = 0; i < len; i += 1) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    return bytes.buffer
+  },
 }

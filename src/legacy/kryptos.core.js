@@ -1,4 +1,4 @@
-/* global sjcl, ES6Promise, Uint8Array, Token, Contacts, jsxc */
+/* global Uint8Array, Token, Contacts, jsxc */
 
 /**
  * KRYPTOS is a cryptographic library wrapping and implementing the
@@ -16,7 +16,7 @@
 /**
  * The KRYPTOS Core module.
  */
-export var KRYPTOS = KRYPTOS || {
+export const KRYPTOS = {
   /**
    * 256 bytes length
    */
@@ -382,13 +382,7 @@ export var KRYPTOS = KRYPTOS || {
     })
   },
 
-  /**
-   * @deprecated
-   */
   deriveAccountPassword(username, password, domain, callback) {
-    console.warn(
-      'kryptos.core: deriveAccountPassword, is deprecated. Use from src/kryptos/derive.js',
-    )
     let start = new Date().getTime(),
       end = 0
     const salt = `${username.toLowerCase()}@${domain}`
@@ -757,6 +751,8 @@ export var KRYPTOS = KRYPTOS || {
  * KRYPTOS utilities.
  * Contains varios utility and conversions functions.
  */
+export const KU = KRYPTOS.utils
+
 KRYPTOS.utils = {
   logContainer: '#logContainer',
   logType: 3,
