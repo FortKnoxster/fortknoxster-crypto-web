@@ -1,4 +1,4 @@
-import { utils } from './utils'
+import { stringToArrayBuffer, arrayBufferToHex } from './utils'
 import { AES_KW, PBKDF2, deriveKeyPBKDF2 } from './algorithms'
 import { DERIVE, WRAP } from './usages'
 import { RAW } from './formats'
@@ -6,8 +6,8 @@ import { EXTRACTABLE, NONEXTRACTABLE } from './constants'
 
 export async function deriveAccountPassword(username, password, domain) {
   const { subtle } = window.crypto
-  const salt = utils.stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
-  const bufferedPassword = utils.stringToArrayBuffer(password)
+  const salt = stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
+  const bufferedPassword = stringToArrayBuffer(password)
 
   try {
     const key = await subtle.importKey(
@@ -26,7 +26,7 @@ export async function deriveAccountPassword(username, password, domain) {
     )
     const exportedKey = await subtle.exportKey(RAW, derivedKey)
 
-    return utils.arrayBufferToHex(exportedKey)
+    return arrayBufferToHex(exportedKey)
   } catch (e) {
     return e
     // TODO ?? return KRYPTOS.getDerivedPassword(salt, password)
