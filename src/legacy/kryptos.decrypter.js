@@ -157,6 +157,7 @@ export const Decrypter = function(
   const handlePlainText = function(plainText) {
     const json = KRYPTOS.utils.ab2json(plainText)
     callback(json)
+    return json
   }
 
   const handlePlainFile = function(plainFile) {
@@ -209,7 +210,7 @@ export const Decrypter = function(
         } else var message = data.ServiceData
         iv = KRYPTOS.utils.b642ab(message.iv)
         cipherText = KRYPTOS.utils.b642ab(message.data)
-        keyStore
+        return keyStore
           .importPek(pek, [])
           .then(importedPek => {
             nodePek = importedPek
@@ -225,7 +226,7 @@ export const Decrypter = function(
             log(key)
             return decryptCipherText(key, 'AES-GCM')
           })
-          .then(handlePlainText)
+          .then(plainText => handlePlainText(plainText))
           .catch(error => {
             KRYPTOS.utils.log(error)
             callback(false, error)
