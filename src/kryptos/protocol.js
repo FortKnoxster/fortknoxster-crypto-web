@@ -1,5 +1,5 @@
 import { EC_AES_GCM_256 } from './algorithms'
-import { utils } from './utils'
+import { base64ToArrayBuffer, dummyCB } from './utils'
 import { Encrypter } from '../legacy/kryptos.encrypter'
 import { Decrypter } from '../legacy/kryptos.decrypter'
 
@@ -45,10 +45,6 @@ function envelope(algo, data) {
   }
 }
 
-function callback(success, text) {
-  console.log(`succes: ${success} message: ${text}`)
-}
-
 // TODO move to utils
 function tryParseResult(result) {
   try {
@@ -72,7 +68,7 @@ function tryParseResult(result) {
  */
 export function encryptProtocol(type, data, nodePEK) {
   const { keyStore } = protocol
-  const encrypter = new Encrypter(keyStore, data, null, callback)
+  const encrypter = new Encrypter(keyStore, data, null, dummyCB)
   return encrypter.protocol(message(type), envelope(EC_AES_GCM_256), nodePEK)
 }
 
@@ -91,7 +87,7 @@ export function decryptProtocol(result, isError, verifyOnly, nodePEK, nodePVK) {
   const data = isError
     ? JSON.parse(result.errors.message)
     : tryParseResult(result)
-  const signature = utils.base64ToArrayBuffer(data.Sign, true)
+  const signature = base64ToArrayBuffer(data.Sign, true)
   data.Sign = null // TODO handle this in decrypter
   const decrypter = new Decrypter(
     keyStore,
@@ -101,7 +97,7 @@ export function decryptProtocol(result, isError, verifyOnly, nodePEK, nodePVK) {
     signature,
     null,
     null,
-    callback,
+    dummyCB,
   )
   return decrypter.protocol(data, nodePVK, nodePEK, verifyOnly)
 }

@@ -708,22 +708,29 @@ export const Encrypter = function(
         .then(keyStore.getPsk)
         .then(signEncryptedPlainText)
         .then(saveSignature)
+        .then(keyStore.getPek)
+        .then(encryptSessionKey)
         .then(key => {
-          encrypterCallback(true, {
+          const result = {
             message: KU.ab2b64(encryptedPlainText[1]),
             iv: KU.ab2b64(encryptedPlainText[0]),
             signature: KU.ab2b64(signature),
             key: KU.ab2b64(exportedSessionKey),
+            // ask Mickey, Key never used, correct ?
+            // only diff between encryptNewItem is below encrypted_key
             encrypted_key: new Blob([key], {
               type: 'application/octet-stream',
             }),
-          })
+          }
+          encrypterCallback(true, result)
+          return result
         })
         .catch(error => {
           KU.log(error)
           if (encrypterCallback) {
             encrypterCallback(false, error)
           }
+          return error
         })
     },
 
@@ -753,18 +760,21 @@ export const Encrypter = function(
         .then(signEncryptedPlainText)
         .then(saveSignature)
         .then(() => {
-          encrypterCallback(true, {
+          const result = {
             message: KU.ab2b64(encryptedPlainText[1]),
             iv: KU.ab2b64(encryptedPlainText[0]),
             signature: KU.ab2b64(signature),
             key: KU.ab2b64(exportedSessionKey),
-          })
+          }
+          encrypterCallback(true, result)
+          return result
         })
         .catch(error => {
           KU.log(error)
           if (encrypterCallback) {
             encrypterCallback(false, error)
           }
+          return error
         })
     },
 

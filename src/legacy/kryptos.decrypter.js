@@ -509,14 +509,17 @@ export const Decrypter = function(
           KRYPTOS.utils.log(error)
         })
         .then(plainText => {
-          callback({
+          const result = {
             json: KRYPTOS.utils.ab2json(plainText),
             key: KRYPTOS.utils.ab2b64(sessionKey),
-          })
+          }
+          callback(result)
+          return result
         })
         .catch(error => {
           KRYPTOS.utils.log(error)
           callback(false, error)
+          return error
         })
     },
     decryptItem(itemId, referenceId) {

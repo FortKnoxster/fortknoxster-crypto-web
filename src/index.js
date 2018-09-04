@@ -7,8 +7,15 @@ export {
   encryptProtocol,
   decryptProtocol,
 } from './kryptos/protocol'
+export {
+  createItem,
+  setupStorage,
+  initStorage,
+  encryptItems,
+  decryptItemAssignment,
+} from './kryptos/storage'
+
 // LEGACY exports
-// export { KRYPTOS as kryptos } from './legacy/kryptos.core'
 export { KeyStore } from './legacy/kryptos.keystore'
 
 KRYPTOS.check.support()
