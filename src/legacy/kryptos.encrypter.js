@@ -786,17 +786,20 @@ export const Encrypter = function(
         .then(signEncryptedPlainText)
         .then(saveSignature)
         .then(() => {
-          encrypterCallback(true, {
+          const result = {
             message: KU.ab2b64(encryptedPlainText[1]),
             iv: KU.ab2b64(encryptedPlainText[0]),
             signature: KU.ab2b64(signature),
-          })
+          }
+          encrypterCallback(true, result)
+          return result
         })
         .catch(error => {
           KU.log(error)
           if (encrypterCallback) {
             encrypterCallback(false, error)
           }
+          return error
         })
     },
 

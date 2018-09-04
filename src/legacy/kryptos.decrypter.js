@@ -546,15 +546,18 @@ export const Decrypter = function(
             //                        resolve({uuid: uuid, failed: true, plain: {subject: "Incorrect key!!"}});
           })
           .then(plainText => {
-            callback({
+            const result = {
               plain: KRYPTOS.utils.ab2json(plainText),
               id: itemId,
               rid: referenceId,
-            })
+            }
+            callback(result)
+            return result
           })
           .catch(error => {
             KRYPTOS.utils.log(error)
             callback(false, error)
+            return error
           })
       )
     },
