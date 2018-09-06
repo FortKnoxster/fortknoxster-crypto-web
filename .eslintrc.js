@@ -8,5 +8,6 @@ module.exports = {
     // 'import/no-default-export': 2,
     'max-lines': ['error', 300],
     quotes: ['error', 'single'],
+    camelcase: ['error', { ignoreDestructuring: true }],
   },
 }

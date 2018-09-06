@@ -8,11 +8,16 @@ export {
   decryptProtocol,
 } from './kryptos/protocol'
 export {
+  addStoragePublicKeys,
+  childItem,
   createItem,
   setupStorage,
   initStorage,
   encryptItems,
+  encryptExistingItem,
+  itemFromJson,
   decryptItemAssignment,
+  decryptItems,
 } from './kryptos/storage'
 
 // LEGACY exports
