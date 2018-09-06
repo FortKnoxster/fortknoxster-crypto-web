@@ -9,7 +9,8 @@
     "build": "webpack -p",
     "lint": "eslint src/**/*.js",
     "precommit": "lint-staged",
-    "test": "test"
+    "test": "test",
+    "prepare": "npm run build"
   },
   "lint-staged": {
     "src/**/*.js": "eslint"
