@@ -15,9 +15,11 @@ export {
   initStorage,
   encryptItems,
   encryptExistingItem,
+  encryptFilePart,
   itemFromJson,
   decryptItemAssignment,
-  decryptItems,
+  decryptItem,
+  decryptChildItems,
 } from './kryptos/storage'
 
 // LEGACY exports

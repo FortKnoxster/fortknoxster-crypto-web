@@ -397,7 +397,7 @@ export const Encrypter = function(
         })
         .then(exportSessionKey)
         .then(rawAesKey => {
-          resolve({
+          const result = {
             id,
             part: partNumber,
             encrypted: new Blob([encryptedFile], {
@@ -407,7 +407,9 @@ export const Encrypter = function(
             key: KU.ab2b64(rawAesKey),
             iv: KU.ab2b64(iv),
             enctype: 'AES-GCM-256',
-          })
+          }
+          resolve(result)
+          return result
         })
         .catch(error => {
           KU.log(error)
@@ -416,6 +418,7 @@ export const Encrypter = function(
               error.message
             }\n${error.stack}`,
           )
+          return error
         }),
     )
   }

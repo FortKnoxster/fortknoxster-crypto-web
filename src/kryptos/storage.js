@@ -89,6 +89,12 @@ export function encryptExistingItem(item) {
   return encrypter.encryptExistingItem(base64ToArrayBuffer(item.key))
 }
 
+export function encryptFilePart(filePart, partNo, itemId) {
+  const { keyStore } = storage
+  const encrypter = new Encrypter(keyStore, null, null, null)
+  return encrypter.encryptFilePart(filePart, itemId, partNo)
+}
+
 // TODO come up with better name,
 // return Promise
 export function setupStorage(item) {
@@ -97,24 +103,28 @@ export function setupStorage(item) {
   return encrypter.encryptNewItemAssignment()
 }
 
-export function decryptItems(items, parent) {
+export function decryptItem(id, rid, key, metaData) {
   const { keyStore } = storage
+  const decrypter = new Decrypter(
+    keyStore,
+    base64ToArrayBuffer(key),
+    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
+    base64ToArrayBuffer(metaData.d),
+    base64ToArrayBuffer(metaData.s),
+    keyStore.getPvk(true),
+    null,
+    dummyCB,
+  )
+  return decrypter.decryptItem(id, rid)
+}
+
+export function decryptChildItems(items, parent) {
   const { ch } = parent.d
-  return items.map(item => {
-    const { meta_data, id, reference_id: rid } = item
+  return ch.map(child => {
+    const { id, key, rid } = child
+    const { meta_data } = items.find(item => item.reference_id === rid)
     const metaData = JSON.parse(meta_data)
-    const { key } = ch.find(child => child.rid === rid)
-    const decrypter = new Decrypter(
-      keyStore,
-      base64ToArrayBuffer(key),
-      new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-      base64ToArrayBuffer(metaData.d),
-      base64ToArrayBuffer(metaData.s),
-      keyStore.getPvk(true),
-      null,
-      dummyCB,
-    )
-    return decrypter.decryptItem(id, rid)
+    return decryptItem(id, rid, key, metaData)
   })
 }
 
