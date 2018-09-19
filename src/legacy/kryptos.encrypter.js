@@ -408,8 +408,7 @@ export const Encrypter = function(
             iv: KU.ab2b64(iv),
             enctype: 'AES-GCM-256',
           }
-          resolve(result)
-          return result
+          return resolve(result)
         })
         .catch(error => {
           KU.log(error)
@@ -752,7 +751,7 @@ export const Encrypter = function(
     },
 
     // PSK should be cached previously
-    encryptNewItem() {
+    encryptNewItem(rid) {
       return generateSessionKey()
         .then(saveSessionKey)
         .then(encryptPlainText)
@@ -768,6 +767,7 @@ export const Encrypter = function(
             iv: KU.ab2b64(encryptedPlainText[0]),
             signature: KU.ab2b64(signature),
             key: KU.ab2b64(exportedSessionKey),
+            rid,
           }
           encrypterCallback(true, result)
           return result
@@ -815,6 +815,7 @@ export const Encrypter = function(
     encryptFilePart(file, id, partNumber, callback) {
       return encryptFilePart(file, id, partNumber, callback).then(result => {
         callback(result)
+        return result
       })
     },
 
