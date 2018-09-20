@@ -57,7 +57,8 @@ export function base64ToArrayBuffer(base64, base64Url) {
 
 export function generateId(bytes) {
   const typedArray = new Uint8Array(bytes)
-  return arrayBufferToHex(window.crypto.getRandomValues(typedArray))
+  const cryptoObj = window.crypto || window.msCrypto
+  return arrayBufferToHex(cryptoObj.getRandomValues(typedArray))
 }
 
 export function dummyCB(success, result) {

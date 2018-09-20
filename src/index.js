@@ -2,22 +2,23 @@ import { KRYPTOS } from './legacy/kryptos.core'
 
 export { deriveAccountPassword } from './kryptos/derive'
 export { unlockKeyStores } from './kryptos/keyStore'
+export { generateId } from './kryptos/utils'
 export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
 } from './kryptos/protocol'
+
 export {
   addStoragePublicKeys,
-  childItem,
-  createItem,
-  setupStorage,
   initStorage,
+  encryptNewItemAssignment,
   encryptItems,
   encryptExistingItem,
-  itemFromJson,
+  encryptFilePart,
   decryptItemAssignment,
-  decryptItems,
+  decryptItem,
+  decryptChildItems,
 } from './kryptos/storage'
 
 // LEGACY exports
