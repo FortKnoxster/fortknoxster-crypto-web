@@ -569,19 +569,23 @@ export const Decrypter = function(
       const algo = KRYPTOS.AES_GCM_ALGO
       return importSessionKey(null, algo)
         .then(key => {
+          console.log('key: ', key)
           log(key)
           return decryptCipherText(key, 'AES-GCM')
         })
         .then(plainFile => {
-          callback({
+          const result = {
             id,
             part: partNumber,
             file: plainFile,
-          })
+          }
+          callback(result)
+          return result
         })
         .catch(error => {
           KRYPTOS.utils.log(error)
-          callback(false, error.message ? error.message : error)
+          callback(false, error)
+          return Promise.reject(error)
         })
     },
     protocol,

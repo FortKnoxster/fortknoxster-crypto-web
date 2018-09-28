@@ -14,7 +14,6 @@ export function initStorage(keyStore) {
   storage.keyStore = keyStore
 }
 
-// return [Promise]
 export function encryptItems(items) {
   const { keyStore } = storage
   return items.map(item => {
@@ -26,7 +25,10 @@ export function encryptItems(items) {
 export function encryptExistingItem(item) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
-  return encrypter.encryptExistingItem(base64ToArrayBuffer(item.key))
+  return encrypter.encryptExistingItem(
+    base64ToArrayBuffer(item.key),
+    new Uint8Array(base64ToArrayBuffer(item.iv)),
+  )
 }
 
 export function encryptFilePart(filePart, partNo, itemId) {
@@ -35,12 +37,27 @@ export function encryptFilePart(filePart, partNo, itemId) {
   return encrypter.encryptFilePart(filePart, itemId, partNo, dummyCB)
 }
 
-// TODO come up with better name,
-// return Promise
 export function encryptNewItemAssignment(item) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
   return encrypter.encryptNewItemAssignment()
+}
+
+export function decryptFilePart(itemId, partItem, filePart) {
+  console.log('decryptFilePart: ', itemId, partItem, filePart)
+  const { keyStore } = storage
+  const { iv, k, p } = partItem
+  const decrypter = new Decrypter(
+    keyStore,
+    base64ToArrayBuffer(k),
+    base64ToArrayBuffer(iv),
+    filePart,
+    null,
+    null,
+    null,
+    dummyCB,
+  )
+  return decrypter.decryptFilePart(itemId, p)
 }
 
 export function decryptItem(id, rid, key, metaData) {
