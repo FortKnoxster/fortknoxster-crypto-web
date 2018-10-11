@@ -569,7 +569,6 @@ export const Decrypter = function(
       const algo = KRYPTOS.AES_GCM_ALGO
       return importSessionKey(null, algo)
         .then(key => {
-          console.log('key: ', key)
           log(key)
           return decryptCipherText(key, 'AES-GCM')
         })

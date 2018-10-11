@@ -44,7 +44,6 @@ export function encryptNewItemAssignment(item) {
 }
 
 export function decryptFilePart(itemId, partItem, filePart) {
-  console.log('decryptFilePart: ', itemId, partItem, filePart)
   const { keyStore } = storage
   const { iv, k, p } = partItem
   const decrypter = new Decrypter(
@@ -77,12 +76,14 @@ export function decryptItem(id, rid, key, metaData) {
 
 export function decryptChildItems(items, parent) {
   const { ch } = parent.d
-  return ch.map(child => {
+  return ch.reduce((array, child) => {
     const { id, key, rid } = child
-    const { meta_data } = items.find(item => item.reference_id === rid)
-    const metaData = JSON.parse(meta_data)
-    return decryptItem(id, rid, key, metaData)
-  })
+    const item = items.find(obj => obj.reference_id === rid)
+    if (item) {
+      array.push(decryptItem(id, rid, key, JSON.parse(item.meta_data)))
+    }
+    return array
+  }, [])
 }
 
 export function decryptItemAssignment(data) {
