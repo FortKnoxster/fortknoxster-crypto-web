@@ -573,15 +573,18 @@ export const Decrypter = function(
           return decryptCipherText(key, 'AES-GCM')
         })
         .then(plainFile => {
-          callback({
+          const result = {
             id,
             part: partNumber,
             file: plainFile,
-          })
+          }
+          callback(result)
+          return result
         })
         .catch(error => {
           KRYPTOS.utils.log(error)
-          callback(false, error.message ? error.message : error)
+          callback(false, error)
+          return Promise.reject(error)
         })
     },
     protocol,

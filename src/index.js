@@ -16,6 +16,7 @@ export {
   encryptItems,
   encryptExistingItem,
   encryptFilePart,
+  decryptFilePart,
   decryptItemAssignment,
   decryptItem,
   decryptChildItems,
