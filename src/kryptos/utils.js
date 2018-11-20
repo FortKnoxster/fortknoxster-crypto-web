@@ -61,6 +61,28 @@ export function generateId(bytes) {
   return arrayBufferToHex(cryptoObj.getRandomValues(typedArray))
 }
 
+export function rsaJwk(jwk) {
+  return {
+    alg: jwk.alg,
+    e: jwk.e,
+    // ext: jwk.ext || true,
+    key_ops: jwk.key_ops, // eslint-disable-line camelcase
+    kty: jwk.kty,
+    n: jwk.n,
+  }
+}
+
+export function ecJwk(jwk) {
+  return {
+    crv: jwk.crv,
+    // ext: jwk.ext || true,
+    key_ops: jwk.key_ops, // eslint-disable-line camelcase
+    kty: jwk.kty,
+    x: jwk.x,
+    y: jwk.y,
+  }
+}
+
 export function dummyCB(success, result) {
   console.log(`success: ${success} result: ${result}`)
 }

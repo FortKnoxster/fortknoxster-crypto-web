@@ -741,12 +741,14 @@ export const Encrypter = function(
       return encryptAssignmentKey()
         .then(result => {
           encrypterCallback(true, result)
+          return result
         })
         .catch(error => {
           KU.log(error)
           if (encrypterCallback) {
             encrypterCallback(false, error)
           }
+          return error
         })
     },
 
