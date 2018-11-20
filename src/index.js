@@ -2,11 +2,16 @@ import { KRYPTOS } from './legacy/kryptos.core'
 
 export { deriveAccountPassword } from './kryptos/derive'
 export { unlockKeyStores } from './kryptos/keyStore'
-export { generateId } from './kryptos/utils'
+export { generateId, blobToDataUrl, dataUrlToBlob } from './kryptos/utils'
 export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
+  generalSettingsType,
+  requestEmailChangeType,
+  confirmEmailChangeType,
+  requestPhoneChangeType,
+  confirmPhoneChangeType,
 } from './kryptos/protocol'
 
 export {

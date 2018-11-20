@@ -61,6 +61,29 @@ export function generateId(bytes) {
   return arrayBufferToHex(cryptoObj.getRandomValues(typedArray))
 }
 
+export function blobToDataUrl(blob) {
+  const a = new FileReader()
+  return new Promise(resolve => {
+    a.onload = e => {
+      resolve(e.target.result)
+    }
+    a.readAsDataURL(blob)
+  })
+}
+
+export function dataUrlToBlob(dataurl) {
+  const arr = dataurl.split(',')
+  const mime = arr[0].match(/:(.*?);/)[1]
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  const u8arr = new Uint8Array(n)
+  while (n - 1 >= 0) {
+    n -= 1
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  return new Blob([u8arr], { type: mime })
+}
+
 export function dummyCB(success, result) {
   console.log(`success: ${success} result: ${result}`)
 }
