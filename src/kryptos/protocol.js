@@ -107,3 +107,13 @@ export function initProtocol(keyStore, nodeId, userId) {
   protocol.nodeId = nodeId
   protocol.userId = userId
 }
+
+export const generalSettingsType = 'settings.setgeneral'
+
+export const requestEmailChangeType = 'account.requestEmailChange'
+
+export const confirmEmailChangeType = 'account.confirmEmailChange'
+
+export const requestPhoneChangeType = 'account.requestPhoneChange'
+
+export const confirmPhoneChangeType = 'account.confirmPhoneChange'
