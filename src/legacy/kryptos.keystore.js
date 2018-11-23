@@ -1076,7 +1076,11 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   const getPublicKey = function(userId, type, callback) {
     return new KRYPTOS.Promise((resolve, reject) => {
       if (KU.isObject(userId)) {
-        return resolve(userId)
+        const contact = userId
+        const { encrypt, verify } = contact.keys[service]
+        const publicKey = type === 'verify' ? verify : encrypt
+        if (callback) callback(publicKey)
+        return resolve(publicKey)
       }
       const publicKeys = KRYPTOS.session.getItem(publicKeyPrefix + userId)
       let publicKey = {}

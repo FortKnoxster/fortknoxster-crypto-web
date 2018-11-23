@@ -9,18 +9,19 @@ import { Decrypter } from '../legacy/kryptos.decrypter'
 
 let keyStore
 
-export function verifyIt(keys, signature, publicKey, userId) {
+export function verifyIt(keys, signature, contact) {
   const decrypter = new Decrypter(
     keyStore,
     null,
     null,
-    stringToArrayBuffer(keys),
+    stringToArrayBuffer(JSON.stringify(keys)),
     base64ToArrayBuffer(signature),
   )
-  return decrypter.verifyIt(publicKey, userId)
+  return decrypter.verifyIt(contact, contact.userId)
 }
 
-export function verifyContactKeys(keys, contactId) {
+export function verifyContactKeys(contact) {
+  const { keys } = contact
   return Object.keys(keys)
     .filter(key => key !== 'identity')
     .map(key => {
@@ -29,7 +30,7 @@ export function verifyContactKeys(keys, contactId) {
         pek: encrypt.kty === RSA ? rsaJwk(encrypt) : ecJwk(encrypt),
         pvk: encrypt.kty === RSA ? rsaJwk(verify) : ecJwk(verify),
       }
-      return verifyIt(keysToVerify, signature, keys.identity, contactId)
+      return verifyIt(keysToVerify, signature, contact)
     })
 }
 
