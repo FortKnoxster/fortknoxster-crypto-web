@@ -43,6 +43,12 @@ export function encryptNewItemAssignment(item) {
   return encrypter.encryptNewItemAssignment()
 }
 
+export function encryptItemAssignment(item, usernames) {
+  const { keyStore } = storage
+  const encrypter = new Encrypter(keyStore, '', usernames, dummyCB)
+  return encrypter.encryptItemAssignment(base64ToArrayBuffer(item.key))
+}
+
 export function decryptFilePart(itemId, partItem, filePart) {
   const { keyStore } = storage
   const { iv, k, p } = partItem

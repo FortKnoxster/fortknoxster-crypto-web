@@ -447,8 +447,8 @@ export const Encrypter = function(
           .importPek(pek, ['encrypt'])
           .then(publicKey => encryptSessionKey(publicKey))
           .then(encryptedSessionKey => {
-            resolve({
-              email: username,
+            return resolve({
+              email: recipient.username ? recipient.username : username,
               key: KU.ab2b64(encryptedSessionKey),
             })
           })
@@ -741,12 +741,14 @@ export const Encrypter = function(
       return encryptAssignmentKey()
         .then(result => {
           encrypterCallback(true, result)
+          return result
         })
         .catch(error => {
           KU.log(error)
           if (encrypterCallback) {
             encrypterCallback(false, error)
           }
+          return error
         })
     },
 

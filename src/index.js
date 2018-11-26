@@ -17,6 +17,7 @@ export {
 export {
   addStoragePublicKeys,
   initStorage,
+  encryptItemAssignment,
   encryptNewItemAssignment,
   encryptItems,
   encryptExistingItem,
@@ -27,6 +28,7 @@ export {
   decryptChildItems,
 } from './kryptos/storage'
 
+export { initIdentity, verifyContactKeys } from './kryptos/identity'
 // LEGACY exports
 export { KeyStore } from './legacy/kryptos.keystore'
 
