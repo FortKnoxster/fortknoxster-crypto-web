@@ -17,7 +17,7 @@ export function verifyIt(keys, signature, contact) {
     stringToArrayBuffer(JSON.stringify(keys)),
     base64ToArrayBuffer(signature),
   )
-  return decrypter.verifyIt(contact, contact.userId)
+  return decrypter.verifyIt(contact, contact.contactUserId)
 }
 
 export function verifyContactKeys(contact) {
