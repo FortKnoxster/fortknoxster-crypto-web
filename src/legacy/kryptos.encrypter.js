@@ -448,7 +448,7 @@ export const Encrypter = function(
           .then(publicKey => encryptSessionKey(publicKey))
           .then(encryptedSessionKey => {
             return resolve({
-              email: recipient.username ? recipient.username : username,
+              username: recipient.username ? recipient.username : username,
               key: KU.ab2b64(encryptedSessionKey),
             })
           })
