@@ -92,7 +92,7 @@ export function decryptChildItems(items, parent) {
   }, [])
 }
 
-export function decryptItemAssignment(data) {
+export function decryptItemAssignment(data, publicKey) {
   const { keyStore } = storage
   const {
     item_key,
@@ -105,7 +105,7 @@ export function decryptItemAssignment(data) {
     new Uint8Array(base64ToArrayBuffer(metaData.iv)),
     base64ToArrayBuffer(metaData.d),
     base64ToArrayBuffer(metaData.s),
-    keyStore.getPvk(true),
+    publicKey || keyStore.getPvk(true),
     null,
     dummyCB,
   )
