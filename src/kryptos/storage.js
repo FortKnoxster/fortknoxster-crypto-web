@@ -65,7 +65,7 @@ export function decryptFilePart(itemId, partItem, filePart) {
   return decrypter.decryptFilePart(itemId, p)
 }
 
-export function decryptItem(id, rid, key, metaData) {
+export function decryptItem(id, rid, key, metaData, publicKey) {
   const { keyStore } = storage
   const decrypter = new Decrypter(
     keyStore,
@@ -73,23 +73,11 @@ export function decryptItem(id, rid, key, metaData) {
     new Uint8Array(base64ToArrayBuffer(metaData.iv)),
     base64ToArrayBuffer(metaData.d),
     base64ToArrayBuffer(metaData.s),
-    keyStore.getPvk(true),
+    publicKey || keyStore.getPvk(true),
     null,
     dummyCB,
   )
   return decrypter.decryptItem(id, rid)
-}
-
-export function decryptChildItems(items, parent) {
-  const { ch } = parent.d
-  return ch.reduce((array, child) => {
-    const { id, key, rid } = child
-    const item = items.find(obj => obj.reference_id === rid)
-    if (item) {
-      array.push(decryptItem(id, rid, key, JSON.parse(item.meta_data)))
-    }
-    return array
-  }, [])
 }
 
 export function decryptItemAssignment(data, publicKey) {

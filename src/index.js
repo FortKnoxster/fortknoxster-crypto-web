@@ -25,7 +25,6 @@ export {
   decryptFilePart,
   decryptItemAssignment,
   decryptItem,
-  decryptChildItems,
 } from './kryptos/storage'
 
 export { initIdentity, verifyContactKeys } from './kryptos/identity'
