@@ -25,10 +25,7 @@ export function encryptItems(items) {
 export function encryptExistingItem(item) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
-  return encrypter.encryptExistingItem(
-    base64ToArrayBuffer(item.key),
-    new Uint8Array(base64ToArrayBuffer(item.iv)),
-  )
+  return encrypter.encryptExistingItem(base64ToArrayBuffer(item.key))
 }
 
 export function encryptFilePart(filePart, partNo, itemId) {
