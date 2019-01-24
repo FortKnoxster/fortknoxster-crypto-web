@@ -63,7 +63,11 @@ export function generateId(bytes) {
 
 export function blobToDataUrl(blob) {
   const a = new FileReader()
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
+    a.onerror = () => {
+      a.abort()
+      reject(new DOMException('Problem parsing blobToDataUrl'))
+    }
     a.onload = e => {
       resolve(e.target.result)
     }
@@ -106,6 +110,7 @@ export function ecJwk(jwk) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 export function dummyCB(success, result) {
-  console.log(`success: ${success} result: ${result}`)
+  // console.log(`success: ${success} result: ${result}`)
 }
