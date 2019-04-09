@@ -556,12 +556,14 @@ export const Encrypter = function(
           data = { data, signature: s }
         }
         encrypterCallback(true, data)
+        return data
       })
       .catch(error => {
         KU.log(error)
         if (encrypterCallback) {
           encrypterCallback(false, error.message ? error.message : error)
         }
+        return error
       })
   }
 
@@ -571,13 +573,16 @@ export const Encrypter = function(
     return importHmacKey(KU.str2ab(key))
       .then(hmacSign)
       .then(signature => {
-        encrypterCallback(true, { data, signature: KU.ab2b64(signature) })
+        const result = { data, signature: KU.ab2b64(signature) }
+        encrypterCallback(true, result)
+        return result
       })
       .catch(error => {
         KU.log(error)
         if (encrypterCallback) {
           encrypterCallback(false, error.message ? error.message : error)
         }
+        return error
       })
   }
 
