@@ -11,15 +11,31 @@ import { Encrypter } from '../legacy/kryptos.encrypter'
 
 let keyStore
 
-export function verifyIt(keys, signature, contact) {
+export function initIdentity(kStore) {
+  keyStore = kStore
+}
+
+export function verifyIt(data, signature, contact) {
   const decrypter = new Decrypter(
     keyStore,
     null,
     null,
-    stringToArrayBuffer(JSON.stringify(keys)),
+    stringToArrayBuffer(JSON.stringify(data)),
     base64ToArrayBuffer(signature),
   )
   return decrypter.verifyIt(contact, contact.contactUserId)
+}
+
+export function verifyContact(contactToVerify, contact) {
+  const { signature } = contact
+  const decrypter = new Decrypter(
+    keyStore,
+    null,
+    null,
+    stringToArrayBuffer(JSON.stringify(contactToVerify)),
+    base64ToArrayBuffer(signature),
+  )
+  return decrypter.verifyIt(contact.userId, contact.contactUserId)
 }
 
 export function verifyContactKeys(contact) {
@@ -36,10 +52,6 @@ export function verifyContactKeys(contact) {
     })
 }
 
-export function initIdentity(kStore) {
-  keyStore = kStore
-}
-
 function signContactKeys(keys, hmacKey) {
   const encrypter = new Encrypter(keyStore, null, null, dummyCB)
   return encrypter.macSignIt(keys, hmacKey)
@@ -52,12 +64,10 @@ export async function signContact(contactToSign, hmacKey) {
   } = contactToSign
   try {
     const signedKeys = await signContactKeys(contact_keys, hmacKey)
+    // eslint-disable-next-line camelcase
+    contact.contacts_keys_hmac = signedKeys.signature
     const encrypter = new Encrypter(keyStore, null, null, dummyCB)
-    const signedContact = await encrypter.signIt(contact, false)
-    return {
-      keySignature: signedKeys.signature,
-      contactSignature: signedContact.signature,
-    }
+    return encrypter.signIt(contact, false)
   } catch (e) {
     return Promise.reject(e)
   }
