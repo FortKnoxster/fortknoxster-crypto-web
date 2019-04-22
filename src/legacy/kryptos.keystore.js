@@ -1076,6 +1076,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   const getPublicKey = function(userId, type, callback) {
     return new KRYPTOS.Promise((resolve, reject) => {
       if (KU.isObject(userId)) {
+        // TODO check consistency with LEGACY
         const contact = userId
         const { encrypt, verify } = contact.keys[service]
         const publicKey = type === 'verify' ? verify : encrypt

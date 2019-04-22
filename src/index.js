@@ -27,7 +27,12 @@ export {
   decryptItem,
 } from './kryptos/storage'
 
-export { initIdentity, verifyContactKeys } from './kryptos/identity'
+export {
+  initIdentity,
+  signContact,
+  verifyContactKeys,
+  verifyContact,
+} from './kryptos/identity'
 // LEGACY exports
 export { KeyStore } from './legacy/kryptos.keystore'
 
