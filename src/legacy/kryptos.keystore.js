@@ -1,5 +1,4 @@
 import { KRYPTOS } from './kryptos.core'
-/* global Promise, Token, Contacts, CryptoKey */
 
 /**
  * KRYPTOS is a cryptographic library wrapping and implementing the
@@ -11,10 +10,10 @@ import { KRYPTOS } from './kryptos.core'
  *
  *
  * @name KRYPTOS
- * @copyright Copyright © FortKnoxster Ltd. 2014 - 2017.
+ * @copyright Copyright © FortKnoxster Ltd. 2014 - 2019.
  * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
  * @author MJ <mj@fortknoxster.com>
- * @version 3.1
+ * @version 4.0
  */
 
 /**
@@ -25,16 +24,13 @@ import { KRYPTOS } from './kryptos.core'
  * @param {Object} containerPSK
  * @returns {KRYPTOS.Encrypter} the public methods
  */
-export const KeyStore = function(service, containerPDK, containerPSK) {
+export const KeyStore = function(serviceType, containerPDK, containerPSK) {
   const KU = KRYPTOS.utils
-  var service = service
-
-  //    var lookupQueue = new Queue(5);
+  const service = serviceType
 
   /**
    * Can be RSA or EC. Determines whether RSA keypairs or EC keypairs are
    * being used for this key store. Default is RSA.
-   * @type String
    */
   let mode = 'RSA'
 
@@ -48,9 +44,9 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
 
   const prefixPVK = `${service}:pvk`
 
-  var prefixIAKPDK = prefixIAKPDK || `${service}:pdk:iak`
+  const prefixIAKPDK = `${service}:pdk:iak`
 
-  var prefixIAKPSK = prefixIAKPSK || `${service}:psk:iak`
+  const prefixIAKPSK = `${service}:psk:iak`
 
   let encryptKeyPair = null
 
@@ -128,76 +124,53 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     setMode(keyType)
     ivPSK = KRYPTOS.nonce()
     ivPDK = KRYPTOS.nonce()
-    return (
-      deriveKeyFromPassword(password)
-        .then(generateIAK)
-        .then(saveIAKPSK)
-        .then(wrapIAKPSK)
-        .then(saveWrappedIAKPSK)
-        .then(generateSigningKeyPair)
-        .then(saveSigningKeyPair)
-        .then(wrapPSK)
-        .then(saveWrappedPSK)
-        .then(exportPVK)
-        .then(savePVK)
-        .then(generateIAK)
-        .then(saveIAKPDK)
-        .then(wrapIAKPDK)
-        .then(saveWrappedIAKPDK)
-        .then(generateEncryptionKeyPair)
-        .then(saveEncryptionKeyPair)
-        .then(wrapPDK)
-        .then(saveWrappedPDK)
-        .then(exportPEK)
-        .then(savePEK)
-        .then(() => signPublicKeys(identity))
-        .then(packageKeyContainers)
-        // .then(unwrapKeyProtector)//.then(function(result) {log(result)})
-        .catch(error => {
-          KU.log(error)
-          //                    alert(error);
-        })
-    )
+    return deriveKeyFromPassword(password)
+      .then(generateIAK)
+      .then(saveIAKPSK)
+      .then(wrapIAKPSK)
+      .then(saveWrappedIAKPSK)
+      .then(generateSigningKeyPair)
+      .then(saveSigningKeyPair)
+      .then(wrapPSK)
+      .then(saveWrappedPSK)
+      .then(exportPVK)
+      .then(savePVK)
+      .then(generateIAK)
+      .then(saveIAKPDK)
+      .then(wrapIAKPDK)
+      .then(saveWrappedIAKPDK)
+      .then(generateEncryptionKeyPair)
+      .then(saveEncryptionKeyPair)
+      .then(wrapPDK)
+      .then(saveWrappedPDK)
+      .then(exportPEK)
+      .then(savePEK)
+      .then(() => signPublicKeys(identity))
+      .then(packageKeyContainers)
+      .catch(error => {
+        KU.log(error)
+      })
   }
 
   const setupSignKeys = function(password, mode) {
     setMode(mode)
     ivPSK = KRYPTOS.nonce()
-    return (
-      deriveKeyFromPassword(password)
-        .then(generateIAK)
-        .catch(error => {
-          log('c1')
-          log(error)
-          KU.log(error)
-        })
-        .then(saveIAKPSK)
-        .then(wrapIAKPSK)
-        .then(saveWrappedIAKPSK)
-        .then(generateSigningKeyPair)
-        .catch(error => {
-          log('c2')
-          log(error)
-          KU.log(error)
-        })
-        .then(saveSigningKeyPair)
-        .then(wrapPSK)
-        .catch(error => {
-          log('c3')
-          log(error)
-          KU.log(error)
-        })
-        .then(saveWrappedPSK)
-        .then(exportPVK) // .catch(function (error) {log('c7'); log(error); KU.log(error);})
-        .then(savePVK)
-        .then(fingerprint)
-        .then(packageSignKeyContainer)
-        // .then(unwrapKeyProtector)//.then(function(result) {log(result)})
-        .catch(error => {
-          log(error)
-          //                    alert(error);
-        })
-    )
+    return deriveKeyFromPassword(password)
+      .then(generateIAK)
+      .then(saveIAKPSK)
+      .then(wrapIAKPSK)
+      .then(saveWrappedIAKPSK)
+      .then(generateSigningKeyPair)
+      .then(saveSigningKeyPair)
+      .then(wrapPSK)
+      .then(saveWrappedPSK)
+      .then(exportPVK)
+      .then(savePVK)
+      .then(fingerprint)
+      .then(packageSignKeyContainer)
+      .catch(error => {
+        KU.log(error)
+      })
   }
 
   const addMemberProtector = function(keyStore, username, callback) {
@@ -262,7 +235,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     )
   }
 
-  var generateIAK = function() {
+  let generateIAK = function() {
     log(' --- generateIAK --- ')
     return KRYPTOS.cryptoSubtle.generateKey(
       KRYPTOS.AES_GCM_ALGO,
@@ -271,13 +244,13 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     )
   }
 
-  var saveIAKPSK = function(iak) {
+  let saveIAKPSK = function(iak) {
     log(' --- saveIAKPSK --- ')
     log(iak)
     IAKPSK = iak
   }
 
-  var saveIAKPDK = function(iak) {
+  let saveIAKPDK = function(iak) {
     log(' --- saveIAKPDK --- ')
     log(iak)
     IAKPDK = iak
@@ -329,17 +302,11 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
         )
       })
       .catch(error => {
-        log(' --- importKeyFromKeyProtector error --- ')
-        log(error)
+        KU.log(error)
       })
-    //                }).then(function(key) {
-    //                    log(' --- import as aes-kw result --- ');
-    //                    log(key);
-    //                    //return KRYPTOS.cryptoSubtle.importKey("raw", key, "AES-KW", KRYPTOS.NONEXTRACTABLE, KRYPTOS.WRAP_USAGE);
-    //                });
   }
 
-  var extractKeyProtector = function(keyType, protectorType) {
+  let extractKeyProtector = function(keyType, protectorType) {
     let protectors = null
     if (keyType === 'PDK') {
       if (keyContainerPDK.keyProtectors) {
@@ -364,56 +331,45 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     throw new Error(`No key protector found for ${protectorType}.`)
   }
 
-  var packageKeyContainers = function(signedKeys) {
+  let packageKeyContainers = function(signedKeys) {
     log(' --- packageKeyContainers --- ')
-    return new KRYPTOS.Promise((resolve, reject) => {
-      const setupData = {}
-      setupData[service] = {
+    return new Promise((resolve, reject) => {
+      const data = {}
+      data[service] = {
         pdk: keyContainerPDK,
         psk: keyContainerPSK,
         pek: exportedPublicEncryptKey,
         pvk: exportedPublicVerifyKey,
         signature: signedKeys.signature,
       }
-      log(setupData)
-      resolve(setupData)
+      resolve(data)
     })
-
-    // setupCallback(true, setupData);
   }
 
-  var packageSignKeyContainer = function(hash) {
-    log(' --- packageSignKeyContainer --- ')
-    return new KRYPTOS.Promise((resolve, reject) => {
-      const setupData = {}
-      setupData[service] = {
+  let packageSignKeyContainer = function(hash) {
+    return new Promise((resolve, reject) => {
+      const data = {}
+      data[service] = {
         psk: keyContainerPSK,
         pvk: exportedPublicVerifyKey,
         fingerprint: KU.ab2hex(hash),
       }
-      log(setupData)
-      resolve(setupData)
+      resolve(data)
     })
-
-    // setupCallback(true, setupData);
   }
 
-  var packageEncryptKeyContainer = function() {
-    log(' --- packageEncryptKeyContainer --- ')
-    return new KRYPTOS.Promise((resolve, reject) => {
-      const setupData = {}
-      setupData[service] = {
+  let packageEncryptKeyContainer = function() {
+    return new Promise((resolve, reject) => {
+      const data = {}
+      data[service] = {
         pdk: keyContainerPDK,
         pek: exportedPublicEncryptKey,
       }
-      log(setupData)
-      resolve(setupData)
+      resolve(data)
     })
-
-    // setupCallback(true, setupData);
   }
 
-  var signPublicKeys = function(identity) {
+  let signPublicKeys = function(identity) {
     const publicKeys = {
       pek: isEC()
         ? KU.ecJwk(exportedPublicEncryptKey)
@@ -422,7 +378,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
         ? KU.ecJwk(exportedPublicVerifyKey)
         : KU.rsaJwk(exportedPublicVerifyKey),
     }
-    return new KRYPTOS.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const Encrypter = new KRYPTOS.Encrypter(
         identity,
         null,
@@ -444,7 +400,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {Promise} of generateKey
    */
-  var generateSigningKeyPair = function() {
+  let generateSigningKeyPair = function() {
     log(' --- generateSigningKeyPair --- ')
     if (isEC()) {
       return KRYPTOS.cryptoSubtle.generateKey(
@@ -465,7 +421,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {Promise} of generateKey
    */
-  var generateEncryptionKeyPair = function() {
+  let generateEncryptionKeyPair = function() {
     log(' --- generateEncryptionKeyPair- -- ')
     if (isEC()) {
       return KRYPTOS.cryptoSubtle.generateKey(
@@ -487,7 +443,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    * @param {raw} keyPair
    * @returns {void}
    */
-  var saveSigningKeyPair = function(keyPair) {
+  let saveSigningKeyPair = function(keyPair) {
     log(' --- saveSigningKeyPair --- ')
     log(keyPair)
     signKeyPair = keyPair
@@ -502,7 +458,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    * @param {raw} keyPair
    * @returns {void}
    */
-  var saveEncryptionKeyPair = function(keyPair) {
+  let saveEncryptionKeyPair = function(keyPair) {
     log(' --- saveEncryptionKeyPair --- ')
     log(keyPair)
     encryptKeyPair = keyPair
@@ -516,7 +472,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {unresolved}
    */
-  var wrapPDK = function() {
+  let wrapPDK = function() {
     log(' --- wrapPDK --- ')
     return KRYPTOS.cryptoSubtle.wrapKey(
       'jwk',
@@ -531,7 +487,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {Promise} of wrapKey
    */
-  var wrapPSK = function() {
+  let wrapPSK = function() {
     log(' --- wrapPSK --- ')
     return KRYPTOS.cryptoSubtle.wrapKey('jwk', signKeyPair.privateKey, IAKPSK, {
       name: 'AES-GCM',
@@ -539,7 +495,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var saveWrappedPDK = function(wrappedKey) {
+  let saveWrappedPDK = function(wrappedKey) {
     log(' --- saveWrappedPDK --- ')
     log(wrappedKey)
     if (keyContainerPDK === null) {
@@ -557,7 +513,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     // wrappedPSK = wrappedKey;
   }
 
-  var saveWrappedPSK = function(wrappedKey) {
+  let saveWrappedPSK = function(wrappedKey) {
     log(' --- saveWrappedPSK --- ')
     log(wrappedKey)
     if (keyContainerPSK === null) {
@@ -575,7 +531,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     // wrappedPSK = wrappedKey;
   }
 
-  var getKeyType = function(type) {
+  let getKeyType = function(type) {
     if (type === 'PSK') {
       if (mode === 'RSA') {
         return 'RSASSA-PKCS1-v1_5-2048'
@@ -633,7 +589,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     return KRYPTOS.cryptoSubtle.exportKey('jwk', key)
   }
 
-  var wrapIAKPSK = function(key) {
+  let wrapIAKPSK = function(key) {
     log(' --- wrapIAKPSK --- ')
     log(IAKPSK || key)
     log(derivedKey)
@@ -642,13 +598,13 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var saveWrappedIAKPSK = function(wrappedKey) {
+  let saveWrappedIAKPSK = function(wrappedKey) {
     log(' --- saveWrappedIAKPSK --- ')
     wrappedIAKPSK = wrappedKey
     log(wrappedKey)
   }
 
-  var wrapIAKPDK = function(key) {
+  let wrapIAKPDK = function(key) {
     log(' --- wrapIAKPDK --- ')
     log(derivedKey)
     log(IAKPDK)
@@ -668,14 +624,14 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var saveWrappedIAKPDK = function(wrappedKey) {
+  let saveWrappedIAKPDK = function(wrappedKey) {
     log(' --- saveWrappedIAKPDK --- ')
     wrappedIAKPDK = wrappedKey
     log(wrappedKey)
     // addPasswordProtector(keyContainerPDK, wrappedKey);
   }
 
-  var addProtector = function(keyContainer, wrappedKey) {
+  let addProtector = function(keyContainer, wrappedKey) {
     log(' --- addProtector --- ')
     if (derivedKey.type === 'public') {
       addAsymmetricProtector(keyContainer, wrappedKey)
@@ -684,7 +640,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     }
   }
 
-  var addPasswordProtector = function(keyContainer, wrappedKey) {
+  let addPasswordProtector = function(keyContainer, wrappedKey) {
     if (!keyContainer) {
       return
     }
@@ -698,7 +654,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var addAsymmetricProtector = function(keyContainer, wrappedKey) {
+  let addAsymmetricProtector = function(keyContainer, wrappedKey) {
     keyContainer.keyProtectors.push({
       encryptedKey: KU.ab2b64(wrappedKey),
       type: 'asymmetric',
@@ -734,7 +690,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     }
   }
 
-  var deriveKeyFromAsymmetric = function(keyStore, username) {
+  let deriveKeyFromAsymmetric = function(keyStore, username) {
     log(' --- deriveKeyFromAsymmetric --- ')
     setDeriveKeyAlgo(KRYPTOS.RSA_OAEP_ALGO)
     let operation = null
@@ -752,7 +708,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var deriveKeyFromPassword = function(password) {
+  let deriveKeyFromPassword = function(password) {
     log(' --- deriveKeyFromPassword --- ')
     setDeriveKeyAlgo({
       name: 'PBKDF2',
@@ -763,7 +719,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     return importPassword(password)
   }
 
-  var setDeriveKeyAlgo = function(algo) {
+  let setDeriveKeyAlgo = function(algo) {
     deriveKeyAlgo = algo
   }
 
@@ -777,7 +733,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       })
   }
 
-  var importPassword = function(password) {
+  let importPassword = function(password) {
     log(' --- importPassword --- ')
     return KRYPTOS.cryptoSubtle
       .importKey(
@@ -796,13 +752,13 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       })
   }
 
-  var saveImportedPassword = function(password) {
+  let saveImportedPassword = function(password) {
     log(' --- saveImportedPassword --- ')
     importedPassword = password
     return importedPassword
   }
 
-  var deriveKey = function(key) {
+  let deriveKey = function(key) {
     log(' --- deriveKey --- ')
     log(key)
     return KRYPTOS.cryptoSubtle.deriveKey(
@@ -826,7 +782,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       .then(saveDerivedKey)
   }
 
-  var saveDerivedKey = function(key) {
+  let saveDerivedKey = function(key) {
     derivedKey = key
   }
 
@@ -835,7 +791,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {Promise} of exportKey
    */
-  var exportPEK = function() {
+  let exportPEK = function() {
     log(' --- exportPVK --- ')
     return KRYPTOS.cryptoSubtle.exportKey('jwk', encryptKeyPair.publicKey)
   }
@@ -846,7 +802,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    * @param {Object} key
    * @returns {void}
    */
-  var savePEK = function(key) {
+  let savePEK = function(key) {
     exportedPublicEncryptKey = key
     if (key.kty === 'EC') {
       // exportedPublicEncryptKey.alg = KRYPTOS.getECAlgo(key.crv);
@@ -859,7 +815,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    *
    * @returns {Promise} of exportKey
    */
-  var exportPVK = function() {
+  let exportPVK = function() {
     log(' --- exportPVK --- ')
     return KRYPTOS.cryptoSubtle.exportKey('jwk', signKeyPair.publicKey)
   }
@@ -870,8 +826,8 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
    * @param {Object} key
    * @returns {void}
    */
-  var savePVK = function(key) {
-    return new KRYPTOS.Promise((resolve, reject) => {
+  let savePVK = function(key) {
+    return new Promise((resolve, reject) => {
       exportedPublicVerifyKey = key
       if (key.kty === 'EC') {
         // exportedPublicVerifyKey.alg = KRYPTOS.getECAlgo(key.crv);
@@ -881,11 +837,11 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var fingerprint = function(key) {
+  let fingerprint = function(key) {
     return KRYPTOS.cryptoSubtle.digest(KRYPTOS.SHA_256.name, KU.jwk2ab(key))
   }
 
-  var importIAKPDK = function(extractable) {
+  let importIAKPDK = function(extractable) {
     log(' --- importIAKPDK --- ')
     const jwk = JSON.parse(KRYPTOS.session.getItem(prefixIAKPDK))
     log(jwk)
@@ -897,7 +853,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     return importIAK(jwk, extractable)
   }
 
-  var importIAK = function(jwk, extractable) {
+  let importIAK = function(jwk, extractable) {
     const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPSK.protectType)
     return KRYPTOS.cryptoSubtle.importKey(
       'jwk',
@@ -913,7 +869,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     if (cachePDK) {
       if (cachedPDK !== null) {
         log('cachedPDK')
-        return new KRYPTOS.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           resolve(cachedPDK)
         })
         // return cachedPDK;
@@ -932,7 +888,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     }
   }
 
-  var unwrapPDK = function(key) {
+  let unwrapPDK = function(key) {
     log(' --- unwrapPDK --- ')
     log(key)
     wrappedPDK = KU.b642ab(keyContainerPDK.encryptedKey)
@@ -971,7 +927,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   const getPsk = function() {
     if (cachePSK) {
       if (cachedPSK !== null) {
-        return new KRYPTOS.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           resolve(cachedPSK)
         })
       }
@@ -988,7 +944,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     }
   }
 
-  var unwrapPSK = function(key) {
+  let unwrapPSK = function(key) {
     log(' --- unwrapPSK --- ')
     log(key)
     wrappedPSK = KU.b642ab(keyContainerPSK.encryptedKey)
@@ -1050,7 +1006,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     KRYPTOS.session.setItem(publicKeyPrefix + username, publicKeys)
   }
 
-  var importPvk = function(publicKey) {
+  let importPvk = function(publicKey) {
     let alg = publicKey.alg
     if (publicKey.kty === 'EC') {
       alg = 'ECDSA'
@@ -1062,7 +1018,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     ])
   }
 
-  var importPek = function(publicKey, usages) {
+  let importPek = function(publicKey, usages) {
     let alg = publicKey.alg
     if (publicKey.kty === 'EC') {
       alg = 'ECDH'
@@ -1074,7 +1030,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   }
 
   const getPublicKey = function(userId, type, callback) {
-    return new KRYPTOS.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (KU.isObject(userId)) {
         // TODO check consistency with LEGACY
         const contact = userId
@@ -1087,7 +1043,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       let publicKey = {}
       if (publicKeys) {
         const keys = JSON.parse(publicKeys)
-        // var pub_keys = JSON.parse(keys.public_keys);
+        // let pub_keys = JSON.parse(keys.public_keys);
         if (type === 'verify') {
           publicKey = keys.verify
         } else {
@@ -1105,7 +1061,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
           let publicKey = {}
           if (publicKeys) {
             const keys = JSON.parse(publicKeys)
-            // var pub_keys = JSON.parse(keys.public_keys);
+            // let pub_keys = JSON.parse(keys.public_keys);
             if (type === 'verify') {
               publicKey = keys.verify
             } else {
@@ -1192,14 +1148,14 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       return
     }
     let usernames = ''
-    //        var maxRecipients = parseInt(KRYPTOS.session.getItem('max_recipients'));
+    //        let maxRecipients = parseInt(KRYPTOS.session.getItem('max_recipients'));
     //        if (emails.length > maxRecipients) {
     //            callback(false, "Max " + maxRecipients + " recipients allowed.");
     //            return;
     //        }
     //          TODO: cleanup
-    //        for (var i = 0; i < emails.length; i++) {
-    //            var username = emails[i];
+    //        for (let i = 0; i < emails.length; i++) {
+    //            let username = emails[i];
     //            if (KRYPTOS.session.getItem(KRYPTOS.Keys.prefix + username) || username === '') continue; // Skip if we already got the public keys in sessionStorage
     //            log(emails[i]);
     //            emails[i] = encodeURIComponent(username);
@@ -1250,8 +1206,8 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     return importDerivedKey(protector).then(() => unlock(derivedKey, pek, pvk))
   }
 
-  var unlock = function(protector, pek, pvk, signature) {
-    return new KRYPTOS.Promise((resolve, reject) => {
+  let unlock = function(protector, pek, pvk, signature) {
+    return new Promise((resolve, reject) => {
       if (keyContainerPDK) {
         KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
       }
@@ -1295,8 +1251,9 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   }
 
   const unlockPrivateKey = function(protector, keyContainer, keyContainerType) {
-    let protectorType = 'password',
-      derivedKeyProtector = null
+    let protectorType = 'password'
+
+    let derivedKeyProtector = null
 
     // From derived CryptoKey
     // derivedKeyProtector = importDerivedKey(protector);
@@ -1322,14 +1279,14 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       .then(exportIAK)
       .catch(error => {
         KU.log(error)
-        return new KRYPTOS.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           reject(error)
         })
       })
   }
 
-  var unlockPdk = function(protector) {
-    return new KRYPTOS.Promise((resolve, reject) => {
+  let unlockPdk = function(protector) {
+    return new Promise((resolve, reject) => {
       if (!keyContainerPDK) {
         resolve()
         return
@@ -1347,8 +1304,8 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  var unlockPsk = function(protector) {
-    return new KRYPTOS.Promise((resolve, reject) => {
+  let unlockPsk = function(protector) {
+    return new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
         resolve()
         return
@@ -1369,7 +1326,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   }
 
   const lockPsk = function() {
-    return new KRYPTOS.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
         resolve()
         return
@@ -1388,7 +1345,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
   }
 
   const lockPdk = function() {
-    return new KRYPTOS.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (!keyContainerPDK) {
         resolve()
         return
@@ -1406,21 +1363,24 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     })
   }
 
-  const lock = function(password) {
-    return new KRYPTOS.Promise((resolve, reject) =>
+  const lock = function(password, type = 'password') {
+    return new Promise((resolve, reject) =>
       deriveKeyFromPassword(password)
-        .then(lockPsk)
-        .then(lockPdk)
         .then(() => {
-          const setupData = {}
-          setupData[service] = {
+          lockPsk(type)
+        })
+        .then(() => {
+          lockPdk(type)
+        })
+        .then(() => {
+          const data = {}
+          data[service] = {
             pdk: keyContainerPDK,
             psk: keyContainerPSK,
           }
-          resolve(setupData)
+          resolve(data)
         })
         .catch(error => {
-          log('ERROR')
           KU.log(error)
           reject({ success: false })
         }),
@@ -1428,44 +1388,15 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
       KU.log(error)
       reject({})
     })
-
-    //            return deriveKeyFromPassword(password)
-    //                    .then(function() {
-    //                        return importIAKPSK(KRYPTOS.EXTRACTABLE);
-    //                    })
-    //                    .then(wrapIAKPSK)
-    //                    .then(function(wrappedKey) {
-    //                        replacePasswordProtector(keyContainerPSK, 'password', wrappedKey);
-    //                        return importIAKPDK(KRYPTOS.EXTRACTABLE);
-    //                    })
-    //                    .then(wrapIAKPDK)
-    //                    .then(function(wrappedKey) {
-    //                        replacePasswordProtector(keyContainerPDK, 'password', wrappedKey);
-    //                        var setupData = {};
-    //                        setupData[service] = {
-    //                            pdk: keyContainerPDK,
-    //                            psk: keyContainerPSK
-    //                        };
-    //                        resolve(setupData);
-    //                    })
-    //                    .catch(function(error) {
-    //                        log('ERROR');
-    //                        KU.log(error);
-    //                        reject({success: false});
-    //                    });
-    //        });
   }
 
-  var setMode = function(keyStoreMode) {
-    log(`${service}--- setMode ---`)
-    log(keyStoreMode)
+  let setMode = function(keyStoreMode) {
     switch (keyStoreMode) {
       case 'RSA':
       case 'EC':
         break
       default:
         throw new Error('Invalid algorithm3')
-        break
     }
     mode = keyStoreMode
   }
@@ -1474,7 +1405,7 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     return mode
   }
 
-  var isEC = function() {
+  let isEC = function() {
     return mode === 'EC'
   }
 
@@ -1488,10 +1419,6 @@ export const KeyStore = function(service, containerPDK, containerPSK) {
     setMode(KRYPTOS.getAsymmetricModeByAlgo(keyContainerPSK.keyType))
     setCachePsk(true)
     setCachePdk(true)
-  }
-
-  var log = function(msg) {
-    //        return false;
   }
 
   return {
