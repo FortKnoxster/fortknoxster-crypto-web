@@ -14,7 +14,7 @@ import { KRYPTOS } from './kryptos.core'
  */
 
 /**
- * The KRYPTOS Key Store module.
+ * The KRYPTOS KeyStore module.
  *
  * @param {String} serviceType
  * @param {Object} containerPDK
@@ -963,6 +963,8 @@ export const KeyStore = function KeyStore(
         .then(() =>
           unlockPdk(protector)
             .then(() => {
+              console.log('this', this)
+              console.log('this.KeyStore', this.KeyStore)
               resolve({ success: true, keyStore: this })
             })
             .catch(error => {
