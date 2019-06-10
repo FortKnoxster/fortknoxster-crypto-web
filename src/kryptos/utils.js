@@ -55,10 +55,48 @@ export function base64ToArrayBuffer(base64, base64Url) {
   return bytes.buffer
 }
 
-export function generateId(bytes) {
+export function arrayBufferToBase64(buffer, base64Url) {
+  let data = ''
+  if (buffer === '') {
+    return ''
+  }
+  const byteArray = new Uint8Array(buffer)
+  for (let i = 0; i < byteArray.length; i += 1) {
+    data += String.fromCharCode(byteArray[i])
+  }
+  const output = btoa(data)
+  if (base64Url) {
+    return output
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')
+  }
+  return output
+}
+
+export function randomValue(bytes) {
   const typedArray = new Uint8Array(bytes)
   const cryptoObj = window.crypto || window.msCrypto
-  return arrayBufferToHex(cryptoObj.getRandomValues(typedArray))
+  return cryptoObj.getRandomValues(typedArray)
+}
+
+export function generateId(bytes) {
+  return arrayBufferToHex(randomValue(bytes))
+}
+
+// Generate a more truly "random" alpha-numeric string.
+export function randomString(length = 32) {
+  let string = ''
+  while (string.length < length) {
+    const size = length - string.length
+    const randomBytes = randomValue(size)
+    string += arrayBufferToBase64(randomBytes)
+      .replace(/\+/g, '')
+      .replace(/\//g, '')
+      .replace(/=/g, '')
+      .substring(0, size)
+  }
+  return string
 }
 
 export function blobToDataUrl(blob) {
