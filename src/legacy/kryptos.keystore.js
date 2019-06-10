@@ -453,7 +453,7 @@ export const KeyStore = function KeyStore(
       updated = true
     }
     if (!updated) {
-      if (type === 'recover_password') {
+      if (type === 'recovery_key') {
         addPasswordProtector(keyContainer, wrappedKey, type)
       } else {
         throw new Error(`No key protector found for ${type} to updated.`)
@@ -883,7 +883,7 @@ export const KeyStore = function KeyStore(
     const keyProtector = extractKeyProtector(keyContainerType, protectorType)
     if (
       keyProtector.type === 'password' ||
-      keyProtector.type === 'recover_password'
+      keyProtector.type === 'recovery_key'
     ) {
       setDeriveKeyAlgo({
         name: keyProtector.name,
