@@ -1,7 +1,11 @@
 import { KRYPTOS } from './legacy/kryptos.core'
 
 export { deriveAccountPassword } from './kryptos/derive'
-export { unlockKeyStores, lockKeyStores } from './kryptos/keyStore'
+export {
+  unlockKeyStores,
+  lockKeyStores,
+  verifyKeyProtector,
+} from './kryptos/keyStore'
 export {
   generateId,
   blobToDataUrl,

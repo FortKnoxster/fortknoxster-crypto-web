@@ -944,7 +944,7 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  function unlock(protector, pek, pvk, signature) {
+  function unlock(protector, pek, pvk, signature, protectorType = 'password') {
     return new Promise((resolve, reject) => {
       if (keyContainerPDK) {
         KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
@@ -970,9 +970,9 @@ export const KeyStore = function KeyStore(
         JSON.stringify(publicKeys),
       )
 
-      return unlockPsk(protector)
+      return unlockPsk(protector, protectorType)
         .then(() =>
-          unlockPdk(protector)
+          unlockPdk(protector, protectorType)
             .then(() => {
               resolve(this)
             })
@@ -987,6 +987,19 @@ export const KeyStore = function KeyStore(
         })
     })
   }
+
+  const verifyProtector = (protector, protectorType = 'password') =>
+    new Promise((resolve, reject) => {
+      unlockPsk(protector, protectorType)
+        .then(() => unlockPdk(protector, protectorType))
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          KU.log(error)
+          reject(error)
+        })
+    })
 
   const unlockFromDerivedKey = (protector, pek, pvk) =>
     importDerivedKey(protector).then(() => unlock(derivedKey, pek, pvk))
@@ -1161,6 +1174,7 @@ export const KeyStore = function KeyStore(
     setupEncryptKeys,
     unlock,
     lock,
+    verifyProtector,
     getPek,
     getPvk,
     getPdk,
