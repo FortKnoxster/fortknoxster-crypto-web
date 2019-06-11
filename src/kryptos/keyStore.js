@@ -14,9 +14,13 @@ export function unlockKeyStores(keys, password) {
 }
 
 export function lockKeyStores(keys, password, type) {
-  const json = JSON.parse(keys)
-  const promises = Object.keys(json).map(key =>
-    new KeyStore(key, json[key].pdk, json[key].psk).lock(password, type),
+  const promises = Object.values(keys).map(k => k.lock(password, type))
+  return Promise.all(promises)
+}
+
+export function verifyKeyProtector(keys, password, type) {
+  const promises = Object.values(keys).map(k =>
+    k.verifyProtector(password, type),
   )
   return Promise.all(promises)
 }
