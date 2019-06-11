@@ -453,7 +453,11 @@ export const KeyStore = function KeyStore(
       updated = true
     }
     if (!updated) {
-      throw new Error(`No key protector found for ${type} to updated.`)
+      if (type === 'recovery_key') {
+        addPasswordProtector(keyContainer, wrappedKey, type)
+      } else {
+        throw new Error(`No key protector found for ${type} to updated.`)
+      }
     }
   }
 
@@ -570,7 +574,6 @@ export const KeyStore = function KeyStore(
   const savePEK = key => {
     exportedPublicEncryptKey = key
     if (key.kty === 'EC') {
-      // exportedPublicEncryptKey.alg = KRYPTOS.getECAlgo(key.crv);
       delete exportedPublicEncryptKey.ext
     }
   }
@@ -593,7 +596,6 @@ export const KeyStore = function KeyStore(
     new Promise(resolve => {
       exportedPublicVerifyKey = key
       if (key.kty === 'EC') {
-        // exportedPublicVerifyKey.alg = KRYPTOS.getECAlgo(key.crv);
         delete exportedPublicVerifyKey.ext
       }
       resolve(exportedPublicVerifyKey)
@@ -774,7 +776,6 @@ export const KeyStore = function KeyStore(
       let publicKey = {}
       if (publicKeys) {
         const keys = JSON.parse(publicKeys)
-        // let pub_keys = JSON.parse(keys.public_keys);
         if (type === 'verify') {
           publicKey = keys.verify
         } else {
@@ -862,13 +863,16 @@ export const KeyStore = function KeyStore(
     return null
   }
 
-  const unlockPrivateKey = (protector, keyContainer, keyContainerType) => {
-    let protectorType = 'password'
-
+  const unlockPrivateKey = (
+    protector,
+    keyContainer,
+    keyContainerType,
+    protectorTypeParam = 'password',
+  ) => {
+    let protectorType = protectorTypeParam
     let derivedKeyProtector = null
 
     // From derived CryptoKey
-    // derivedKeyProtector = importDerivedKey(protector);
     if (protector instanceof Object) {
       protectorType = 'asymmetric'
       derivedKeyProtector = importAsymmetric(protector)
@@ -877,7 +881,10 @@ export const KeyStore = function KeyStore(
     }
 
     const keyProtector = extractKeyProtector(keyContainerType, protectorType)
-    if (keyProtector.type === 'password') {
+    if (
+      keyProtector.type === 'password' ||
+      keyProtector.type === 'recovery_key'
+    ) {
       setDeriveKeyAlgo({
         name: keyProtector.name,
         salt: KU.b642ab(keyProtector.salt),

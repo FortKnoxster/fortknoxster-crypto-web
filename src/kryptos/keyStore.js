@@ -12,3 +12,11 @@ export function unlockKeyStores(keys, password) {
   )
   return Promise.all(promises)
 }
+
+export function lockKeyStores(keys, password, type) {
+  const json = JSON.parse(keys)
+  const promises = Object.keys(json).map(key =>
+    new KeyStore(key, json[key].pdk, json[key].psk).lock(password, type),
+  )
+  return Promise.all(promises)
+}
