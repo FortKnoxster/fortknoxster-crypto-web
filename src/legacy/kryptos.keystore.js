@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { KRYPTOS } from './kryptos.core'
+import { PROTECTOR_TYPES } from '../kryptos/constants'
 
 /**
  * KRYPTOS is a cryptographic library wrapping and implementing the
@@ -320,7 +321,7 @@ export const KeyStore = function KeyStore(
   const addPasswordProtector = (
     keyContainer,
     wrappedKey,
-    typeProtector = 'password',
+    typeProtector = PROTECTOR_TYPES.password,
   ) => {
     if (!keyContainer) {
       return
@@ -457,7 +458,7 @@ export const KeyStore = function KeyStore(
       updated = true
     }
     if (!updated) {
-      if (type === 'recovery_key') {
+      if (type === PROTECTOR_TYPES.recovery) {
         addPasswordProtector(keyContainer, wrappedKey, type)
       } else {
         throw new Error(`No key protector found for ${type} to updated.`)
@@ -871,7 +872,7 @@ export const KeyStore = function KeyStore(
     protector,
     keyContainer,
     keyContainerType,
-    protectorTypeParam = 'password',
+    protectorTypeParam = PROTECTOR_TYPES.password,
   ) => {
     let protectorType = protectorTypeParam
     let derivedKeyProtector = null
@@ -886,8 +887,8 @@ export const KeyStore = function KeyStore(
 
     const keyProtector = extractKeyProtector(keyContainerType, protectorType)
     if (
-      keyProtector.type === 'password' ||
-      keyProtector.type === 'recovery_key'
+      keyProtector.type === PROTECTOR_TYPES.password ||
+      keyProtector.type === PROTECTOR_TYPES.recovery
     ) {
       setDeriveKeyAlgo({
         name: keyProtector.name,
@@ -944,7 +945,13 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  function unlock(protector, pek, pvk, signature, protectorType = 'password') {
+  function unlock(
+    protector,
+    pek,
+    pvk,
+    signature,
+    protectorType = PROTECTOR_TYPES.password,
+  ) {
     return new Promise((resolve, reject) => {
       if (keyContainerPDK) {
         KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
@@ -988,7 +995,10 @@ export const KeyStore = function KeyStore(
     })
   }
 
-  const verifyProtector = (protector, protectorType = 'password') =>
+  const verifyProtector = (
+    protector,
+    protectorType = PROTECTOR_TYPES.password,
+  ) =>
     new Promise((resolve, reject) => {
       unlockPsk(protector, protectorType)
         .then(() => unlockPdk(protector, protectorType))
@@ -1004,7 +1014,7 @@ export const KeyStore = function KeyStore(
   const unlockFromDerivedKey = (protector, pek, pvk) =>
     importDerivedKey(protector).then(() => unlock(derivedKey, pek, pvk))
 
-  const lockPsk = (type = 'password') =>
+  const lockPsk = (type = PROTECTOR_TYPES.password) =>
     new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
         resolve()
@@ -1022,7 +1032,7 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  const lockPdk = (type = 'password') =>
+  const lockPdk = (type = PROTECTOR_TYPES.password) =>
     new Promise((resolve, reject) => {
       if (!keyContainerPDK) {
         resolve()
@@ -1040,7 +1050,7 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  const lock = (password, type = 'password') =>
+  const lock = (password, type = PROTECTOR_TYPES.password) =>
     new Promise((resolve, reject) =>
       deriveKeyFromPassword(password)
         .then(() => lockPsk(type))

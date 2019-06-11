@@ -1,6 +1,7 @@
 import { KRYPTOS } from './legacy/kryptos.core'
 
 export { deriveAccountPassword } from './kryptos/derive'
+export { PROTECTOR_TYPES } from './kryptos/constants'
 export {
   unlockKeyStores,
   lockKeyStores,
