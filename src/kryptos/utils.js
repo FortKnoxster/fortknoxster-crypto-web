@@ -57,7 +57,7 @@ export function base64ToArrayBuffer(base64, base64Url) {
 
 export function arrayBufferToBase64(buffer, base64Url) {
   let data = ''
-  if (buffer === '') {
+  if (!buffer) {
     return ''
   }
   const byteArray = new Uint8Array(buffer)
