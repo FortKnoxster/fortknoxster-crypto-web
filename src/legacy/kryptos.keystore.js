@@ -991,7 +991,7 @@ export const KeyStore = function KeyStore(
   const unlockFromDerivedKey = (protector, pek, pvk) =>
     importDerivedKey(protector).then(() => unlock(derivedKey, pek, pvk))
 
-  const lockPsk = () =>
+  const lockPsk = (type = 'password') =>
     new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
         resolve()
@@ -1000,7 +1000,7 @@ export const KeyStore = function KeyStore(
       return importIAKPSK(KRYPTOS.EXTRACTABLE)
         .then(wrapIAKPSK)
         .then(wrappedKey => {
-          replacePasswordProtector(keyContainerPSK, 'password', wrappedKey)
+          replacePasswordProtector(keyContainerPSK, type, wrappedKey)
           resolve()
         })
         .catch(error => {
@@ -1009,7 +1009,7 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  const lockPdk = () =>
+  const lockPdk = (type = 'password') =>
     new Promise((resolve, reject) => {
       if (!keyContainerPDK) {
         resolve()
@@ -1018,7 +1018,7 @@ export const KeyStore = function KeyStore(
       return importIAKPDK(KRYPTOS.EXTRACTABLE)
         .then(wrapIAKPDK)
         .then(wrappedKey => {
-          replacePasswordProtector(keyContainerPDK, 'password', wrappedKey)
+          replacePasswordProtector(keyContainerPDK, type, wrappedKey)
           resolve()
         })
         .catch(error => {
@@ -1030,12 +1030,8 @@ export const KeyStore = function KeyStore(
   const lock = (password, type = 'password') =>
     new Promise((resolve, reject) =>
       deriveKeyFromPassword(password)
-        .then(() => {
-          lockPsk(type)
-        })
-        .then(() => {
-          lockPdk(type)
-        })
+        .then(() => lockPsk(type))
+        .then(() => lockPdk(type))
         .then(() => {
           const data = {}
           data[service] = {
@@ -1048,9 +1044,7 @@ export const KeyStore = function KeyStore(
           KU.log(error)
           reject(error)
         }),
-    ).catch(error => {
-      KU.log(error)
-    })
+    )
 
   const addMemberProtector = (keyStore, username, callback) =>
     deriveKeyFromAsymmetric(keyStore, username)
