@@ -317,13 +317,17 @@ export const KeyStore = function KeyStore(
     throw new Error('Invalid key type')
   }
 
-  const addPasswordProtector = (keyContainer, wrappedKey) => {
+  const addPasswordProtector = (
+    keyContainer,
+    wrappedKey,
+    typeProtector = 'password',
+  ) => {
     if (!keyContainer) {
       return
     }
     keyContainer.keyProtectors.push({
       encryptedKey: KU.ab2b64(wrappedKey),
-      type: 'password',
+      type: typeProtector,
       name: deriveKeyAlgo.name,
       salt: KU.ab2b64(deriveKeyAlgo.salt),
       iterations: deriveKeyAlgo.iterations,
