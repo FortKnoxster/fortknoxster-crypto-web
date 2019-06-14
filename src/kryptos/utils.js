@@ -62,6 +62,7 @@ export function arrayBufferToBase64(buffer, base64Url) {
   const byteArray = new Uint8Array(buffer)
   const data = byteArray.reduce(
     (previous, current) => previous + String.fromCharCode(current),
+    '',
   )
   const output = btoa(data)
   if (base64Url) {
