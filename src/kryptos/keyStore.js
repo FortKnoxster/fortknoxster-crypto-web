@@ -12,3 +12,15 @@ export function unlockKeyStores(keys, password) {
   )
   return Promise.all(promises)
 }
+
+export function lockKeyStores(keys, password, type) {
+  const promises = Object.values(keys).map(k => k.lock(password, type))
+  return Promise.all(promises)
+}
+
+export function verifyKeyProtector(keys, password, type) {
+  const promises = Object.values(keys).map(k =>
+    k.verifyProtector(password, type),
+  )
+  return Promise.all(promises)
+}
