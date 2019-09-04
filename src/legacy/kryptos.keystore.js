@@ -909,14 +909,14 @@ export const KeyStore = function KeyStore(
       })
   }
 
-  const unlockPdk = protector =>
+  const unlockPdk = (protector, protectorType) =>
     new Promise((resolve, reject) => {
       if (!keyContainerPDK) {
         resolve()
         return null
       }
 
-      return unlockPrivateKey(protector, keyContainerPDK, 'PDK')
+      return unlockPrivateKey(protector, keyContainerPDK, 'PDK', protectorType)
         .then(exportedKey => {
           KRYPTOS.session.setItem(prefixIAKPDK, JSON.stringify(exportedKey))
           resolve()
@@ -927,14 +927,14 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  const unlockPsk = protector =>
+  const unlockPsk = (protector, protectorType) =>
     new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
         resolve()
         return null
       }
 
-      return unlockPrivateKey(protector, keyContainerPSK, 'PSK')
+      return unlockPrivateKey(protector, keyContainerPSK, 'PSK', protectorType)
         .then(exportedKey => {
           KRYPTOS.session.setItem(prefixIAKPSK, JSON.stringify(exportedKey))
           resolve()
