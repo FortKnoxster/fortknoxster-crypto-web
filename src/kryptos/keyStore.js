@@ -1,13 +1,13 @@
 import { KeyStore } from '../legacy/kryptos.keystore'
 
-export function unlockKeyStores(keys, password) {
-  const json = JSON.parse(keys)
-  const promises = Object.keys(json).map(key =>
-    new KeyStore(key, json[key].pdk, json[key].psk).unlock(
+export function unlockKeyStores(keys, password, type) {
+  const promises = Object.keys(keys).map(key =>
+    new KeyStore(key, keys[key].pdk, keys[key].psk).unlock(
       password,
-      json[key].pek,
-      json[key].pvk,
-      json[key].signature,
+      keys[key].pek,
+      keys[key].pvk,
+      keys[key].signature,
+      type,
     ),
   )
   return Promise.all(promises)
