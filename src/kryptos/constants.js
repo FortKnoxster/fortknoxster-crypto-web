@@ -5,3 +5,13 @@ export const PROTECTOR_TYPES = {
   recovery: 'recovery_key',
   asymmetric: 'asymmetric',
 }
+export const SERVICES = {
+  identity: 'identity',
+  mail: 'mail',
+  storage: 'storage',
+  protocol: 'protocol',
+}
+export const SERVICE_MODES = {
+  rsa: 'RSA',
+  ec: 'EC',
+}

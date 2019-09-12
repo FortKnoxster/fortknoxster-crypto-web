@@ -1,8 +1,11 @@
 import { KRYPTOS } from './legacy/kryptos.core'
 
 export { deriveAccountPassword } from './kryptos/derive'
-export { PROTECTOR_TYPES } from './kryptos/constants'
+export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
+  newKeyStore,
+  setupMultipleKeys,
+  generateSignKeys,
   unlockKeyStores,
   lockKeyStores,
   verifyKeyProtector,
@@ -38,6 +41,7 @@ export {
 } from './kryptos/storage'
 
 export {
+  createIdentity,
   initIdentity,
   signContact,
   verifyContactKeys,
