@@ -74,8 +74,6 @@ export async function signContact(contactToSign, hmacKey) {
 }
 
 export function createIdentity(identityKeyStore, id, pvk) {
-  console.log('createIdentity identityKeyStore', identityKeyStore)
-  console.log('createIdentity id', id)
   const encrypter = new Encrypter(identityKeyStore, null, null, dummyCB)
   const identity = {
     id,
