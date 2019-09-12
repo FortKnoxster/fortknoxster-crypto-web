@@ -72,3 +72,13 @@ export async function signContact(contactToSign, hmacKey) {
     return Promise.reject(e)
   }
 }
+
+export function createIdentity(identityKeyStore, id, pvk) {
+  const encrypter = new Encrypter(identityKeyStore, null, null, dummyCB)
+  const identity = {
+    id,
+    pvk,
+    signature: '',
+  }
+  return encrypter.signIt(identity, true)
+}

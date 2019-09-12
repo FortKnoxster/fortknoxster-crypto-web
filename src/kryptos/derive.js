@@ -1,5 +1,5 @@
 import { stringToArrayBuffer, arrayBufferToHex } from './utils'
-import { AES_KW, PBKDF2, deriveKeyPBKDF2 } from './algorithms'
+import { AES_KW_ALGO, PBKDF2, deriveKeyPBKDF2 } from './algorithms'
 import { DERIVE, WRAP } from './usages'
 import { RAW } from './formats'
 import { EXTRACTABLE, NONEXTRACTABLE } from './constants'
@@ -20,7 +20,7 @@ export async function deriveAccountPassword(username, password, domain) {
     const derivedKey = await subtle.deriveKey(
       deriveKeyPBKDF2(salt),
       key,
-      AES_KW,
+      AES_KW_ALGO,
       EXTRACTABLE,
       WRAP,
     )

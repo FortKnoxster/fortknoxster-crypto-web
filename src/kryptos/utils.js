@@ -84,6 +84,10 @@ export function generateId(bytes) {
   return arrayBufferToHex(randomValue(bytes))
 }
 
+export function nonce() {
+  return randomValue(16)
+}
+
 // Generate a more truly "random" alpha-numeric string.
 export function randomString(length = 32) {
   let string = ''
