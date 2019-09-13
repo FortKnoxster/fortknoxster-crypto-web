@@ -37,10 +37,6 @@ export function newKeyStores(serviceKeys) {
   )
 }
 
-export function setupKeys(key, password, identityKeyStore) {
-  return key.setupKeys(password, identityKeyStore)
-}
-
-export function setupMultipleKeys(keys, password, identityKeyStore) {
-  return keys.map(key => setupKeys(key, password, identityKeyStore))
+export function setupKeys(keys, password, identityKeyStore) {
+  return keys.map(key => key.setupKeys(password, identityKeyStore))
 }
