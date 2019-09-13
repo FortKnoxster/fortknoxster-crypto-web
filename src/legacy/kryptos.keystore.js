@@ -9,6 +9,7 @@ import {
   objectToArrayBuffer,
   base64ToArrayBuffer,
   arrayBufferToObject,
+  hexToArrayBuffer,
   ecJwk,
   rsaJwk,
 } from '../kryptos/utils'
@@ -41,7 +42,6 @@ export const KeyStore = function KeyStore(
   containerPSK,
   keyMode,
 ) {
-  const KU = KRYPTOS.utils
   const service = serviceType
 
   /**
@@ -592,7 +592,7 @@ export const KeyStore = function KeyStore(
     KRYPTOS.cryptoSubtle
       .importKey(
         formats.RAW,
-        KU.hex2ab(derivedPassword),
+        hexToArrayBuffer(derivedPassword),
         algorithms.AES_KW,
         KRYPTOS.NONEXTRACTABLE,
         KRYPTOS.WRAP_USAGE,
