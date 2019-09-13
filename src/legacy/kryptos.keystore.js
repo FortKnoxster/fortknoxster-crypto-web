@@ -77,8 +77,6 @@ export const KeyStore = function KeyStore(
 
   let wrappedIAKPDK = null
 
-  let setupData = null
-
   let cachedPSK = null
 
   let cachedPDK = null
@@ -111,12 +109,6 @@ export const KeyStore = function KeyStore(
   const isRSA = () => mode === 'RSA'
 
   const isLoaded = () => (ivPDK && ivPSK && wrappedPDK && wrappedPSK) !== null
-
-  const justSetUp = () => setupData !== null
-
-  const setSetUp = () => {
-    setupData = null
-  }
 
   const generateIAK = () =>
     KRYPTOS.cryptoSubtle.generateKey(
@@ -1185,8 +1177,6 @@ export const KeyStore = function KeyStore(
     getMode,
     isEC,
     isRSA,
-    justSetUp,
-    setSetUp,
     isLoaded,
     setupKeys,
     setupSignKeys,
