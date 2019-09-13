@@ -25,25 +25,25 @@ export function verifyKeyProtector(keys, password, type) {
   return Promise.all(promises)
 }
 
-export function generateSignKeys(key, password, mode) {
-  return key.setupSignKeys(password, mode)
+export function generateSignKeys(key, password) {
+  return key.setupSignKeys(password)
 }
 
-export function newKeyStore(service) {
-  return new KeyStore(service, null, null)
+export function newKeyStore(service, mode) {
+  return new KeyStore(service, null, null, mode)
 }
 
-export function setupKeys(service, password, mode, identityKeyStore) {
-  return new KeyStore(service, null, null).setupKeys(
-    password,
-    mode,
-    identityKeyStore,
+export function newKeyStores(serviceKeys) {
+  return serviceKeys.map(serviceKey =>
+    newKeyStore(serviceKey.service, serviceKey.mode),
   )
 }
 
-export function setupMultipleKeys(serviceKeys, password, identityKeyStore) {
-  const promises = serviceKeys.map(serviceKey =>
-    setupKeys(serviceKey.service, password, serviceKey.mode, identityKeyStore),
-  )
+export function setupKeys(key, password, identityKeyStore) {
+  return key.setupKeys(password, identityKeyStore)
+}
+
+export function setupMultipleKeys(keys, password, identityKeyStore) {
+  const promises = keys.map(key => setupKeys(key, password, identityKeyStore))
   return Promise.all(promises)
 }

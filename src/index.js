@@ -4,6 +4,7 @@ export { deriveAccountPassword } from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
   newKeyStore,
+  newKeyStores,
   setupMultipleKeys,
   generateSignKeys,
   unlockKeyStores,

@@ -152,6 +152,25 @@ export function ecJwk(jwk) {
   }
 }
 
+export function getKeyType(mode, type) {
+  if (type === 'PSK') {
+    if (mode === 'RSA') {
+      return 'RSASSA-PKCS1-v1_5-2048'
+    }
+    if (mode === 'EC') {
+      return 'ECDSA-P521'
+    }
+  } else if (type === 'PDK') {
+    if (mode === 'RSA') {
+      return 'RSA-OAEP-2048'
+    }
+    if (mode === 'EC') {
+      return 'ECDH-P521'
+    }
+  }
+  throw new Error('Invalid key type')
+}
+
 // eslint-disable-next-line no-unused-vars
 export function dummyCB(success, result) {
   // console.log(`success: ${success} result: ${result}`)
