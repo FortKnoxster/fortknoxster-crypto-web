@@ -14,6 +14,25 @@ export function stringToArrayBuffer(str) {
   return buf
 }
 
+export function arrayBufferToString(buf) {
+  let str = ''
+  const byteArray = new Uint8Array(buf)
+  for (let i = 0; i < byteArray.length; i += 1) {
+    str += String.fromCharCode(byteArray[i])
+  }
+  return str
+}
+
+export function hexToArrayBuffer(hex) {
+  const hexString = hex.length % 2 !== 0 ? `0${hex}` : hex
+  const numBytes = hexString.length / 2
+  const byteArray = new Uint8Array(numBytes)
+  for (let i = 0; i < numBytes; i += 1) {
+    byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
+  }
+  return byteArray
+}
+
 /**
  * Converts an ArrayBuffer to a string of hexadecimal numbers.
  *
@@ -128,6 +147,14 @@ export function dataUrlToBlob(dataurl) {
     u8arr[n] = bstr.charCodeAt(n)
   }
   return new Blob([u8arr], { type: mime })
+}
+
+export function objectToArrayBuffer(jwk) {
+  return stringToArrayBuffer(JSON.stringify(jwk))
+}
+
+export function arrayBufferToObject(arrayBuffer) {
+  return JSON.parse(arrayBufferToString(arrayBuffer))
 }
 
 export function rsaJwk(jwk) {

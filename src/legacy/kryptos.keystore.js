@@ -1,6 +1,17 @@
 /* eslint-disable max-lines */
 import { KRYPTOS } from './kryptos.core'
-import { nonce, getKeyType } from '../kryptos/utils'
+import {
+  nonce,
+  getKeyType,
+  arrayBufferToHex,
+  arrayBufferToBase64,
+  stringToArrayBuffer,
+  objectToArrayBuffer,
+  base64ToArrayBuffer,
+  arrayBufferToObject,
+  ecJwk,
+  rsaJwk,
+} from '../kryptos/utils'
 import { PROTECTOR_TYPES } from '../kryptos/constants'
 import * as algorithms from '../kryptos/algorithms'
 import * as formats from '../kryptos/formats'
@@ -201,7 +212,7 @@ export const KeyStore = function KeyStore(
       data[service] = {
         psk: keyContainerPSK,
         pvk: exportedPublicVerifyKey,
-        fingerprint: KU.ab2hex(hash),
+        fingerprint: arrayBufferToHex(hash),
       }
       storeKeys(null, exportedPublicVerifyKey)
       resolve(data)
@@ -220,11 +231,11 @@ export const KeyStore = function KeyStore(
   const signPublicKeys = identity => {
     const publicKeys = {
       pek: isEC()
-        ? KU.ecJwk(exportedPublicEncryptKey)
-        : KU.rsaJwk(exportedPublicEncryptKey),
+        ? ecJwk(exportedPublicEncryptKey)
+        : rsaJwk(exportedPublicEncryptKey),
       pvk: isEC()
-        ? KU.ecJwk(exportedPublicVerifyKey)
-        : KU.rsaJwk(exportedPublicVerifyKey),
+        ? ecJwk(exportedPublicVerifyKey)
+        : rsaJwk(exportedPublicVerifyKey),
     }
     return new Promise((resolve, reject) => {
       const Encrypter = new KRYPTOS.Encrypter(
@@ -341,10 +352,10 @@ export const KeyStore = function KeyStore(
       return
     }
     keyContainer.keyProtectors.push({
-      encryptedKey: KU.ab2b64(wrappedKey),
+      encryptedKey: arrayBufferToBase64(wrappedKey),
       type: typeProtector,
       name: deriveKeyAlgo.name,
-      salt: KU.ab2b64(deriveKeyAlgo.salt),
+      salt: arrayBufferToBase64(deriveKeyAlgo.salt),
       iterations: deriveKeyAlgo.iterations,
       hash: deriveKeyAlgo.hash,
     })
@@ -352,7 +363,7 @@ export const KeyStore = function KeyStore(
 
   const addAsymmetricProtector = (keyContainer, wrappedKey) => {
     keyContainer.keyProtectors.push({
-      encryptedKey: KU.ab2b64(wrappedKey),
+      encryptedKey: arrayBufferToBase64(wrappedKey),
       type: 'asymmetric',
       name: deriveKeyAlgo.name,
     })
@@ -370,28 +381,28 @@ export const KeyStore = function KeyStore(
     if (keyContainerPDK === null) {
       keyContainerPDK = {
         encryptedKey: null,
-        iv: KU.ab2b64(ivPDK),
+        iv: arrayBufferToBase64(ivPDK),
         keyType: getKeyType(mode, 'PDK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
       addProtector(keyContainerPDK, wrappedIAKPDK)
     }
-    keyContainerPDK.encryptedKey = KU.ab2b64(wrappedKey)
+    keyContainerPDK.encryptedKey = arrayBufferToBase64(wrappedKey)
   }
 
   const saveWrappedPSK = wrappedKey => {
     if (keyContainerPSK === null) {
       keyContainerPSK = {
         encryptedKey: null,
-        iv: KU.ab2b64(ivPSK),
+        iv: arrayBufferToBase64(ivPSK),
         keyType: getKeyType(mode, 'PSK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
       addPasswordProtector(keyContainerPSK, wrappedIAKPSK)
     }
-    keyContainerPSK.encryptedKey = KU.ab2b64(wrappedKey)
+    keyContainerPSK.encryptedKey = arrayBufferToBase64(wrappedKey)
   }
 
   const unwrapIAK = (wrappedKey, algo) => {
@@ -468,10 +479,10 @@ export const KeyStore = function KeyStore(
     if (index !== -1) {
       // eslint-disable-next-line no-param-reassign
       keyContainer.keyProtectors[index] = {
-        encryptedKey: KU.ab2b64(wrappedKey),
+        encryptedKey: arrayBufferToBase64(wrappedKey),
         type,
         name: deriveKeyAlgo.name,
-        salt: KU.ab2b64(deriveKeyAlgo.salt),
+        salt: arrayBufferToBase64(deriveKeyAlgo.salt),
         iterations: deriveKeyAlgo.iterations,
         hash: deriveKeyAlgo.hash,
       }
@@ -508,7 +519,7 @@ export const KeyStore = function KeyStore(
     KRYPTOS.cryptoSubtle
       .importKey(
         formats.RAW,
-        KU.str2ab(password),
+        stringToArrayBuffer(password),
         algorithms.PBKDF2,
         false,
         KRYPTOS.DERIVE_USAGE,
@@ -517,7 +528,7 @@ export const KeyStore = function KeyStore(
       .then(deriveKey)
       .then(saveDerivedKey)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
 
   const importPek = (publicKey, usages) => {
@@ -555,7 +566,7 @@ export const KeyStore = function KeyStore(
     }
 
     return operation.then(saveDerivedKey).catch(error => {
-      KU.log(error)
+      console.error(error)
     })
   }
 
@@ -574,7 +585,7 @@ export const KeyStore = function KeyStore(
       .getPdk()
       .then(saveDerivedKey)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
 
   const importDerivedKey = derivedPassword =>
@@ -633,7 +644,7 @@ export const KeyStore = function KeyStore(
     })
 
   const fingerprint = key =>
-    KRYPTOS.cryptoSubtle.digest(KRYPTOS.SHA_256.name, KU.jwk2ab(key))
+    KRYPTOS.cryptoSubtle.digest(KRYPTOS.SHA_256.name, objectToArrayBuffer(key))
 
   const importIAK = (jwk, extractable) => {
     const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPSK.protectType)
@@ -657,8 +668,8 @@ export const KeyStore = function KeyStore(
   }
 
   const unwrapPDK = key => {
-    wrappedPDK = KU.b642ab(keyContainerPDK.encryptedKey)
-    ivPDK = KU.b642ab(keyContainerPDK.iv)
+    wrappedPDK = base64ToArrayBuffer(keyContainerPDK.encryptedKey)
+    ivPDK = base64ToArrayBuffer(keyContainerPDK.iv)
     const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPDK.protectType)
     const unwrappedKeyAlgo = KRYPTOS.getAlgo(keyContainerPDK.keyType)
     const usages = isEC()
@@ -669,7 +680,7 @@ export const KeyStore = function KeyStore(
       return KRYPTOS.cryptoSubtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPDK }, key, wrappedPDK)
         .then(result => {
-          const decryptedKey = KU.ab2json(result)
+          const decryptedKey = arrayBufferToObject(result)
           return KRYPTOS.cryptoSubtle.importKey(
             formats.JWK,
             decryptedKey,
@@ -703,13 +714,13 @@ export const KeyStore = function KeyStore(
         return cachedPDK
       })
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
   }
 
   const unwrapPSK = key => {
-    wrappedPSK = KU.b642ab(keyContainerPSK.encryptedKey)
-    ivPSK = KU.b642ab(keyContainerPSK.iv)
+    wrappedPSK = base64ToArrayBuffer(keyContainerPSK.encryptedKey)
+    ivPSK = base64ToArrayBuffer(keyContainerPSK.iv)
     const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPSK.protectType)
     const unwrappedKeyAlgo = KRYPTOS.getAlgo(keyContainerPSK.keyType)
     if (isEC()) {
@@ -717,7 +728,7 @@ export const KeyStore = function KeyStore(
       return KRYPTOS.cryptoSubtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPSK }, key, wrappedPSK)
         .then(result => {
-          const decryptedKey = KU.ab2json(result)
+          const decryptedKey = arrayBufferToObject(result)
           return KRYPTOS.cryptoSubtle.importKey(
             formats.JWK,
             decryptedKey,
@@ -795,7 +806,7 @@ export const KeyStore = function KeyStore(
 
   const getPublicKey = (userId, type, callback) =>
     new Promise(resolve => {
-      if (KU.isObject(userId)) {
+      if (typeof userId === 'object') {
         // TODO check consistency with LEGACY
         const contact = userId
         const { encrypt, verify } = contact.keys[service]
@@ -887,7 +898,7 @@ export const KeyStore = function KeyStore(
         return callback(true, '')
       },
       error => {
-        KU.log(error)
+        console.error(error)
         callback(false, error)
       },
     )
@@ -918,17 +929,19 @@ export const KeyStore = function KeyStore(
     ) {
       setDeriveKeyAlgo({
         name: keyProtector.name,
-        salt: KU.b642ab(keyProtector.salt),
+        salt: base64ToArrayBuffer(keyProtector.salt),
         iterations: keyProtector.iterations,
         hash: keyProtector.hash,
       })
     }
     const algo = KRYPTOS.getAlgo(keyContainer.protectType)
     return derivedKeyProtector
-      .then(() => unwrapIAK(KU.b642ab(keyProtector.encryptedKey), algo.name))
+      .then(() =>
+        unwrapIAK(base64ToArrayBuffer(keyProtector.encryptedKey), algo.name),
+      )
       .then(exportIAK)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
         return new Promise((resolve, reject) => {
           reject(error)
         })
@@ -948,7 +961,7 @@ export const KeyStore = function KeyStore(
           resolve()
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -966,7 +979,7 @@ export const KeyStore = function KeyStore(
           resolve()
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -988,12 +1001,12 @@ export const KeyStore = function KeyStore(
               resolve(this)
             })
             .catch(error => {
-              KU.log(error)
+              console.error(error)
               reject(error)
             }),
         )
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -1010,7 +1023,7 @@ export const KeyStore = function KeyStore(
           resolve()
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -1031,7 +1044,7 @@ export const KeyStore = function KeyStore(
           resolve()
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -1049,7 +1062,7 @@ export const KeyStore = function KeyStore(
           resolve()
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         })
     })
@@ -1068,7 +1081,7 @@ export const KeyStore = function KeyStore(
           resolve(data)
         })
         .catch(error => {
-          KU.log(error)
+          console.error(error)
           reject(error)
         }),
     )
@@ -1079,7 +1092,7 @@ export const KeyStore = function KeyStore(
       .then(wrapIAKPDK)
       .then(wrappedKey => {
         callback(true, {
-          encryptedKey: KU.ab2b64(wrappedKey),
+          encryptedKey: arrayBufferToBase64(wrappedKey),
           username,
           type: 'asymmetric',
           name: deriveKeyAlgo.name,
@@ -1116,7 +1129,7 @@ export const KeyStore = function KeyStore(
       .then(() => signPublicKeys(identity))
       .then(packageKeyContainers)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
   }
 
@@ -1136,7 +1149,7 @@ export const KeyStore = function KeyStore(
       .then(fingerprint)
       .then(packageSignKeyContainer)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
   }
 
@@ -1161,7 +1174,7 @@ export const KeyStore = function KeyStore(
       .then(savePEK)
       .then(packageEncryptKeyContainer)
       .catch(error => {
-        KU.log(error)
+        console.error(error)
       })
   }
 
