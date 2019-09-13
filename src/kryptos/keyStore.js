@@ -1,7 +1,7 @@
 import { KeyStore } from '../legacy/kryptos.keystore'
 
 export function unlockKeyStores(keys, password, type) {
-  const promises = Object.keys(keys).map(key =>
+  return Object.keys(keys).map(key =>
     new KeyStore(key, keys[key].pdk, keys[key].psk).unlock(
       password,
       keys[key].pek,
@@ -10,12 +10,10 @@ export function unlockKeyStores(keys, password, type) {
       type,
     ),
   )
-  return Promise.all(promises)
 }
 
 export function lockKeyStores(keys, password, type) {
-  const promises = Object.values(keys).map(k => k.lock(password, type))
-  return Promise.all(promises)
+  return Object.values(keys).map(k => k.lock(password, type))
 }
 
 export function verifyKeyProtector(keys, password, type) {
@@ -44,6 +42,5 @@ export function setupKeys(key, password, identityKeyStore) {
 }
 
 export function setupMultipleKeys(keys, password, identityKeyStore) {
-  const promises = keys.map(key => setupKeys(key, password, identityKeyStore))
-  return Promise.all(promises)
+  return keys.map(key => setupKeys(key, password, identityKeyStore))
 }
