@@ -164,26 +164,26 @@ export const KeyStore = function KeyStore(
 
   const storeKeys = (pek, pvk, signature) => {
     if (keyContainerPDK) {
-      KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
+      sessionStorage.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
     }
     if (keyContainerPSK) {
-      KRYPTOS.session.setItem(prefixPSK, JSON.stringify(keyContainerPSK))
+      sessionStorage.setItem(prefixPSK, JSON.stringify(keyContainerPSK))
     }
     const publicKeys = {}
     if (pek) {
-      KRYPTOS.session.setItem(prefixPEK, JSON.stringify(pek))
+      sessionStorage.setItem(prefixPEK, JSON.stringify(pek))
       publicKeys.encrypt = pek
     }
     if (pvk) {
-      KRYPTOS.session.setItem(prefixPVK, JSON.stringify(pvk))
+      sessionStorage.setItem(prefixPVK, JSON.stringify(pvk))
       publicKeys.verify = pvk
     }
     if (signature) {
       publicKeys.signature = signature
     }
 
-    KRYPTOS.session.setItem(
-      publicKeyPrefix + KRYPTOS.session.getItem('id'),
+    sessionStorage.setItem(
+      publicKeyPrefix + sessionStorage.getItem('id'),
       JSON.stringify(publicKeys),
     )
   }
@@ -658,12 +658,12 @@ export const KeyStore = function KeyStore(
   }
 
   const importIAKPDK = extractable => {
-    const jwk = JSON.parse(KRYPTOS.session.getItem(prefixIAKPDK))
+    const jwk = JSON.parse(sessionStorage.getItem(prefixIAKPDK))
     return importIAK(jwk, extractable)
   }
 
   const importIAKPSK = extractable => {
-    const jwk = JSON.parse(KRYPTOS.session.getItem(prefixIAKPSK))
+    const jwk = JSON.parse(sessionStorage.getItem(prefixIAKPSK))
     return importIAK(jwk, extractable)
   }
 
@@ -755,7 +755,7 @@ export const KeyStore = function KeyStore(
         resolve(cachedPSK)
       })
     }
-    if (!KRYPTOS.session.getItem(prefixIAKPSK)) {
+    if (!sessionStorage.getItem(prefixIAKPSK)) {
       return ''
     }
     return importIAKPSK(KRYPTOS.NONEXTRACTABLE)
@@ -767,7 +767,7 @@ export const KeyStore = function KeyStore(
   }
 
   const getPek = () => {
-    const pek = JSON.parse(KRYPTOS.session.getItem(prefixPEK))
+    const pek = JSON.parse(sessionStorage.getItem(prefixPEK))
     return importPek(pek, ['encrypt'])
   }
 
@@ -785,7 +785,7 @@ export const KeyStore = function KeyStore(
   }
 
   const getPvk = jwk => {
-    const pvk = JSON.parse(KRYPTOS.session.getItem(prefixPVK))
+    const pvk = JSON.parse(sessionStorage.getItem(prefixPVK))
     if (jwk) {
       return pvk
     }
@@ -801,7 +801,7 @@ export const KeyStore = function KeyStore(
   }
 
   const setPublicKeys = (username, publicKeys) => {
-    KRYPTOS.session.setItem(publicKeyPrefix + username, publicKeys)
+    sessionStorage.setItem(publicKeyPrefix + username, publicKeys)
   }
 
   const getPublicKey = (userId, type, callback) =>
@@ -814,7 +814,7 @@ export const KeyStore = function KeyStore(
         if (callback) callback(publicKey)
         return resolve(publicKey)
       }
-      const publicKeys = KRYPTOS.session.getItem(publicKeyPrefix + userId)
+      const publicKeys = sessionStorage.getItem(publicKeyPrefix + userId)
       let publicKey = {}
       if (publicKeys) {
         const keys = JSON.parse(publicKeys)
@@ -831,7 +831,7 @@ export const KeyStore = function KeyStore(
         // TODO: Clean up here
         const Contacts = {}
         Contacts.getContactFromCache(userId, () => {
-          const contactPublicKeys = KRYPTOS.session.getItem(
+          const contactPublicKeys = sessionStorage.getItem(
             publicKeyPrefix + userId,
           )
           let contactPublicKey = {}
@@ -853,7 +853,7 @@ export const KeyStore = function KeyStore(
     })
 
   const getRecipientPublicKeys = username =>
-    JSON.parse(KRYPTOS.session.getItem(publicKeyPrefix + username))
+    JSON.parse(sessionStorage.getItem(publicKeyPrefix + username))
 
   /**
    * Retrieve the public keys.
@@ -873,9 +873,7 @@ export const KeyStore = function KeyStore(
       const username = emails[i]
 
       if (
-        !(
-          KRYPTOS.session.getItem(publicKeyPrefix + username) || username === ''
-        )
+        !(sessionStorage.getItem(publicKeyPrefix + username) || username === '')
       )
         temp.push(encodeURIComponent(username))
     }
@@ -889,7 +887,7 @@ export const KeyStore = function KeyStore(
         if (data) {
           // eslint-disable-next-line no-plusplus
           for (let i = 0; i < data.length; i++) {
-            KRYPTOS.session.setItem(
+            sessionStorage.setItem(
               publicKeyPrefix + data[i].username,
               data[i].public_keys,
             )
@@ -957,7 +955,7 @@ export const KeyStore = function KeyStore(
 
       return unlockPrivateKey(protector, keyContainerPDK, 'PDK', protectorType)
         .then(exportedKey => {
-          KRYPTOS.session.setItem(prefixIAKPDK, JSON.stringify(exportedKey))
+          sessionStorage.setItem(prefixIAKPDK, JSON.stringify(exportedKey))
           resolve()
         })
         .catch(error => {
@@ -975,7 +973,7 @@ export const KeyStore = function KeyStore(
 
       return unlockPrivateKey(protector, keyContainerPSK, 'PSK', protectorType)
         .then(exportedKey => {
-          KRYPTOS.session.setItem(prefixIAKPSK, JSON.stringify(exportedKey))
+          sessionStorage.setItem(prefixIAKPSK, JSON.stringify(exportedKey))
           resolve()
         })
         .catch(error => {
@@ -1179,8 +1177,8 @@ export const KeyStore = function KeyStore(
   }
 
   const init = () => {
-    keyContainerPDK = JSON.parse(KRYPTOS.session.getItem(prefixPDK))
-    keyContainerPSK = JSON.parse(KRYPTOS.session.getItem(prefixPSK))
+    keyContainerPDK = JSON.parse(sessionStorage.getItem(prefixPDK))
+    keyContainerPSK = JSON.parse(sessionStorage.getItem(prefixPSK))
     setMode(KRYPTOS.getAsymmetricModeByAlgo(keyContainerPSK.keyType))
   }
 
