@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { KRYPTOS } from './kryptos.core'
-import { nonce } from '../kryptos/utils'
+import { nonce, getKeyType } from '../kryptos/utils'
 import { PROTECTOR_TYPES } from '../kryptos/constants'
 import * as algorithms from '../kryptos/algorithms'
 import * as formats from '../kryptos/formats'
@@ -28,6 +28,7 @@ export const KeyStore = function KeyStore(
   serviceType,
   containerPDK,
   containerPSK,
+  keyMode,
 ) {
   const KU = KRYPTOS.utils
   const service = serviceType
@@ -36,7 +37,7 @@ export const KeyStore = function KeyStore(
    * Can be RSA or EC. Determines whether RSA keypairs or EC keypairs are
    * being used for this key store. Default is RSA.
    */
-  let mode = algorithms.RSA
+  let mode = keyMode || algorithms.RSA
 
   const publicKeyPrefix = `${service}:pub:`
 
@@ -158,6 +159,32 @@ export const KeyStore = function KeyStore(
     return protectors[index]
   }
 
+  const storeKeys = (pek, pvk, signature) => {
+    if (keyContainerPDK) {
+      KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
+    }
+    if (keyContainerPSK) {
+      KRYPTOS.session.setItem(prefixPSK, JSON.stringify(keyContainerPSK))
+    }
+    const publicKeys = {}
+    if (pek) {
+      KRYPTOS.session.setItem(prefixPEK, JSON.stringify(pek))
+      publicKeys.encrypt = pek
+    }
+    if (pvk) {
+      KRYPTOS.session.setItem(prefixPVK, JSON.stringify(pvk))
+      publicKeys.verify = pvk
+    }
+    if (signature) {
+      publicKeys.signature = signature
+    }
+
+    KRYPTOS.session.setItem(
+      publicKeyPrefix + KRYPTOS.session.getItem('id'),
+      JSON.stringify(publicKeys),
+    )
+  }
+
   const packageKeyContainers = signedKeys =>
     new Promise(resolve => {
       const data = {}
@@ -168,6 +195,11 @@ export const KeyStore = function KeyStore(
         pvk: exportedPublicVerifyKey,
         signature: signedKeys.signature,
       }
+      storeKeys(
+        exportedPublicEncryptKey,
+        exportedPublicVerifyKey,
+        signedKeys.signature,
+      )
       resolve(data)
     })
 
@@ -179,6 +211,7 @@ export const KeyStore = function KeyStore(
         pvk: exportedPublicVerifyKey,
         fingerprint: KU.ab2hex(hash),
       }
+      storeKeys(null, exportedPublicVerifyKey)
       resolve(data)
     })
 
@@ -307,25 +340,6 @@ export const KeyStore = function KeyStore(
       iv: ivPSK,
     })
 
-  const getKeyType = type => {
-    if (type === 'PSK') {
-      if (mode === 'RSA') {
-        return 'RSASSA-PKCS1-v1_5-2048'
-      }
-      if (mode === 'EC') {
-        return 'ECDSA-P521'
-      }
-    } else if (type === 'PDK') {
-      if (mode === 'RSA') {
-        return 'RSA-OAEP-2048'
-      }
-      if (mode === 'EC') {
-        return 'ECDH-P521'
-      }
-    }
-    throw new Error('Invalid key type')
-  }
-
   const addPasswordProtector = (
     keyContainer,
     wrappedKey,
@@ -365,7 +379,7 @@ export const KeyStore = function KeyStore(
       keyContainerPDK = {
         encryptedKey: null,
         iv: KU.ab2b64(ivPDK),
-        keyType: getKeyType('PDK'),
+        keyType: getKeyType(mode, 'PDK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
@@ -379,7 +393,7 @@ export const KeyStore = function KeyStore(
       keyContainerPSK = {
         encryptedKey: null,
         iv: KU.ab2b64(ivPSK),
-        keyType: getKeyType('PSK'),
+        keyType: getKeyType(mode, 'PSK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
@@ -973,29 +987,7 @@ export const KeyStore = function KeyStore(
     protectorType = PROTECTOR_TYPES.password,
   ) {
     return new Promise((resolve, reject) => {
-      if (keyContainerPDK) {
-        KRYPTOS.session.setItem(prefixPDK, JSON.stringify(keyContainerPDK))
-      }
-      if (keyContainerPSK) {
-        KRYPTOS.session.setItem(prefixPSK, JSON.stringify(keyContainerPSK))
-      }
-      const publicKeys = {}
-      if (pek) {
-        KRYPTOS.session.setItem(prefixPEK, JSON.stringify(pek))
-        publicKeys.encrypt = pek
-      }
-      if (pvk) {
-        KRYPTOS.session.setItem(prefixPVK, JSON.stringify(pvk))
-        publicKeys.verify = pvk
-      }
-      if (signature) {
-        publicKeys.signature = signature
-      }
-
-      KRYPTOS.session.setItem(
-        publicKeyPrefix + KRYPTOS.session.getItem('id'),
-        JSON.stringify(publicKeys),
-      )
+      storeKeys(pek, pvk, signature)
 
       return unlockPsk(protector, protectorType)
         .then(() =>
@@ -1105,8 +1097,7 @@ export const KeyStore = function KeyStore(
         callback(false, error)
       })
 
-  const setupKeys = (password, keyType, identity) => {
-    setMode(keyType)
+  const setupKeys = (password, identity) => {
     ivPSK = nonce()
     ivPDK = nonce()
     return deriveKeyFromPassword(password)
@@ -1137,8 +1128,7 @@ export const KeyStore = function KeyStore(
       })
   }
 
-  const setupSignKeys = (password, keyMode) => {
-    setMode(keyMode)
+  const setupSignKeys = password => {
     ivPSK = nonce()
     return deriveKeyFromPassword(password)
       .then(generateIAK)
@@ -1158,8 +1148,7 @@ export const KeyStore = function KeyStore(
       })
   }
 
-  const setupEncryptKeys = (protector, keyMode) => {
-    setMode(keyMode)
+  const setupEncryptKeys = protector => {
     ivPDK = nonce()
     let keyProtector = null
     if (protector instanceof Object) {
