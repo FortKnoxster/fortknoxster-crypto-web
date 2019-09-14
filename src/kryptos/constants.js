@@ -1,5 +1,6 @@
 export const EXTRACTABLE = true
 export const NONEXTRACTABLE = false
+export const LENGTH_256 = 256
 export const PROTECTOR_TYPES = {
   password: 'password',
   recovery: 'recovery_key',

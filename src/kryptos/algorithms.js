@@ -120,3 +120,17 @@ export function getAlgorithm(algo) {
   }
   throw new Error('Invalid algorithm')
 }
+
+export function getSignAlgo(algo) {
+  switch (algo) {
+    case 'RSASSA-PKCS1-v1_5':
+      return RSASSA_PKCS1_V1_5
+    case 'ECDSA':
+      return { name: 'ECDSA', hash: { name: 'SHA-256' } }
+    case 'HMAC':
+      return HMAC
+    default:
+      break
+  }
+  throw new Error('Invalid sign algorithm')
+}
