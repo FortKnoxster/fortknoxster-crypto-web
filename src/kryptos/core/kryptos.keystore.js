@@ -103,13 +103,9 @@ export const KeyStore = function KeyStore(
     mode = keyStoreMode
   }
 
-  const getMode = () => mode
-
   const isEC = () => mode === 'EC'
 
   const isRSA = () => mode === 'RSA'
-
-  const isLoaded = () => (ivPDK && ivPSK && wrappedPDK && wrappedPSK) !== null
 
   const generateIAK = () =>
     kryptos.subtle.generateKey(
@@ -757,14 +753,6 @@ export const KeyStore = function KeyStore(
     return importPvk(pvk, ['verify'])
   }
 
-  const setPek = pek => {
-    exportedPublicEncryptKey = pek
-  }
-
-  const setPvk = pvk => {
-    exportedPublicVerifyKey = pvk
-  }
-
   const setPublicKeys = (username, publicKeys) => {
     sessionStorage.setItem(publicKeyPrefix + username, publicKeys)
   }
@@ -1101,11 +1089,8 @@ export const KeyStore = function KeyStore(
 
   return {
     init,
-    setMode,
-    getMode,
     isEC,
     isRSA,
-    isLoaded,
     setupKeys,
     setupSignKeys,
     setupEncryptKeys,
@@ -1116,8 +1101,6 @@ export const KeyStore = function KeyStore(
     getPvk,
     getPdk,
     getPsk,
-    setPek,
-    setPvk,
     getPublicKey,
     setPublicKeys,
     importPvk,
