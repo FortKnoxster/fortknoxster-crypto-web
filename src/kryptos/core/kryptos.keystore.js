@@ -563,17 +563,6 @@ export const KeyStore = function KeyStore(
         console.error(error)
       })
 
-  const importDerivedKey = derivedPassword =>
-    kryptos.subtle
-      .importKey(
-        formats.RAW,
-        utils.hexToArrayBuffer(derivedPassword),
-        algorithms.AES_KW,
-        NONEXTRACTABLE,
-        usage.WRAP,
-      )
-      .then(saveDerivedKey)
-
   /**
    * Export the public encryption key
    *
@@ -957,9 +946,6 @@ export const KeyStore = function KeyStore(
         })
     })
 
-  const unlockFromDerivedKey = (protector, pek, pvk) =>
-    importDerivedKey(protector).then(() => unlock(derivedKey, pek, pvk))
-
   const lockPsk = (type = PROTECTOR_TYPES.password) =>
     new Promise((resolve, reject) => {
       if (!keyContainerPSK) {
@@ -1139,7 +1125,6 @@ export const KeyStore = function KeyStore(
     getRecipientPublicKeys,
     deriveKeyFromPassword,
     addMemberProtector,
-    unlockFromDerivedKey,
     id: service,
   }
 }
