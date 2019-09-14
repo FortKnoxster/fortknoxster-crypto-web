@@ -1,204 +1,172 @@
-import { KRYPTOS } from './kryptos.core'
-/* global KRYPTOS, CryptoKey */
+/* eslint-disable max-lines */
+/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
+import { kryptos } from '../kryptos/kryptos'
+import * as utils from '../kryptos/utils'
+import * as algorithms from '../kryptos/algorithms'
+import * as formats from '../kryptos/formats'
+import * as usage from '../kryptos/usages'
+import { EXTRACTABLE, NONEXTRACTABLE } from '../kryptos/constants'
 
 /**
- * KRYPTOS is a cryptographic library wrapping and implementing the
+ * Kryptos is a cryptographic library wrapping and implementing the
  * Web Cryptography API. It supports both symmetric keys and asymmetric key pair
  * generation, encryption, decryption, signing and verification.
  *
  *
- * @name KRYPTOS
- * @copyright Copyright © FortKnoxster Ltd. 2014 - 2018.
+ * @name Kryptos
+ * @copyright Copyright © FortKnoxster Ltd. 2014 - 2019.
  * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
  * @author MJ <mj@fortknoxster.com>
  * @version 4.0
  */
 
 /**
- * The KRYPTOS Decrypter module.
+ * The Kryptos Decrypter module.
  *
- * @param {KRYPTOS.KeyStore} serviceKeyStore
+ * @param {kryptos.KeyStore} serviceKeyStore
  * @param {ByteArray} encryptedKey
  * @param {ByteArray} iv
  * @param {ByteArray} cipherText
  * @param {ByteArray} signature
  * @param {CryptoKey} theirPublicKey
- * @param {CryptoKey} privateKey
- * @param {type} callback
  * @returns {void}
  */
-export const Decrypter = function(
+export const Decrypter = function Decrypter(
   serviceKeyStore,
   encryptedKey,
-  iv,
-  cipherText,
+  iVector,
+  cipher,
   signature,
   theirPublicKey,
-  privateKey,
-  callback,
 ) {
   const keyStore = serviceKeyStore
-  const key = encryptedKey
-  var iv = iv
-  var cipherText = cipherText
+  let iv = iVector
+  let cipherText = cipher
   let publicKey = theirPublicKey
-  var privateKey = privateKey
-  var signature = signature
-  var callback = callback
   let sessionKey = null
-  let hmacKey = null
 
-  const deriveSessionKey = function(algorithm, pdk, pek) {
-    return KRYPTOS.cryptoSubtle.deriveKey(
+  const deriveSessionKey = (algorithm, pdk, pek) =>
+    kryptos.subtle.deriveKey(
       { name: 'ECDH', namedCurve: 'P-521', public: pek },
       pdk,
       algorithm,
-      KRYPTOS.EXTRACTABLE,
-      KRYPTOS.ENCRYPT_USAGE,
+      EXTRACTABLE,
+      usage.ENCRYPT,
     )
-  }
 
-  const verifyEncryptedMessage = function() {
-    return KRYPTOS.cryptoSubtle.verify(
-      KRYPTOS.getSignAlgo(publicKey.algorithm.name),
+  const verifyEncryptedMessage = () =>
+    kryptos.subtle.verify(
+      algorithms.getSignAlgorithm(publicKey.algorithm.name),
       publicKey,
       signature,
       cipherText,
-    ) // cipherText
-
-    // return true;
-  }
-
-  const verifyEncryptedFile = function(verifyKey) {
-    hmacKey = verifyKey
-    return KRYPTOS.cryptoSubtle.verify(
-      KRYPTOS.HMAC,
-      verifyKey,
-      signature,
-      cipherText,
-    ) // cipherText
-  }
-
-  const handleMessageVerification = function(successful) {
-    if (successful !== true) {
-      throw 'Verification Error: The sender could not be verified. Decryption of this message has been cancelled.'
-    }
-  }
-
-  const handleFileVerification = function(successful) {
-    if (successful !== true) {
-      throw 'Verification Error: The file integrity could not be verified. File corrupted.'
-    }
-  }
-
-  const decryptKey = function(pdk) {
-    return KRYPTOS.cryptoSubtle.decrypt(
-      { name: 'RSA-OAEP' },
-      pdk || privateKey,
-      key,
     )
+
+  const verifyEncryptedFile = verifyKey =>
+    kryptos.subtle.verify(algorithms.HMAC, verifyKey, signature, cipherText)
+
+  const handleMessageVerification = successful => {
+    if (successful !== true) {
+      throw new Error(
+        'Verification Error: The sender could not be verified. Decryption of this message has been cancelled.',
+      )
+    }
   }
 
-  const unwrapKey = function(pdk) {
-    return KRYPTOS.cryptoSubtle.unwrapKey(
-      'raw',
-      key,
+  const handleFileVerification = successful => {
+    if (successful !== true) {
+      throw new Error(
+        'Verification Error: The file integrity could not be verified. File corrupted.',
+      )
+    }
+  }
+
+  const decryptKey = pdk =>
+    kryptos.subtle.decrypt({ name: 'RSA-OAEP' }, pdk, encryptedKey)
+
+  const unwrapKey = pdk =>
+    kryptos.subtle.unwrapKey(
+      formats.RAW,
+      encryptedKey,
       pdk,
       { name: 'RSA-OAEP' },
       { name: 'AES-GCM' },
-      KRYPTOS.NONEXTRACTABLE,
-      KRYPTOS.ENCRYPT_USAGE,
+      NONEXTRACTABLE,
+      usage.ENCRYPT,
     )
-    // return KRYPTOS.cryptoSubtle.decrypt({name: "RSA-OAEP"}, pdk, key);
-  }
 
-  const importSessionKey = function(keyBytes, algo) {
+  const importSessionKey = (keyBytes, algo) => {
     if (!keyBytes) {
-      keyBytes = key
+      keyBytes = encryptedKey
     }
     if (keyBytes instanceof CryptoKey) {
-      log('CryptoKey')
-      return new KRYPTOS.Promise((resolve, reject) => {
-        resolve(key)
+      return new Promise(resolve => {
+        resolve(encryptedKey)
       })
     }
     if (!algo) {
-      algo = KRYPTOS.AES_CBC_ALGO
+      algo = algorithms.AES_CBC_ALGO
     }
-    return KRYPTOS.cryptoSubtle.importKey(
-      'raw',
+    return kryptos.subtle.importKey(
+      formats.RAW,
       keyBytes,
       algo,
-      KRYPTOS.NONEXTRACTABLE,
-      KRYPTOS.ENCRYPT_USAGE,
+      NONEXTRACTABLE,
+      usage.ENCRYPT,
     )
   }
 
-  const saveSessionKey = function(key) {
+  const saveSessionKey = key => {
     sessionKey = key
     return sessionKey
   }
 
-  const savePublicKey = function(key) {
+  const savePublicKey = key => {
     publicKey = key
     return publicKey
   }
 
-  const decryptCipherText = function(sessionKey, algorithm) {
+  const decryptCipherText = (key, algorithm) => {
     let algo = {}
     if (algorithm && algorithm.indexOf('AES-GCM') !== -1) {
       algo = { name: 'AES-GCM', iv, tagLength: 128 }
     } else {
       algo = { name: 'AES-CBC', iv }
     }
-    return KRYPTOS.cryptoSubtle.decrypt(algo, sessionKey, cipherText)
+    return kryptos.subtle.decrypt(algo, key, cipherText)
   }
 
-  const handlePlainText = function(plainText) {
-    const json = KRYPTOS.utils.ab2json(plainText)
-    callback(json)
+  const handlePlainText = plainText => {
+    const json = utils.arrayBufferToObject(plainText)
     return json
   }
 
-  const handlePlainFile = function(plainFile) {
-    callback(true, plainFile)
-  }
-
-  const importVerifyKey = function() {
-    return KRYPTOS.cryptoSubtle.importKey(
-      'raw',
-      key,
-      KRYPTOS.HMAC_ALGO,
-      KRYPTOS.NONEXTRACTABLE,
-      ['sign', 'verify'],
+  const importVerifyKey = () =>
+    kryptos.subtle.importKey(
+      formats.RAW,
+      encryptedKey,
+      algorithms.HMAC_ALGO,
+      NONEXTRACTABLE,
+      usage.SIGN,
     )
-  }
 
-  const importPublicVerifyKey = function() {
-    return KRYPTOS.cryptoSubtle.importKey(
-      'jwk',
+  const importPublicVerifyKey = () =>
+    kryptos.subtle.importKey(
+      formats.JWK,
       publicKey,
-      KRYPTOS.getImportAlgo(publicKey.kty),
+      algorithms.getImportAlgorithm(publicKey.kty),
       false,
       ['verify'],
     )
-  }
 
-  const saveImportedPublicVerifyKey = function(publicVerifyKey) {
+  const saveImportedPublicVerifyKey = publicVerifyKey => {
     publicKey = publicVerifyKey
   }
 
-  //    var extractData = function(data) {
-  //        var signatureLength = KRYPTOS.utils.byteLength(publicKey);
-  //        signature = new Uint8Array(data, 0, signatureLength);
-  //        plain = new Uint8Array(data, signatureLength);
-  //        return publicKey;
-  //    };
-
-  const protocol = function(data, pvk, pek, verifyOnly) {
-    cipherText = KRYPTOS.utils.str2ab(JSON.stringify(data))
+  const protocol = (data, pvk, pek, verifyOnly) => {
+    cipherText = utils.stringToArrayBuffer(JSON.stringify(data))
     let nodePek = null
-    log(cipherText)
     return keyStore
       .importPvk(pvk, ['verify'])
       .then(saveImportedPublicVerifyKey)
@@ -206,41 +174,34 @@ export const Decrypter = function(
       .then(handleMessageVerification)
       .then(() => {
         if (verifyOnly) {
-          callback(true)
-        } else var message = data.ServiceData
-        iv = KRYPTOS.utils.b642ab(message.iv)
-        cipherText = KRYPTOS.utils.b642ab(message.data)
+          return true
+        }
+        const message = data.ServiceData
+        iv = utils.base64ToArrayBuffer(message.iv)
+        cipherText = utils.base64ToArrayBuffer(message.data)
         return keyStore
           .importPek(pek, [])
           .then(importedPek => {
             nodePek = importedPek
           })
           .then(keyStore.getPdk)
-          .then(pdk => {
-            log('pdk ---------------------------')
-            log(pdk)
-            return deriveSessionKey(KRYPTOS.AES_GCM_ALGO, pdk, nodePek)
-          })
-          .then(key => {
-            log('deriveSessionKey key done!')
-            log(key)
-            return decryptCipherText(key, 'AES-GCM')
-          })
+          .then(pdk => deriveSessionKey(algorithms.AES_GCM_ALGO, pdk, nodePek))
+          .then(key => decryptCipherText(key, 'AES-GCM'))
           .then(plainText => handlePlainText(plainText))
           .catch(error => {
-            KRYPTOS.utils.log(error)
-            callback(false, error)
+            console.error(error)
+            return error
           })
       })
       .catch(error => {
-        KRYPTOS.utils.log(error)
-        callback(false, error)
+        console.error(error)
+        return error
       })
   }
 
-  const justDecryptIt = function(id, algo, key) {
+  const justDecryptIt = (id, algo, key) => {
     sessionKey = key
-    return new KRYPTOS.Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if (!key) {
         return keyStore
           .getPdk()
@@ -250,39 +211,32 @@ export const Decrypter = function(
             resolve(sessionKey)
           })
       }
-      //                return sessionKey;
-      resolve(sessionKey)
+      return resolve(sessionKey)
     })
-      .then(sessionKey => importSessionKey(sessionKey, KRYPTOS.getAlgo(algo)))
-      .then(key => decryptCipherText(key, algo))
+      .then(resolvedKey =>
+        importSessionKey(resolvedKey, algorithms.getAlgorithm(algo)),
+      )
+      .then(resolvedKey => decryptCipherText(resolvedKey, algo))
       .then(plainText => {
         const data = {
           id,
-          plain: KRYPTOS.utils.ab2json(plainText),
+          plain: utils.arrayBufferToObject(plainText),
           failed: false,
-          key: KRYPTOS.utils.ab2b64(sessionKey),
+          key: utils.arrayBufferToBase64(sessionKey),
         }
-        if (callback) {
-          callback(data)
-        } else {
-          return new KRYPTOS.Promise((resolve, reject) => {
-            resolve(data)
-          })
-        }
+        return new Promise(resolve => {
+          resolve(data)
+        })
       })
       .catch(error => {
-        KRYPTOS.utils.log(error)
-        if (callback) {
-          callback(false, error)
-        } else {
-          return new KRYPTOS.Promise((resolve, reject) => {
-            resolve(error)
-          })
-        }
+        console.error(error)
+        return new Promise(resolve => {
+          resolve(error)
+        })
       })
   }
 
-  const decryptIt = function(from, id, algo, key) {
+  const decryptIt = (from, id, algo, key) => {
     sessionKey = key
     return keyStore
       .getPublicKey(from, 'verify')
@@ -293,300 +247,204 @@ export const Decrypter = function(
       .then(handleMessageVerification)
       .then(() => justDecryptIt(id, algo, key))
       .catch(error => {
-        KRYPTOS.utils.log(error)
-        if (callback) {
-          callback(false, error)
-        }
+        console.error(error)
+        return error
       })
   }
 
-  const verifyIt = function(from, id) {
-    return (
+  const verifyIt = (from, id) =>
+    keyStore
+      .getPublicKey(from, 'verify')
+      .then(savePublicKey)
+      .then(keyStore.importPvk)
+      .then(saveImportedPublicVerifyKey)
+      .then(verifyEncryptedMessage)
+      .then(handleMessageVerification)
+      .then(() => {
+        const data = {
+          id,
+        }
+        return new Promise(resolve => {
+          resolve(data)
+        })
+      })
+      .catch(error => {
+        console.error(error)
+        return new Promise(resolve => {
+          resolve(error)
+        })
+      })
+
+  const decrypt = () =>
+    importPublicVerifyKey()
+      .then(saveImportedPublicVerifyKey)
+      .then(verifyEncryptedMessage)
+      .then(handleMessageVerification)
+      .then(keyStore.getPdk)
+      .then(decryptKey)
+      .then(importSessionKey)
+      .then(decryptCipherText)
+      .then(handlePlainText)
+      .catch(error => {
+        console.error(error)
+      })
+
+  const decryptGroupKey = raw => {
+    if (raw) {
+      return keyStore
+        .getPdk()
+        .then(decryptKey)
+        .then(result => result)
+        .catch(error => {
+          console.error(error)
+          return error
+        })
+    }
+    return keyStore
+      .getPdk()
+      .then(unwrapKey)
+      .then(result => result)
+      .catch(error => {
+        console.error(error)
+        return error
+      })
+  }
+
+  const decryptGroupMessage = (from, id) =>
+    decryptIt(from, id, 'AES-GCM', encryptedKey)
+
+  const decryptFile = () =>
+    importVerifyKey()
+      .then(verifyEncryptedFile)
+      .then(handleFileVerification)
+      .then(importSessionKey)
+      .then(decryptCipherText)
+      .then(result => result)
+      .catch(error => {
+        console.error(error)
+        return error
+      })
+
+  // Todo: Rewrite, still used in legacy inbox
+  const decrypt2 = (from, uuid) =>
+    new Promise(resolve =>
       keyStore
         .getPublicKey(from, 'verify')
         .then(savePublicKey)
-        .then(keyStore.importPvk)
+        .then(importPublicVerifyKey)
         .then(saveImportedPublicVerifyKey)
         .then(verifyEncryptedMessage)
+        .catch(error => {
+          console.error(error)
+          resolve({
+            uuid,
+            failed: true,
+            plain: { subject: 'Could not verify sender' },
+          })
+        })
         .then(handleMessageVerification)
-        //                        .catch(function (error) {
-        // //                            alert('ERROR! Check console!');
-        //                        })
-        .then(() => {
-          const data = {
-            id,
-          }
-          if (callback) {
-            callback(data)
-          } else {
-            return new KRYPTOS.Promise((resolve, reject) => {
-              resolve(data)
-            })
+        .then(keyStore.getPdk)
+        .then(decryptKey)
+        .catch(error => {
+          console.error(error)
+          resolve({ uuid, failed: true, plain: { subject: 'Invalid key!' } })
+        })
+        .then(importSessionKey)
+        .then(decryptCipherText)
+        .catch(error => {
+          console.error(error)
+          resolve({
+            uuid,
+            failed: true,
+            plain: { subject: 'Could not decrypt message!!' },
+          })
+        })
+        .then(plainText => {
+          if (plainText) {
+            const plain = utils.arrayBufferToObject(plainText)
+            resolve({ uuid, failed: false, plain })
           }
         })
         .catch(error => {
-          KRYPTOS.utils.log(error)
-          if (callback) {
-            callback(false, error)
-          } else {
-            return new KRYPTOS.Promise((resolve, reject) => {
-              resolve(error)
-            })
-          }
-        })
+          console.error(error)
+          resolve({
+            uuid,
+            failed: true,
+            plain: { subject: 'Something went wrong!!' },
+          })
+        }),
     )
-  }
 
-  var log = function(msg) {
-    return false
+  const decryptItemAssignment = () =>
+    importPublicVerifyKey()
+      .then(saveImportedPublicVerifyKey)
+      .then(verifyEncryptedMessage)
+      .then(handleMessageVerification)
+      .then(keyStore.getPdk)
+      .then(decryptKey)
+      .then(saveSessionKey)
+      .then(importSessionKey)
+      .then(decryptCipherText)
+      .then(plainText => {
+        const result = {
+          json: utils.arrayBufferToObject(plainText),
+          key: utils.arrayBufferToBase64(sessionKey),
+        }
+        return result
+      })
+      .catch(error => {
+        console.error(error)
+        return error
+      })
+
+  const decryptItem = (itemId, referenceId) =>
+    importPublicVerifyKey()
+      .then(saveImportedPublicVerifyKey)
+      .then(verifyEncryptedMessage)
+      .then(handleMessageVerification)
+      .then(() => encryptedKey)
+      .then(importSessionKey)
+      .then(decryptCipherText)
+      .then(plainText => {
+        const result = {
+          plain: utils.arrayBufferToObject(plainText),
+          id: itemId,
+          rid: referenceId,
+        }
+        return result
+      })
+      .catch(error => {
+        console.error(error)
+        return error
+      })
+
+  const decryptFilePart = (id, partNumber) => {
+    const algo = algorithms.AES_GCM_ALGO
+    return importSessionKey(null, algo)
+      .then(key => decryptCipherText(key, 'AES-GCM'))
+      .then(plainFile => {
+        const result = {
+          id,
+          part: partNumber,
+          file: plainFile,
+        }
+        return result
+      })
+      .catch(error => {
+        console.error(error)
+        return Promise.reject(error)
+      })
   }
 
   return {
-    decrypt() {
-      return importPublicVerifyKey()
-        .then(saveImportedPublicVerifyKey)
-        .then(verifyEncryptedMessage)
-        .then(handleMessageVerification)
-        .then(keyStore.getPdk)
-        .then(decryptKey)
-        .then(importSessionKey)
-        .then(decryptCipherText)
-        .then(handlePlainText)
-        .catch(error => {
-          KRYPTOS.utils.log(error)
-          callback(false, error)
-        })
-    },
-    decrypt3() {
-      return decryptKey()
-        .then(importSessionKey)
-        .then(decryptCipherText)
-        .then(handlePlainText)
-        .catch(error => {
-          KRYPTOS.utils.log(error)
-          callback(false, error)
-        })
-    },
-    decryptGroupKey(raw) {
-      if (raw) {
-        return keyStore
-          .getPdk()
-          .then(decryptKey)
-          .then(result => {
-            callback(true, result)
-          })
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            callback(false, error)
-          })
-      }
-      return (
-        keyStore
-          .getPdk()
-          .then(unwrapKey)
-          //                    .then(decryptKey)
-          //                    .then(importGroupSessionKey)
-          .then(result => {
-            callback(true, result)
-          })
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            callback(false, error)
-          })
-      )
-    },
-    decryptGroupMessage(from, id) {
-      return decryptIt(from, id, 'AES-GCM', key)
-    },
-    decryptFile() {
-      return (
-        importVerifyKey()
-          //                    .then(saveExportedFileSessionKey)
-          //                    .then(importVerifyKey)
-          .then(verifyEncryptedFile)
-          .then(handleFileVerification)
-          .then(importSessionKey)
-          .then(decryptCipherText)
-          .then(handlePlainFile)
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            callback(false, error.message ? error.message : error)
-          })
-      )
-    },
-    decrypt2(from, uuid) {
-      return new KRYPTOS.Promise((resolve, reject) =>
-        //                return importPublicVerifyKey().catch(function (error) {log('a'); log(error); KRYPTOS.utils.log(error);})
-        keyStore
-          .getPublicKey(from, 'verify')
-          .then(savePublicKey)
-          .then(importPublicVerifyKey)
-          .then(saveImportedPublicVerifyKey)
-          .then(verifyEncryptedMessage)
-          .catch(error => {
-            resolve({
-              uuid,
-              failed: true,
-              plain: { subject: 'Could not verify sender' },
-            })
-          })
-          .then(handleMessageVerification)
-          .then(keyStore.getPdk)
-          .then(decryptKey)
-          .catch(error => {
-            resolve({ uuid, failed: true, plain: { subject: 'Error!' } }) // Incorrect key!!
-          })
-          .then(importSessionKey)
-          .then(decryptCipherText)
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            resolve({
-              uuid,
-              failed: true,
-              plain: { subject: 'Could not decrypt message!!' },
-            })
-          })
-          .then(plainText => {
-            if (plainText) {
-              const plain = KRYPTOS.utils.ab2json(plainText)
-              resolve({ uuid, failed: false, plain })
-            }
-          })
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            resolve({
-              uuid,
-              failed: true,
-              plain: { subject: 'Something went wrong!!' },
-            })
-            // reject("DECRYPT 2: Something went wrong decrypting message " + error.message + "\n" + error.stack);
-          }),
-      )
-    },
-    decryptItemAssignment() {
-      return importPublicVerifyKey()
-        .catch(error => {
-          log('a')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(saveImportedPublicVerifyKey)
-        .then(verifyEncryptedMessage)
-        .catch(error => {
-          log('b')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(handleMessageVerification)
-        .catch(error => {
-          KRYPTOS.utils.log('decryptItemAssignment')
-          KRYPTOS.utils.log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(keyStore.getPdk)
-        .catch(error => {
-          log('b2')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(decryptKey)
-        .catch(error => {
-          log('c')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(saveSessionKey)
-        .then(importSessionKey)
-        .catch(error => {
-          log('d')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(decryptCipherText)
-        .catch(error => {
-          log('e')
-          log(error)
-          KRYPTOS.utils.log(error)
-        })
-        .then(plainText => {
-          const result = {
-            json: KRYPTOS.utils.ab2json(plainText),
-            key: KRYPTOS.utils.ab2b64(sessionKey),
-          }
-          callback(result)
-          return result
-        })
-        .catch(error => {
-          KRYPTOS.utils.log(error)
-          callback(false, error)
-          return error
-        })
-    },
-    decryptItem(itemId, referenceId) {
-      return (
-        importPublicVerifyKey()
-          .then(saveImportedPublicVerifyKey)
-          .then(verifyEncryptedMessage)
-          .then(handleMessageVerification)
-          .catch(error => {
-            KRYPTOS.utils.log('decryptItem')
-            KRYPTOS.utils.log(error)
-            KRYPTOS.utils.log(error)
-          })
-          //                    .then(decryptKey)
-          .then(() => key)
-          .then(importSessionKey)
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            //                        resolve({uuid: uuid, failed: true, plain: {subject: "Incorrect key!!"}});
-          })
-          .then(decryptCipherText)
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            //                        resolve({uuid: uuid, failed: true, plain: {subject: "Incorrect key!!"}});
-          })
-          .then(plainText => {
-            const result = {
-              plain: KRYPTOS.utils.ab2json(plainText),
-              id: itemId,
-              rid: referenceId,
-            }
-            callback(result)
-            return result
-          })
-          .catch(error => {
-            KRYPTOS.utils.log(error)
-            callback(false, error)
-            return error
-          })
-      )
-    },
-    decryptFilePart(id, partNumber) {
-      //            return importVerifyKey()
-      //                    .then(verifyEncryptedFile)
-      //                    .then(handleFileVerification)
-      //                    .then(importSessionKey)
-      const algo = KRYPTOS.AES_GCM_ALGO
-      return importSessionKey(null, algo)
-        .then(key => {
-          log(key)
-          return decryptCipherText(key, 'AES-GCM')
-        })
-        .then(plainFile => {
-          const result = {
-            id,
-            part: partNumber,
-            file: plainFile,
-          }
-          callback(result)
-          return result
-        })
-        .catch(error => {
-          KRYPTOS.utils.log(error)
-          callback(false, error)
-          return Promise.reject(error)
-        })
-    },
+    decrypt,
+    decryptGroupKey,
+    decryptGroupMessage,
+    decryptFile,
+    decrypt2,
+    decryptItemAssignment,
+    decryptItem,
+    decryptFilePart,
     protocol,
     decryptIt,
     verifyIt,

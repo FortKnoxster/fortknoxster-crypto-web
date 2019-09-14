@@ -1,5 +1,5 @@
 import { EC_AES_GCM_256 } from './algorithms'
-import { base64ToArrayBuffer, dummyCB } from './utils'
+import { base64ToArrayBuffer } from './utils'
 import { Encrypter } from '../legacy/kryptos.encrypter'
 import { Decrypter } from '../legacy/kryptos.decrypter'
 
@@ -68,7 +68,7 @@ function tryParseResult(result) {
  */
 export function encryptProtocol(type, data, nodePEK) {
   const { keyStore } = protocol
-  const encrypter = new Encrypter(keyStore, data, null, dummyCB)
+  const encrypter = new Encrypter(keyStore, data)
   return encrypter.protocol(message(type), envelope(EC_AES_GCM_256), nodePEK)
 }
 
@@ -89,16 +89,7 @@ export function decryptProtocol(result, isError, verifyOnly, nodePEK, nodePVK) {
     : tryParseResult(result)
   const signature = base64ToArrayBuffer(data.Sign, true)
   data.Sign = null // TODO handle this in decrypter
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    null,
-    signature,
-    null,
-    null,
-    dummyCB,
-  )
+  const decrypter = new Decrypter(keyStore, null, null, null, signature)
   return decrypter.protocol(data, nodePVK, nodePEK, verifyOnly)
 }
 

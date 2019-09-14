@@ -211,8 +211,3 @@ export function getKeyMode(keyType) {
   }
   throw new Error('Invalid key type.')
 }
-
-// eslint-disable-next-line no-unused-vars
-export function dummyCB(success, result) {
-  // console.log(`success: ${success} result: ${result}`)
-}

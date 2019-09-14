@@ -121,7 +121,7 @@ export function getAlgorithm(algo) {
   throw new Error('Invalid algorithm')
 }
 
-export function getSignAlgo(algo) {
+export function getSignAlgorithm(algo) {
   switch (algo) {
     case 'RSASSA-PKCS1-v1_5':
       return RSASSA_PKCS1_V1_5
@@ -133,4 +133,20 @@ export function getSignAlgo(algo) {
       break
   }
   throw new Error('Invalid sign algorithm')
+}
+
+export function getImportAlgorithm(algo) {
+  switch (algo) {
+    case 'RSA':
+    case 'RSASSA-PKCS1-v1_5':
+      return { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
+    case 'EC':
+    case 'ECDSA':
+      return ECDSA_ALGO
+    case 'HMAC':
+      return HMAC_ALGO
+    default:
+      break
+  }
+  throw new Error('Invalid import algorithm')
 }

@@ -123,7 +123,7 @@ export const Encrypter = function Encrypter(
       return ''
     }
     return kryptos.subtle.sign(
-      algorithms.getSignAlgo(psk.algorithm.name),
+      algorithms.getSignAlgorithm(psk.algorithm.name),
       psk,
       new Uint8Array(encryptedPlainText[1]),
     )
