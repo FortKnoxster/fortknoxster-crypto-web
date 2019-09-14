@@ -2,25 +2,11 @@
 import { kryptos } from '../kryptos/kryptos'
 import { Encrypter } from './kryptos.encrypter'
 import {
-  nonce,
-  getKeyType,
-  arrayBufferToHex,
-  arrayBufferToBase64,
-  stringToArrayBuffer,
-  objectToArrayBuffer,
-  base64ToArrayBuffer,
-  arrayBufferToObject,
-  hexToArrayBuffer,
-  ecJwk,
-  rsaJwk,
-  randomValue,
-  getKeyMode,
-} from '../kryptos/utils'
-import {
   PROTECTOR_TYPES,
   EXTRACTABLE,
   NONEXTRACTABLE,
 } from '../kryptos/constants'
+import * as utils from '../kryptos/utils'
 import * as algorithms from '../kryptos/algorithms'
 import * as usage from '../kryptos/usages'
 import * as formats from '../kryptos/formats'
@@ -220,7 +206,7 @@ export const KeyStore = function KeyStore(
       data[service] = {
         psk: keyContainerPSK,
         pvk: exportedPublicVerifyKey,
-        fingerprint: arrayBufferToHex(hash),
+        fingerprint: utils.arrayBufferToHex(hash),
       }
       storeKeys(null, exportedPublicVerifyKey)
       resolve(data)
@@ -239,11 +225,11 @@ export const KeyStore = function KeyStore(
   const signPublicKeys = identity => {
     const publicKeys = {
       pek: isEC()
-        ? ecJwk(exportedPublicEncryptKey)
-        : rsaJwk(exportedPublicEncryptKey),
+        ? utils.ecJwk(exportedPublicEncryptKey)
+        : utils.rsaJwk(exportedPublicEncryptKey),
       pvk: isEC()
-        ? ecJwk(exportedPublicVerifyKey)
-        : rsaJwk(exportedPublicVerifyKey),
+        ? utils.ecJwk(exportedPublicVerifyKey)
+        : utils.rsaJwk(exportedPublicVerifyKey),
     }
     return new Promise((resolve, reject) => {
       const encrypter = new Encrypter(
@@ -355,10 +341,10 @@ export const KeyStore = function KeyStore(
       return
     }
     keyContainer.keyProtectors.push({
-      encryptedKey: arrayBufferToBase64(wrappedKey),
+      encryptedKey: utils.arrayBufferToBase64(wrappedKey),
       type: typeProtector,
       name: deriveKeyAlgo.name,
-      salt: arrayBufferToBase64(deriveKeyAlgo.salt),
+      salt: utils.arrayBufferToBase64(deriveKeyAlgo.salt),
       iterations: deriveKeyAlgo.iterations,
       hash: deriveKeyAlgo.hash,
     })
@@ -366,7 +352,7 @@ export const KeyStore = function KeyStore(
 
   const addAsymmetricProtector = (keyContainer, wrappedKey) => {
     keyContainer.keyProtectors.push({
-      encryptedKey: arrayBufferToBase64(wrappedKey),
+      encryptedKey: utils.arrayBufferToBase64(wrappedKey),
       type: 'asymmetric',
       name: deriveKeyAlgo.name,
     })
@@ -384,28 +370,28 @@ export const KeyStore = function KeyStore(
     if (keyContainerPDK === null) {
       keyContainerPDK = {
         encryptedKey: null,
-        iv: arrayBufferToBase64(ivPDK),
-        keyType: getKeyType(mode, 'PDK'),
+        iv: utils.arrayBufferToBase64(ivPDK),
+        keyType: utils.getKeyType(mode, 'PDK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
       addProtector(keyContainerPDK, wrappedIAKPDK)
     }
-    keyContainerPDK.encryptedKey = arrayBufferToBase64(wrappedKey)
+    keyContainerPDK.encryptedKey = utils.arrayBufferToBase64(wrappedKey)
   }
 
   const saveWrappedPSK = wrappedKey => {
     if (keyContainerPSK === null) {
       keyContainerPSK = {
         encryptedKey: null,
-        iv: arrayBufferToBase64(ivPSK),
-        keyType: getKeyType(mode, 'PSK'),
+        iv: utils.arrayBufferToBase64(ivPSK),
+        keyType: utils.getKeyType(mode, 'PSK'),
         protectType: 'AES-GCM-256',
         keyProtectors: [],
       }
       addPasswordProtector(keyContainerPSK, wrappedIAKPSK)
     }
-    keyContainerPSK.encryptedKey = arrayBufferToBase64(wrappedKey)
+    keyContainerPSK.encryptedKey = utils.arrayBufferToBase64(wrappedKey)
   }
 
   const unwrapIAK = (wrappedKey, algo) => {
@@ -478,10 +464,10 @@ export const KeyStore = function KeyStore(
     if (index !== -1) {
       // eslint-disable-next-line no-param-reassign
       keyContainer.keyProtectors[index] = {
-        encryptedKey: arrayBufferToBase64(wrappedKey),
+        encryptedKey: utils.arrayBufferToBase64(wrappedKey),
         type,
         name: deriveKeyAlgo.name,
-        salt: arrayBufferToBase64(deriveKeyAlgo.salt),
+        salt: utils.arrayBufferToBase64(deriveKeyAlgo.salt),
         iterations: deriveKeyAlgo.iterations,
         hash: deriveKeyAlgo.hash,
       }
@@ -518,7 +504,7 @@ export const KeyStore = function KeyStore(
     kryptos.subtle
       .importKey(
         formats.RAW,
-        stringToArrayBuffer(password),
+        utils.stringToArrayBuffer(password),
         algorithms.PBKDF2,
         false,
         usage.DERIVE,
@@ -566,7 +552,7 @@ export const KeyStore = function KeyStore(
   const deriveKeyFromPassword = password => {
     setDeriveKeyAlgo({
       name: algorithms.PBKDF2.name,
-      salt: randomValue(32),
+      salt: utils.randomValue(32),
       iterations: 20000,
       hash: algorithms.SHA_256.name,
     })
@@ -585,7 +571,7 @@ export const KeyStore = function KeyStore(
     kryptos.subtle
       .importKey(
         formats.RAW,
-        hexToArrayBuffer(derivedPassword),
+        utils.hexToArrayBuffer(derivedPassword),
         algorithms.AES_KW,
         NONEXTRACTABLE,
         usage.WRAP,
@@ -637,7 +623,10 @@ export const KeyStore = function KeyStore(
     })
 
   const fingerprint = key =>
-    kryptos.subtle.digest(algorithms.SHA_256.name, objectToArrayBuffer(key))
+    kryptos.subtle.digest(
+      algorithms.SHA_256.name,
+      utils.objectToArrayBuffer(key),
+    )
 
   const importIAK = (jwk, extractable) => {
     const unwrapAlgo = algorithms.getAlgorithm(keyContainerPSK.protectType)
@@ -661,8 +650,8 @@ export const KeyStore = function KeyStore(
   }
 
   const unwrapPDK = key => {
-    wrappedPDK = base64ToArrayBuffer(keyContainerPDK.encryptedKey)
-    ivPDK = base64ToArrayBuffer(keyContainerPDK.iv)
+    wrappedPDK = utils.base64ToArrayBuffer(keyContainerPDK.encryptedKey)
+    ivPDK = utils.base64ToArrayBuffer(keyContainerPDK.iv)
     const unwrapAlgo = algorithms.getAlgorithm(keyContainerPDK.protectType)
     const unwrappedKeyAlgo = algorithms.getAlgorithm(keyContainerPDK.keyType)
     const usages = isEC() ? usage.DERIVE : ['decrypt', 'unwrapKey']
@@ -671,7 +660,7 @@ export const KeyStore = function KeyStore(
       return kryptos.subtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPDK }, key, wrappedPDK)
         .then(result => {
-          const decryptedKey = arrayBufferToObject(result)
+          const decryptedKey = utils.arrayBufferToObject(result)
           return kryptos.subtle.importKey(
             formats.JWK,
             decryptedKey,
@@ -710,8 +699,8 @@ export const KeyStore = function KeyStore(
   }
 
   const unwrapPSK = key => {
-    wrappedPSK = base64ToArrayBuffer(keyContainerPSK.encryptedKey)
-    ivPSK = base64ToArrayBuffer(keyContainerPSK.iv)
+    wrappedPSK = utils.base64ToArrayBuffer(keyContainerPSK.encryptedKey)
+    ivPSK = utils.base64ToArrayBuffer(keyContainerPSK.iv)
     const unwrapAlgo = algorithms.getAlgorithm(keyContainerPSK.protectType)
     const unwrappedKeyAlgo = algorithms.getAlgorithm(keyContainerPSK.keyType)
     if (isEC()) {
@@ -719,7 +708,7 @@ export const KeyStore = function KeyStore(
       return kryptos.subtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPSK }, key, wrappedPSK)
         .then(result => {
-          const decryptedKey = arrayBufferToObject(result)
+          const decryptedKey = utils.arrayBufferToObject(result)
           return kryptos.subtle.importKey(
             formats.JWK,
             decryptedKey,
@@ -870,7 +859,7 @@ export const KeyStore = function KeyStore(
     ) {
       setDeriveKeyAlgo({
         name: keyProtector.name,
-        salt: base64ToArrayBuffer(keyProtector.salt),
+        salt: utils.base64ToArrayBuffer(keyProtector.salt),
         iterations: keyProtector.iterations,
         hash: keyProtector.hash,
       })
@@ -878,7 +867,10 @@ export const KeyStore = function KeyStore(
     const algo = algorithms.getAlgorithm(keyContainer.protectType)
     return derivedKeyProtector
       .then(() =>
-        unwrapIAK(base64ToArrayBuffer(keyProtector.encryptedKey), algo.name),
+        unwrapIAK(
+          utils.base64ToArrayBuffer(keyProtector.encryptedKey),
+          algo.name,
+        ),
       )
       .then(exportIAK)
       .catch(error => {
@@ -1033,7 +1025,7 @@ export const KeyStore = function KeyStore(
       .then(wrapIAKPDK)
       .then(wrappedKey => {
         callback(true, {
-          encryptedKey: arrayBufferToBase64(wrappedKey),
+          encryptedKey: utils.arrayBufferToBase64(wrappedKey),
           username,
           type: 'asymmetric',
           name: deriveKeyAlgo.name,
@@ -1044,8 +1036,8 @@ export const KeyStore = function KeyStore(
       })
 
   const setupKeys = (password, identity) => {
-    ivPSK = nonce()
-    ivPDK = nonce()
+    ivPSK = utils.nonce()
+    ivPDK = utils.nonce()
     return deriveKeyFromPassword(password)
       .then(generateIAK)
       .then(saveIAKPSK)
@@ -1075,7 +1067,7 @@ export const KeyStore = function KeyStore(
   }
 
   const setupSignKeys = password => {
-    ivPSK = nonce()
+    ivPSK = utils.nonce()
     return deriveKeyFromPassword(password)
       .then(generateIAK)
       .then(saveIAKPSK)
@@ -1095,7 +1087,7 @@ export const KeyStore = function KeyStore(
   }
 
   const setupEncryptKeys = protector => {
-    ivPDK = nonce()
+    ivPDK = utils.nonce()
     let keyProtector = null
     if (protector instanceof Object) {
       keyProtector = deriveKeyFromAsymmetric(protector)
@@ -1122,7 +1114,7 @@ export const KeyStore = function KeyStore(
   const init = () => {
     keyContainerPDK = JSON.parse(sessionStorage.getItem(prefixPDK))
     keyContainerPSK = JSON.parse(sessionStorage.getItem(prefixPSK))
-    setMode(getKeyMode(keyContainerPSK.keyType))
+    setMode(utils.getKeyMode(keyContainerPSK.keyType))
   }
 
   return {
