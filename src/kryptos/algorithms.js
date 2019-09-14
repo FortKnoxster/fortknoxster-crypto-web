@@ -90,3 +90,33 @@ export const deriveKeyPBKDF2 = salt => ({
   iterations: 50000,
   hash: 'SHA-256',
 })
+
+export function getAlgorithm(algo) {
+  switch (algo) {
+    case 'AES-GCM-256':
+    case 'AES-GCM':
+    case 'A256GCM':
+      return AES_GCM_ALGO
+    case 'AES-CBC':
+    case 'AES-CBC-256':
+    case 'A256CBC':
+      return AES_CBC_ALGO
+    case 'RS256':
+    case 'RSASSA-PKCS1-v1_5-2048':
+      return { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
+    case 'RSA2048':
+    case 'RSA-OAEP-256':
+    case 'RSA-OAEP-2048':
+      return { name: 'RSA-OAEP', hash: { name: 'SHA-256' } }
+    case 'ECDSA':
+    case 'ES512':
+    case 'ECDSA-P521':
+      return ECDSA_ALGO
+    case 'ECDH':
+    case 'ECDH-P521':
+      return ECDH_ALGO
+    default:
+      break
+  }
+  throw new Error('Invalid algorithm')
+}

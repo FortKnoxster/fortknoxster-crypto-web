@@ -12,9 +12,16 @@ import {
   hexToArrayBuffer,
   ecJwk,
   rsaJwk,
+  randomValue,
+  getKeyMode,
 } from '../kryptos/utils'
-import { PROTECTOR_TYPES } from '../kryptos/constants'
+import {
+  PROTECTOR_TYPES,
+  EXTRACTABLE,
+  NONEXTRACTABLE,
+} from '../kryptos/constants'
 import * as algorithms from '../kryptos/algorithms'
+import * as usage from '../kryptos/usages'
 import * as formats from '../kryptos/formats'
 
 /**
@@ -108,7 +115,7 @@ export const KeyStore = function KeyStore(
       case 'EC':
         break
       default:
-        throw new Error('Invalid algorithm3')
+        throw new Error('Invalid algorithm in setMode.')
     }
     mode = keyStoreMode
   }
@@ -124,8 +131,8 @@ export const KeyStore = function KeyStore(
   const generateIAK = () =>
     KRYPTOS.cryptoSubtle.generateKey(
       algorithms.AES_GCM_ALGO,
-      KRYPTOS.EXTRACTABLE,
-      KRYPTOS.WRAP_USAGE.concat(KRYPTOS.ENCRYPT_USAGE),
+      EXTRACTABLE,
+      usage.WRAP.concat(usage.ENCRYPT),
     )
 
   const saveIAKPSK = iak => {
@@ -263,14 +270,14 @@ export const KeyStore = function KeyStore(
     if (isEC()) {
       return KRYPTOS.cryptoSubtle.generateKey(
         algorithms.ECDSA_ALGO,
-        KRYPTOS.EXTRACTABLE,
-        KRYPTOS.SIGN_USAGE,
+        EXTRACTABLE,
+        usage.SIGN,
       )
     }
     return KRYPTOS.cryptoSubtle.generateKey(
       algorithms.RSASSA_PKCS1_V1_5_ALGO,
-      KRYPTOS.EXTRACTABLE,
-      KRYPTOS.SIGN_USAGE,
+      EXTRACTABLE,
+      usage.SIGN,
     )
   }
 
@@ -283,14 +290,14 @@ export const KeyStore = function KeyStore(
     if (isEC()) {
       return KRYPTOS.cryptoSubtle.generateKey(
         algorithms.ECDH_ALGO,
-        KRYPTOS.EXTRACTABLE,
-        KRYPTOS.DERIVE_USAGE,
+        EXTRACTABLE,
+        usage.DERIVE,
       )
     }
     return KRYPTOS.cryptoSubtle.generateKey(
       algorithms.RSA_OAEP_ALGO,
-      KRYPTOS.EXTRACTABLE,
-      KRYPTOS.ENCRYPT_USAGE.concat(KRYPTOS.WRAP_USAGE),
+      EXTRACTABLE,
+      usage.ENCRYPT.concat(usage.WRAP),
     )
   }
 
@@ -406,7 +413,7 @@ export const KeyStore = function KeyStore(
   }
 
   const unwrapIAK = (wrappedKey, algo) => {
-    const usage = KRYPTOS.WRAP_USAGE.concat(KRYPTOS.ENCRYPT_USAGE)
+    const usages = usage.WRAP.concat(usage.ENCRYPT)
     if (derivedKey.type === 'private') {
       return KRYPTOS.cryptoSubtle
         .decrypt({ name: derivedKey.algorithm.name }, derivedKey, wrappedKey)
@@ -414,9 +421,9 @@ export const KeyStore = function KeyStore(
           KRYPTOS.cryptoSubtle.importKey(
             formats.RAW,
             keyBytes,
-            KRYPTOS.getAlgo(algo),
-            KRYPTOS.EXTRACTABLE,
-            usage,
+            algorithms.getAlgorithm(algo),
+            EXTRACTABLE,
+            usages,
           ),
         )
     }
@@ -426,8 +433,8 @@ export const KeyStore = function KeyStore(
       derivedKey,
       algorithms.AES_KW,
       { name: algo },
-      KRYPTOS.EXTRACTABLE,
-      usage,
+      EXTRACTABLE,
+      usages,
     )
   }
 
@@ -506,9 +513,9 @@ export const KeyStore = function KeyStore(
     KRYPTOS.cryptoSubtle.deriveKey(
       deriveKeyAlgo,
       key,
-      KRYPTOS.AES_KW_ALGO,
-      KRYPTOS.NONEXTRACTABLE,
-      KRYPTOS.WRAP_USAGE,
+      algorithms.AES_KW_ALGO,
+      NONEXTRACTABLE,
+      usage.WRAP,
     )
 
   const saveDerivedKey = key => {
@@ -522,7 +529,7 @@ export const KeyStore = function KeyStore(
         stringToArrayBuffer(password),
         algorithms.PBKDF2,
         false,
-        KRYPTOS.DERIVE_USAGE,
+        usage.DERIVE,
       )
       .then(saveImportedPassword)
       .then(deriveKey)
@@ -540,7 +547,7 @@ export const KeyStore = function KeyStore(
       // eslint-disable-next-line no-param-reassign
       delete publicKey.key_ops
     }
-    const algo = KRYPTOS.getAlgo(alg)
+    const algo = algorithms.getAlgorithm(alg)
     return KRYPTOS.cryptoSubtle.importKey(
       formats.JWK,
       publicKey,
@@ -555,7 +562,7 @@ export const KeyStore = function KeyStore(
   }
 
   const deriveKeyFromAsymmetric = (keyStore, username) => {
-    setDeriveKeyAlgo(KRYPTOS.RSA_OAEP_ALGO)
+    setDeriveKeyAlgo(algorithms.RSA_OAEP_ALGO)
     let operation = null
     if (username) {
       operation = keyStore
@@ -573,7 +580,7 @@ export const KeyStore = function KeyStore(
   const deriveKeyFromPassword = password => {
     setDeriveKeyAlgo({
       name: algorithms.PBKDF2.name,
-      salt: KRYPTOS.randomValue(32),
+      salt: randomValue(32),
       iterations: 20000,
       hash: algorithms.SHA_256.name,
     })
@@ -594,8 +601,8 @@ export const KeyStore = function KeyStore(
         formats.RAW,
         hexToArrayBuffer(derivedPassword),
         algorithms.AES_KW,
-        KRYPTOS.NONEXTRACTABLE,
-        KRYPTOS.WRAP_USAGE,
+        NONEXTRACTABLE,
+        usage.WRAP,
       )
       .then(saveDerivedKey)
 
@@ -647,7 +654,7 @@ export const KeyStore = function KeyStore(
     KRYPTOS.cryptoSubtle.digest(KRYPTOS.SHA_256.name, objectToArrayBuffer(key))
 
   const importIAK = (jwk, extractable) => {
-    const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPSK.protectType)
+    const unwrapAlgo = algorithms.getAlgorithm(keyContainerPSK.protectType)
     return KRYPTOS.cryptoSubtle.importKey(
       formats.JWK,
       jwk,
@@ -670,11 +677,9 @@ export const KeyStore = function KeyStore(
   const unwrapPDK = key => {
     wrappedPDK = base64ToArrayBuffer(keyContainerPDK.encryptedKey)
     ivPDK = base64ToArrayBuffer(keyContainerPDK.iv)
-    const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPDK.protectType)
-    const unwrappedKeyAlgo = KRYPTOS.getAlgo(keyContainerPDK.keyType)
-    const usages = isEC()
-      ? ['deriveKey', 'deriveBits']
-      : ['decrypt', 'unwrapKey']
+    const unwrapAlgo = algorithms.getAlgorithm(keyContainerPDK.protectType)
+    const unwrappedKeyAlgo = algorithms.getAlgorithm(keyContainerPDK.keyType)
+    const usages = isEC() ? usage.DERIVE : ['decrypt', 'unwrapKey']
     if (isEC()) {
       // Firefox fix for missing AES-GCM unwrapKey for ECDH
       return KRYPTOS.cryptoSubtle
@@ -696,7 +701,7 @@ export const KeyStore = function KeyStore(
       key,
       { name: unwrapAlgo.name, iv: ivPDK },
       unwrappedKeyAlgo,
-      KRYPTOS.NONEXTRACTABLE,
+      NONEXTRACTABLE,
       usages,
     )
   }
@@ -707,7 +712,7 @@ export const KeyStore = function KeyStore(
         resolve(cachedPDK)
       })
     }
-    return importIAKPDK(KRYPTOS.NONEXTRACTABLE)
+    return importIAKPDK(NONEXTRACTABLE)
       .then(unwrapPDK)
       .then(pdk => {
         cachedPDK = pdk
@@ -721,8 +726,8 @@ export const KeyStore = function KeyStore(
   const unwrapPSK = key => {
     wrappedPSK = base64ToArrayBuffer(keyContainerPSK.encryptedKey)
     ivPSK = base64ToArrayBuffer(keyContainerPSK.iv)
-    const unwrapAlgo = KRYPTOS.getAlgo(keyContainerPSK.protectType)
-    const unwrappedKeyAlgo = KRYPTOS.getAlgo(keyContainerPSK.keyType)
+    const unwrapAlgo = algorithms.getAlgorithm(keyContainerPSK.protectType)
+    const unwrappedKeyAlgo = algorithms.getAlgorithm(keyContainerPSK.keyType)
     if (isEC()) {
       // Firefox fix for missing AES-GCM unwrapKey for ECDSA
       return KRYPTOS.cryptoSubtle
@@ -744,7 +749,7 @@ export const KeyStore = function KeyStore(
       key,
       { name: unwrapAlgo.name, iv: ivPSK },
       unwrappedKeyAlgo,
-      KRYPTOS.NONEXTRACTABLE,
+      NONEXTRACTABLE,
       ['sign'],
     )
   }
@@ -758,7 +763,7 @@ export const KeyStore = function KeyStore(
     if (!sessionStorage.getItem(prefixIAKPSK)) {
       return ''
     }
-    return importIAKPSK(KRYPTOS.NONEXTRACTABLE)
+    return importIAKPSK(NONEXTRACTABLE)
       .then(unwrapPSK)
       .then(psk => {
         cachedPSK = psk
@@ -778,7 +783,7 @@ export const KeyStore = function KeyStore(
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
     }
-    const algo = KRYPTOS.getAlgo(alg)
+    const algo = algorithms.getAlgorithm(alg)
     return KRYPTOS.cryptoSubtle.importKey(formats.JWK, publicKey, algo, false, [
       'verify',
     ])
@@ -855,54 +860,6 @@ export const KeyStore = function KeyStore(
   const getRecipientPublicKeys = username =>
     JSON.parse(sessionStorage.getItem(publicKeyPrefix + username))
 
-  /**
-   * Retrieve the public keys.
-   *
-   * @param {String} emails
-   * @param {function} callback
-   * @returns {undefined}
-   */
-  const getRecipientsPublicKeys = (emails, callback) => {
-    if (KRYPTOS.utils.isEmpty(emails)) {
-      return callback(false, 'No emails provided.')
-    }
-    let usernames = ''
-    const temp = []
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < emails.length; i++) {
-      const username = emails[i]
-
-      if (
-        !(sessionStorage.getItem(publicKeyPrefix + username) || username === '')
-      )
-        temp.push(encodeURIComponent(username))
-    }
-    if (temp.length === 0) {
-      return callback(true, 'Done!')
-    }
-    usernames = temp.join(',')
-    KRYPTOS.API.getPublicKeys(
-      { service, usernames },
-      data => {
-        if (data) {
-          // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < data.length; i++) {
-            sessionStorage.setItem(
-              publicKeyPrefix + data[i].username,
-              data[i].public_keys,
-            )
-          }
-        }
-        return callback(true, '')
-      },
-      error => {
-        console.error(error)
-        callback(false, error)
-      },
-    )
-    return null
-  }
-
   const unlockPrivateKey = (
     protector,
     keyContainer,
@@ -932,7 +889,7 @@ export const KeyStore = function KeyStore(
         hash: keyProtector.hash,
       })
     }
-    const algo = KRYPTOS.getAlgo(keyContainer.protectType)
+    const algo = algorithms.getAlgorithm(keyContainer.protectType)
     return derivedKeyProtector
       .then(() =>
         unwrapIAK(base64ToArrayBuffer(keyProtector.encryptedKey), algo.name),
@@ -1035,7 +992,7 @@ export const KeyStore = function KeyStore(
         resolve()
         return null
       }
-      return importIAKPSK(KRYPTOS.EXTRACTABLE)
+      return importIAKPSK(EXTRACTABLE)
         .then(wrapIAKPSK)
         .then(wrappedKey => {
           replacePasswordProtector(keyContainerPSK, type, wrappedKey)
@@ -1053,7 +1010,7 @@ export const KeyStore = function KeyStore(
         resolve()
         return null
       }
-      return importIAKPDK(KRYPTOS.EXTRACTABLE)
+      return importIAKPDK(EXTRACTABLE)
         .then(wrapIAKPDK)
         .then(wrappedKey => {
           replacePasswordProtector(keyContainerPDK, type, wrappedKey)
@@ -1086,7 +1043,7 @@ export const KeyStore = function KeyStore(
 
   const addMemberProtector = (keyStore, username, callback) =>
     deriveKeyFromAsymmetric(keyStore, username)
-      .then(() => importIAKPDK(KRYPTOS.EXTRACTABLE))
+      .then(() => importIAKPDK(EXTRACTABLE))
       .then(wrapIAKPDK)
       .then(wrappedKey => {
         callback(true, {
@@ -1179,7 +1136,7 @@ export const KeyStore = function KeyStore(
   const init = () => {
     keyContainerPDK = JSON.parse(sessionStorage.getItem(prefixPDK))
     keyContainerPSK = JSON.parse(sessionStorage.getItem(prefixPSK))
-    setMode(KRYPTOS.getAsymmetricModeByAlgo(keyContainerPSK.keyType))
+    setMode(getKeyMode(keyContainerPSK.keyType))
   }
 
   return {
@@ -1206,7 +1163,6 @@ export const KeyStore = function KeyStore(
     importPvk,
     importPek,
     getRecipientPublicKeys,
-    getRecipientsPublicKeys,
     deriveKeyFromPassword,
     addMemberProtector,
     unlockFromDerivedKey,

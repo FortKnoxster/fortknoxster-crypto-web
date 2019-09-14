@@ -195,7 +195,21 @@ export function getKeyType(mode, type) {
       return 'ECDH-P521'
     }
   }
-  throw new Error('Invalid key type')
+  throw new Error('Invalid key mode.')
+}
+
+export function getKeyMode(keyType) {
+  switch (keyType) {
+    case 'ECDSA-P521':
+    case 'ECDH-P521':
+      return 'EC'
+    case 'RSA-OAEP-2048':
+    case 'RSASSA-PKCS1-v1_5-2048':
+      return 'RSA'
+    default:
+      break
+  }
+  throw new Error('Invalid key type.')
 }
 
 // eslint-disable-next-line no-unused-vars
