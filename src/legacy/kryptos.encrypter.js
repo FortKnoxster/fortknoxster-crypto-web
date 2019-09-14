@@ -26,14 +26,12 @@ import { LENGTH_256, EXTRACTABLE, NONEXTRACTABLE } from '../kryptos/constants'
  * @param {Kryptos.KeyStore} serviceKeyStore
  * @param {String} plainText
  * @param {Array} recipients
- * @param {function} callback
  * @returns {Kryptos.Encrypter} the public methods
  */
 export const Encrypter = function Encrypter(
   serviceKeyStore,
   plainText,
   recipients,
-  callback,
 ) {
   const keyStore = serviceKeyStore
   const plain = plainText
@@ -41,7 +39,6 @@ export const Encrypter = function Encrypter(
   let exportedSessionKey = null
   let encryptedPlainText = null
   let signature = null
-  const encrypterCallback = callback
 
   const deriveSessionKey = (algorithm, pdk, pek) =>
     kryptos.subtle.deriveKey(
@@ -215,14 +212,10 @@ export const Encrypter = function Encrypter(
       .then(saveSignature)
       .then(encryptSessionKeys)
       .then(packageResults)
-      .then(result => {
-        encrypterCallback(true, result)
-      })
+      .then(result => result)
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message ? error.message : error)
-        }
+        return error
       })
 
   /**
@@ -427,14 +420,11 @@ export const Encrypter = function Encrypter(
       .then(signEncryptedPlainText)
       .then(sig => {
         message.Sign = utils.arrayBufferToBase64(sig)
-        encrypterCallback(true, message)
         return message
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message ? error.message : error)
-        }
+        return error
       })
   }
 
@@ -450,19 +440,15 @@ export const Encrypter = function Encrypter(
       .then(signEncryptedPlainText)
       .then(saveSignature)
       .then(encryptSessionKeys)
-      .then(sessionKeys => {
-        encrypterCallback(true, {
-          m: utils.arrayBufferToBase64(encryptedPlainText[1]),
-          iv: utils.arrayBufferToBase64(encryptedPlainText[0]),
-          s: utils.arrayBufferToBase64(signature),
-          keys: sessionKeys,
-        })
-      })
+      .then(sessionKeys => ({
+        m: utils.arrayBufferToBase64(encryptedPlainText[1]),
+        iv: utils.arrayBufferToBase64(encryptedPlainText[0]),
+        s: utils.arrayBufferToBase64(signature),
+        keys: sessionKeys,
+      }))
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message ? error.message : error)
-        }
+        return error
       })
   }
 
@@ -479,14 +465,10 @@ export const Encrypter = function Encrypter(
         } else {
           data = { data, signature: s }
         }
-        encrypterCallback(true, data)
         return data
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message ? error.message : error)
-        }
         return error
       })
   }
@@ -498,14 +480,10 @@ export const Encrypter = function Encrypter(
       .then(hmacSign)
       .then(sig => {
         const result = { data, signature: utils.arrayBufferToBase64(sig) }
-        encrypterCallback(true, result)
         return result
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message ? error.message : error)
-        }
         return error
       })
   }
@@ -520,16 +498,10 @@ export const Encrypter = function Encrypter(
       .then(exportSessionKey)
       .then(saveExportedSessionKey)
       .then(encryptSessionKeys)
-      .then(sessionKeys => {
-        encrypterCallback(true, {
-          members_keys: sessionKeys,
-        })
-      })
+      .then(sessionKeys => ({ members_keys: sessionKeys }))
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message)
-        }
+        return error
       })
 
   const encryptExistingGroupChatKey = key => {
@@ -537,16 +509,10 @@ export const Encrypter = function Encrypter(
     return importSessionKey(key)
       .then(saveSessionKey)
       .then(encryptSessionKeys)
-      .then(sessionKeys => {
-        encrypterCallback(true, {
-          members_keys: sessionKeys,
-        })
-      })
+      .then(sessionKeys => ({ members_keys: sessionKeys }))
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error.message)
-        }
+        return error
       })
   }
 
@@ -574,29 +540,19 @@ export const Encrypter = function Encrypter(
             type: 'application/octet-stream',
           }),
         }
-        encrypterCallback(true, result)
         return result
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error)
-        }
         return error
       })
 
   const encryptItemAssignment = existingKey => {
     saveExportedSessionKey(existingKey)
     return encryptAssignmentKey()
-      .then(result => {
-        encrypterCallback(true, result)
-        return result
-      })
+      .then(result => result)
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error)
-        }
         return error
       })
   }
@@ -619,14 +575,10 @@ export const Encrypter = function Encrypter(
           key: utils.arrayBufferToBase64(exportedSessionKey),
           rid,
         }
-        encrypterCallback(true, result)
         return result
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error)
-        }
         return error
       })
 
@@ -643,14 +595,10 @@ export const Encrypter = function Encrypter(
           iv: utils.arrayBufferToBase64(encryptedPlainText[0]),
           signature: utils.arrayBufferToBase64(signature),
         }
-        encrypterCallback(true, result)
         return result
       })
       .catch(error => {
         console.error(error)
-        if (encrypterCallback) {
-          encrypterCallback(false, error)
-        }
         return error
       })
 
