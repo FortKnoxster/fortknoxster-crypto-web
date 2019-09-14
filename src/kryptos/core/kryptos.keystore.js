@@ -1,15 +1,11 @@
 /* eslint-disable max-lines */
-import { kryptos } from '../kryptos/kryptos'
+import { kryptos } from '../kryptos'
 import { Encrypter } from './kryptos.encrypter'
-import {
-  PROTECTOR_TYPES,
-  EXTRACTABLE,
-  NONEXTRACTABLE,
-} from '../kryptos/constants'
-import * as utils from '../kryptos/utils'
-import * as algorithms from '../kryptos/algorithms'
-import * as usage from '../kryptos/usages'
-import * as formats from '../kryptos/formats'
+import { PROTECTOR_TYPES, EXTRACTABLE, NONEXTRACTABLE } from '../constants'
+import * as utils from '../utils'
+import * as algorithms from '../algorithms'
+import * as usage from '../usages'
+import * as formats from '../formats'
 
 /**
  * Kryptos is a cryptographic library wrapping and implementing the

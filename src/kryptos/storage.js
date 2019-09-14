@@ -1,5 +1,5 @@
-import { Encrypter } from '../legacy/kryptos.encrypter'
-import { Decrypter } from '../legacy/kryptos.decrypter'
+import { Encrypter } from './core/kryptos.encrypter'
+import { Decrypter } from './core/kryptos.decrypter'
 import { base64ToArrayBuffer } from './utils'
 
 const storage = {

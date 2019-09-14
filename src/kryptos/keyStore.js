@@ -1,4 +1,4 @@
-import { KeyStore } from '../legacy/kryptos.keystore'
+import { KeyStore } from './core/kryptos.keystore'
 
 export function unlockKeyStores(keys, password, type) {
   return Object.keys(keys).map(key =>

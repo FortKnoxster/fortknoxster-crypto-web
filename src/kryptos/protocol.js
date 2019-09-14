@@ -1,7 +1,7 @@
 import { EC_AES_GCM_256 } from './algorithms'
 import { base64ToArrayBuffer } from './utils'
-import { Encrypter } from '../legacy/kryptos.encrypter'
-import { Decrypter } from '../legacy/kryptos.decrypter'
+import { Encrypter } from './core/kryptos.encrypter'
+import { Decrypter } from './core/kryptos.decrypter'
 
 const protocol = {
   keyStore: null,

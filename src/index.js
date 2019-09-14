@@ -1,5 +1,3 @@
-import { KRYPTOS } from './legacy/kryptos.core'
-
 export { initKryptos } from './kryptos/kryptos'
 export { deriveAccountPassword } from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
@@ -50,6 +48,4 @@ export {
   verifyContact,
 } from './kryptos/identity'
 // LEGACY exports
-export { KeyStore } from './legacy/kryptos.keystore'
-
-KRYPTOS.check.support()
+export { KeyStore } from './kryptos/core/kryptos.keystore'

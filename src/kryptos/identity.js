@@ -5,8 +5,8 @@ import {
   rsaJwk,
   stringToArrayBuffer,
 } from './utils'
-import { Decrypter } from '../legacy/kryptos.decrypter'
-import { Encrypter } from '../legacy/kryptos.encrypter'
+import { Decrypter } from './core/kryptos.decrypter'
+import { Encrypter } from './core/kryptos.encrypter'
 
 let keyStore
 
