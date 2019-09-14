@@ -47,7 +47,11 @@ export const Encrypter = function Encrypter(
 
   const deriveSessionKey = (algorithm, pdk, pek) =>
     kryptos.subtle.deriveKey(
-      { name: 'ECDH', namedCurve: 'P-521', public: pek },
+      {
+        name: algorithms.ECDH_ALGO.name,
+        namedCurve: algorithms.ECDH_ALGO.namedCurve,
+        public: pek,
+      },
       pdk,
       algorithm,
       EXTRACTABLE,
@@ -254,7 +258,11 @@ export const Encrypter = function Encrypter(
         .then(() => {
           const iv = utils.nonce()
           return kryptos.subtle
-            .encrypt({ name: 'AES-CBC', iv }, fileSessionKey, file)
+            .encrypt(
+              { name: algorithms.AES_CBC.name, iv },
+              fileSessionKey,
+              file,
+            )
             .then(cipherText => {
               encryptedFile = [iv, new Uint8Array(cipherText)]
             })
