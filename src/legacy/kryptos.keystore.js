@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
-import { KRYPTOS } from './kryptos.core'
+import { kryptos } from '../kryptos/kryptos'
+import { Encrypter } from './kryptos.encrypter'
 import {
   nonce,
   getKeyType,
@@ -25,11 +26,11 @@ import * as usage from '../kryptos/usages'
 import * as formats from '../kryptos/formats'
 
 /**
- * KRYPTOS is a cryptographic library wrapping and implementing the
+ * Kryptos is a cryptographic library wrapping and implementing the
  * Web Cryptography API. It supports both symmetric keys and asymmetric key pair
  * generation, encryption, decryption, signing and verification.
  *
- * @name KRYPTOS
+ * @name kryptos.KeyStore
  * @copyright Copyright © FortKnoxster Ltd. 2014 - 2019.
  * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
  * @author MJ <mj@fortknoxster.com>
@@ -37,7 +38,7 @@ import * as formats from '../kryptos/formats'
  */
 
 /**
- * The KRYPTOS KeyStore module.
+ * The kryptos KeyStore module.
  *
  * @param {String} serviceType
  * @param {Object} containerPDK
@@ -129,7 +130,7 @@ export const KeyStore = function KeyStore(
   const isLoaded = () => (ivPDK && ivPSK && wrappedPDK && wrappedPSK) !== null
 
   const generateIAK = () =>
-    KRYPTOS.cryptoSubtle.generateKey(
+    kryptos.subtle.generateKey(
       algorithms.AES_GCM_ALGO,
       EXTRACTABLE,
       usage.WRAP.concat(usage.ENCRYPT),
@@ -245,7 +246,7 @@ export const KeyStore = function KeyStore(
         : rsaJwk(exportedPublicVerifyKey),
     }
     return new Promise((resolve, reject) => {
-      const Encrypter = new KRYPTOS.Encrypter(
+      const encrypter = new Encrypter(
         identity,
         null,
         null,
@@ -257,7 +258,7 @@ export const KeyStore = function KeyStore(
           }
         },
       )
-      Encrypter.signIt(publicKeys, true)
+      encrypter.signIt(publicKeys, true)
     })
   }
 
@@ -268,13 +269,13 @@ export const KeyStore = function KeyStore(
    */
   const generateSigningKeyPair = () => {
     if (isEC()) {
-      return KRYPTOS.cryptoSubtle.generateKey(
+      return kryptos.subtle.generateKey(
         algorithms.ECDSA_ALGO,
         EXTRACTABLE,
         usage.SIGN,
       )
     }
-    return KRYPTOS.cryptoSubtle.generateKey(
+    return kryptos.subtle.generateKey(
       algorithms.RSASSA_PKCS1_V1_5_ALGO,
       EXTRACTABLE,
       usage.SIGN,
@@ -288,13 +289,13 @@ export const KeyStore = function KeyStore(
    */
   const generateEncryptionKeyPair = () => {
     if (isEC()) {
-      return KRYPTOS.cryptoSubtle.generateKey(
+      return kryptos.subtle.generateKey(
         algorithms.ECDH_ALGO,
         EXTRACTABLE,
         usage.DERIVE,
       )
     }
-    return KRYPTOS.cryptoSubtle.generateKey(
+    return kryptos.subtle.generateKey(
       algorithms.RSA_OAEP_ALGO,
       EXTRACTABLE,
       usage.ENCRYPT.concat(usage.WRAP),
@@ -329,15 +330,10 @@ export const KeyStore = function KeyStore(
    * @returns {unresolved}
    */
   const wrapPDK = () =>
-    KRYPTOS.cryptoSubtle.wrapKey(
-      formats.JWK,
-      encryptKeyPair.privateKey,
-      IAKPDK,
-      {
-        name: algorithms.AES_GCM.name,
-        iv: ivPDK,
-      },
-    )
+    kryptos.subtle.wrapKey(formats.JWK, encryptKeyPair.privateKey, IAKPDK, {
+      name: algorithms.AES_GCM.name,
+      iv: ivPDK,
+    })
 
   /**
    * Wrape the private sign key.
@@ -345,7 +341,7 @@ export const KeyStore = function KeyStore(
    * @returns {Promise} of wrapKey
    */
   const wrapPSK = () =>
-    KRYPTOS.cryptoSubtle.wrapKey(formats.JWK, signKeyPair.privateKey, IAKPSK, {
+    kryptos.subtle.wrapKey(formats.JWK, signKeyPair.privateKey, IAKPSK, {
       name: algorithms.AES_GCM.name,
       iv: ivPSK,
     })
@@ -415,10 +411,10 @@ export const KeyStore = function KeyStore(
   const unwrapIAK = (wrappedKey, algo) => {
     const usages = usage.WRAP.concat(usage.ENCRYPT)
     if (derivedKey.type === 'private') {
-      return KRYPTOS.cryptoSubtle
+      return kryptos.subtle
         .decrypt({ name: derivedKey.algorithm.name }, derivedKey, wrappedKey)
         .then(keyBytes =>
-          KRYPTOS.cryptoSubtle.importKey(
+          kryptos.subtle.importKey(
             formats.RAW,
             keyBytes,
             algorithms.getAlgorithm(algo),
@@ -427,7 +423,7 @@ export const KeyStore = function KeyStore(
           ),
         )
     }
-    return KRYPTOS.cryptoSubtle.unwrapKey(
+    return kryptos.subtle.unwrapKey(
       formats.RAW,
       wrappedKey,
       derivedKey,
@@ -438,10 +434,10 @@ export const KeyStore = function KeyStore(
     )
   }
 
-  const exportIAK = key => KRYPTOS.cryptoSubtle.exportKey(formats.JWK, key)
+  const exportIAK = key => kryptos.subtle.exportKey(formats.JWK, key)
 
   const wrapIAKPSK = key =>
-    KRYPTOS.cryptoSubtle.wrapKey(
+    kryptos.subtle.wrapKey(
       formats.RAW,
       IAKPSK || key,
       derivedKey,
@@ -454,17 +450,13 @@ export const KeyStore = function KeyStore(
 
   const wrapIAKPDK = key => {
     if (derivedKey.type === 'public') {
-      return KRYPTOS.cryptoSubtle
+      return kryptos.subtle
         .exportKey(formats.RAW, IAKPDK || key)
         .then(exportedKey =>
-          KRYPTOS.cryptoSubtle.encrypt(
-            derivedKey.algorithm,
-            derivedKey,
-            exportedKey,
-          ),
+          kryptos.subtle.encrypt(derivedKey.algorithm, derivedKey, exportedKey),
         )
     }
-    return KRYPTOS.cryptoSubtle.wrapKey(
+    return kryptos.subtle.wrapKey(
       formats.RAW,
       IAKPDK || key,
       derivedKey,
@@ -510,7 +502,7 @@ export const KeyStore = function KeyStore(
   }
 
   const deriveKey = key =>
-    KRYPTOS.cryptoSubtle.deriveKey(
+    kryptos.subtle.deriveKey(
       deriveKeyAlgo,
       key,
       algorithms.AES_KW_ALGO,
@@ -523,7 +515,7 @@ export const KeyStore = function KeyStore(
   }
 
   const importPassword = password =>
-    KRYPTOS.cryptoSubtle
+    kryptos.subtle
       .importKey(
         formats.RAW,
         stringToArrayBuffer(password),
@@ -548,13 +540,7 @@ export const KeyStore = function KeyStore(
       delete publicKey.key_ops
     }
     const algo = algorithms.getAlgorithm(alg)
-    return KRYPTOS.cryptoSubtle.importKey(
-      formats.JWK,
-      publicKey,
-      algo,
-      false,
-      usages,
-    )
+    return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, usages)
   }
 
   const setDeriveKeyAlgo = algo => {
@@ -596,7 +582,7 @@ export const KeyStore = function KeyStore(
       })
 
   const importDerivedKey = derivedPassword =>
-    KRYPTOS.cryptoSubtle
+    kryptos.subtle
       .importKey(
         formats.RAW,
         hexToArrayBuffer(derivedPassword),
@@ -612,7 +598,7 @@ export const KeyStore = function KeyStore(
    * @returns {Promise} of exportKey
    */
   const exportPEK = () =>
-    KRYPTOS.cryptoSubtle.exportKey(formats.JWK, encryptKeyPair.publicKey)
+    kryptos.subtle.exportKey(formats.JWK, encryptKeyPair.publicKey)
 
   /**
    * Save the public encryption key.
@@ -633,7 +619,7 @@ export const KeyStore = function KeyStore(
    * @returns {Promise} of exportKey
    */
   const exportPVK = () =>
-    KRYPTOS.cryptoSubtle.exportKey(formats.JWK, signKeyPair.publicKey)
+    kryptos.subtle.exportKey(formats.JWK, signKeyPair.publicKey)
 
   /**
    * Save the public sign key.
@@ -651,11 +637,11 @@ export const KeyStore = function KeyStore(
     })
 
   const fingerprint = key =>
-    KRYPTOS.cryptoSubtle.digest(KRYPTOS.SHA_256.name, objectToArrayBuffer(key))
+    kryptos.subtle.digest(algorithms.SHA_256.name, objectToArrayBuffer(key))
 
   const importIAK = (jwk, extractable) => {
     const unwrapAlgo = algorithms.getAlgorithm(keyContainerPSK.protectType)
-    return KRYPTOS.cryptoSubtle.importKey(
+    return kryptos.subtle.importKey(
       formats.JWK,
       jwk,
       unwrapAlgo.name,
@@ -682,11 +668,11 @@ export const KeyStore = function KeyStore(
     const usages = isEC() ? usage.DERIVE : ['decrypt', 'unwrapKey']
     if (isEC()) {
       // Firefox fix for missing AES-GCM unwrapKey for ECDH
-      return KRYPTOS.cryptoSubtle
+      return kryptos.subtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPDK }, key, wrappedPDK)
         .then(result => {
           const decryptedKey = arrayBufferToObject(result)
-          return KRYPTOS.cryptoSubtle.importKey(
+          return kryptos.subtle.importKey(
             formats.JWK,
             decryptedKey,
             unwrappedKeyAlgo,
@@ -695,7 +681,7 @@ export const KeyStore = function KeyStore(
           )
         })
     }
-    return KRYPTOS.cryptoSubtle.unwrapKey(
+    return kryptos.subtle.unwrapKey(
       formats.JWK,
       wrappedPDK,
       key,
@@ -730,11 +716,11 @@ export const KeyStore = function KeyStore(
     const unwrappedKeyAlgo = algorithms.getAlgorithm(keyContainerPSK.keyType)
     if (isEC()) {
       // Firefox fix for missing AES-GCM unwrapKey for ECDSA
-      return KRYPTOS.cryptoSubtle
+      return kryptos.subtle
         .decrypt({ name: unwrapAlgo.name, iv: ivPSK }, key, wrappedPSK)
         .then(result => {
           const decryptedKey = arrayBufferToObject(result)
-          return KRYPTOS.cryptoSubtle.importKey(
+          return kryptos.subtle.importKey(
             formats.JWK,
             decryptedKey,
             unwrappedKeyAlgo,
@@ -743,7 +729,7 @@ export const KeyStore = function KeyStore(
           )
         })
     }
-    return KRYPTOS.cryptoSubtle.unwrapKey(
+    return kryptos.subtle.unwrapKey(
       formats.JWK,
       wrappedPSK,
       key,
@@ -784,7 +770,7 @@ export const KeyStore = function KeyStore(
       delete publicKey.alg
     }
     const algo = algorithms.getAlgorithm(alg)
-    return KRYPTOS.cryptoSubtle.importKey(formats.JWK, publicKey, algo, false, [
+    return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, [
       'verify',
     ])
   }
