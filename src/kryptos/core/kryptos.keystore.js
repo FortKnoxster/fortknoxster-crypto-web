@@ -515,7 +515,7 @@ export const KeyStore = function KeyStore(
   const importPek = (publicKey, usages) => {
     let { alg } = publicKey
     if (publicKey.kty === 'EC') {
-      alg = 'ECDH'
+      alg = algorithms.ECDH_ALGO.name
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
       // eslint-disable-next-line no-param-reassign
@@ -750,7 +750,7 @@ export const KeyStore = function KeyStore(
   const importPvk = publicKey => {
     let { alg } = publicKey
     if (publicKey.kty === 'EC') {
-      alg = 'ECDSA'
+      alg = algorithms.ECDSA_ALGO.name
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
     }

@@ -6,7 +6,7 @@ import * as utils from '../utils'
 import * as algorithms from '../algorithms'
 import * as formats from '../formats'
 import * as usage from '../usages'
-import { EXTRACTABLE, NONEXTRACTABLE } from '../constants'
+import { LENGTH_128, EXTRACTABLE, NONEXTRACTABLE } from '../constants'
 
 /**
  * Kryptos is a cryptographic library wrapping and implementing the
@@ -48,7 +48,11 @@ export const Decrypter = function Decrypter(
 
   const deriveSessionKey = (algorithm, pdk, pek) =>
     kryptos.subtle.deriveKey(
-      { name: 'ECDH', namedCurve: 'P-521', public: pek },
+      {
+        name: algorithms.ECDH_ALGO.name,
+        namedCurve: algorithms.ECDH_ALGO.namedCurve,
+        public: pek,
+      },
       pdk,
       algorithm,
       EXTRACTABLE,
@@ -83,15 +87,19 @@ export const Decrypter = function Decrypter(
   }
 
   const decryptKey = pdk =>
-    kryptos.subtle.decrypt({ name: 'RSA-OAEP' }, pdk, encryptedKey)
+    kryptos.subtle.decrypt(
+      { name: algorithms.RSA_OAEP.name },
+      pdk,
+      encryptedKey,
+    )
 
   const unwrapKey = pdk =>
     kryptos.subtle.unwrapKey(
       formats.RAW,
       encryptedKey,
       pdk,
-      { name: 'RSA-OAEP' },
-      { name: 'AES-GCM' },
+      { name: algorithms.RSA_OAEP.name },
+      { name: algorithms.AES_GCM.name },
       NONEXTRACTABLE,
       usage.ENCRYPT,
     )
@@ -129,10 +137,10 @@ export const Decrypter = function Decrypter(
 
   const decryptCipherText = (key, algorithm) => {
     let algo = {}
-    if (algorithm && algorithm.indexOf('AES-GCM') !== -1) {
-      algo = { name: 'AES-GCM', iv, tagLength: 128 }
+    if (algorithm && algorithm.indexOf(algorithms.AES_GCM.name) !== -1) {
+      algo = { name: algorithms.AES_GCM.name, iv, tagLength: LENGTH_128 }
     } else {
-      algo = { name: 'AES-CBC', iv }
+      algo = { name: algorithms.AES_CBC.name, iv }
     }
     return kryptos.subtle.decrypt(algo, key, cipherText)
   }
@@ -186,7 +194,7 @@ export const Decrypter = function Decrypter(
           })
           .then(keyStore.getPdk)
           .then(pdk => deriveSessionKey(algorithms.AES_GCM_ALGO, pdk, nodePek))
-          .then(key => decryptCipherText(key, 'AES-GCM'))
+          .then(key => decryptCipherText(key, algorithms.AES_GCM.name))
           .then(plainText => handlePlainText(plainText))
           .catch(error => {
             console.error(error)
@@ -311,7 +319,7 @@ export const Decrypter = function Decrypter(
   }
 
   const decryptGroupMessage = (from, id) =>
-    decryptIt(from, id, 'AES-GCM', encryptedKey)
+    decryptIt(from, id, algorithms.AES_GCM.name, encryptedKey)
 
   const decryptFile = () =>
     importVerifyKey()
@@ -421,7 +429,7 @@ export const Decrypter = function Decrypter(
   const decryptFilePart = (id, partNumber) => {
     const algo = algorithms.AES_GCM_ALGO
     return importSessionKey(null, algo)
-      .then(key => decryptCipherText(key, 'AES-GCM'))
+      .then(key => decryptCipherText(key, algorithms.AES_GCM.name))
       .then(plainFile => {
         const result = {
           id,

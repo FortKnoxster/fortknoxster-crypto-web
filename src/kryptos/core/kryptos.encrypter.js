@@ -6,7 +6,12 @@ import * as utils from '../utils'
 import * as algorithms from '../algorithms'
 import * as formats from '../formats'
 import * as usage from '../usages'
-import { LENGTH_256, EXTRACTABLE, NONEXTRACTABLE } from '../constants'
+import {
+  LENGTH_256,
+  LENGTH_128,
+  EXTRACTABLE,
+  NONEXTRACTABLE,
+} from '../constants'
 /**
  * Kryptos is a cryptographic library wrapping and implementing the
  * Web Cryptography API. It supports both symmetric keys and asymmetric key pair
@@ -94,8 +99,8 @@ export const Encrypter = function Encrypter(
   const encryptPlainText = key => {
     const iv = utils.nonce()
     const algo = { name: key.algorithm.name, iv }
-    if (algo.name === 'AES-GCM') {
-      algo.tagLength = 128
+    if (algo.name === algorithms.AES_GCM.name) {
+      algo.tagLength = LENGTH_128
     }
     return kryptos.subtle
       .encrypt(algo, key, utils.stringToArrayBuffer(JSON.stringify(plain)))
@@ -313,7 +318,7 @@ export const Encrypter = function Encrypter(
         // Encrypt file part
         .then(key =>
           kryptos.subtle.encrypt(
-            { name: 'AES-GCM', iv, tagLength: 128 },
+            { name: algorithms.AES_GCM.name, iv, tagLength: LENGTH_128 },
             key,
             file,
           ),
