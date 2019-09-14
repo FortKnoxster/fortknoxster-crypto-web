@@ -47,5 +47,4 @@ export {
   verifyContactKeys,
   verifyContact,
 } from './kryptos/identity'
-// LEGACY exports
 export { KeyStore } from './kryptos/core/kryptos.keystore'
