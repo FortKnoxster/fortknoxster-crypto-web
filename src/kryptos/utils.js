@@ -1,3 +1,4 @@
+import { kryptos } from './kryptos'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -95,8 +96,7 @@ export function arrayBufferToBase64(buffer, base64Url) {
 
 export function randomValue(bytes) {
   const typedArray = new Uint8Array(bytes)
-  const cryptoObj = window.crypto || window.msCrypto
-  return cryptoObj.getRandomValues(typedArray)
+  return kryptos.getRandomValues(typedArray)
 }
 
 export function generateId(bytes) {
