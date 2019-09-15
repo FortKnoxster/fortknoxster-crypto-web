@@ -28,7 +28,6 @@ export {
 } from './kryptos/protocol'
 
 export {
-  addStoragePublicKeys,
   initStorage,
   encryptItemAssignment,
   encryptNewItemAssignment,
@@ -39,6 +38,8 @@ export {
   decryptItemAssignment,
   decryptItem,
 } from './kryptos/storage'
+
+export { initChat, encryptChatMessage } from './kryptos/chat'
 
 export {
   createIdentity,
