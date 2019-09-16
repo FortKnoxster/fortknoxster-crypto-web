@@ -223,21 +223,8 @@ export const KeyStore = function KeyStore(
         ? utils.ecJwk(exportedPublicVerifyKey)
         : utils.rsaJwk(exportedPublicVerifyKey),
     }
-    return new Promise((resolve, reject) => {
-      const encrypter = new Encrypter(
-        identity,
-        null,
-        null,
-        (success, signedKeys) => {
-          if (!success) {
-            reject()
-          } else {
-            resolve(signedKeys)
-          }
-        },
-      )
-      encrypter.signIt(publicKeys, true)
-    })
+    const encrypter = new Encrypter(identity)
+    return encrypter.signIt(publicKeys, true)
   }
 
   /**
