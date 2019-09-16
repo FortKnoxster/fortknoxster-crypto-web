@@ -1,10 +1,22 @@
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
+export const RSA = 'RSA'
+export const EC = 'EC'
+export const RSASSA_PKCS1_V1_5_2048 = 'RSASSA-PKCS1-v1_5-2048'
+export const AES_GCM_256 = 'AES-GCM-256'
+export const A256GCM = 'A256GCM'
+export const AES_CBC_256 = 'AES-CBC-256'
+export const A256CBC = 'A256CBC'
+export const RS256 = 'RS256'
+export const RSA2048 = 'RSA2048'
+export const RSA_OAEP_256 = 'RSA-OAEP-256'
+export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
+export const ES512 = 'ES512'
+export const ECDSA_P521 = 'ECDSA-P521'
+export const ECDH_P521 = 'ECDH-P521'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
 }
-
-export const RSA = 'RSA'
 
 export const SHA_256 = {
   name: 'SHA-256',
@@ -35,11 +47,11 @@ export const RSASSA_PKCS1_V1_5 = {
 }
 
 export const RSASSA_PKCS1_V1_5_ALGO = {
-  name: 'RSASSA-PKCS1-v1_5',
+  name: RSASSA_PKCS1_V1_5.name,
   modulusLength: 2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: {
-    name: 'SHA-256',
+    name: SHA_256.name,
   },
 }
 
@@ -48,7 +60,7 @@ export const RSA_OAEP_ALGO = {
   modulusLength: 2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: {
-    name: 'SHA-256',
+    name: SHA_256.name,
   },
 }
 
@@ -63,12 +75,12 @@ export const ECDSA_ALGO = {
 }
 
 export const AES_CBC_ALGO = {
-  name: 'AES-CBC',
+  name: AES_CBC.name,
   length: 256,
 }
 
 export const AES_GCM_ALGO = {
-  name: 'AES-GCM',
+  name: AES_GCM.name,
   length: 256,
 }
 
@@ -78,9 +90,9 @@ export const AES_KW_ALGO = {
 }
 
 export const HMAC_ALGO = {
-  name: 'HMAC',
+  name: HMAC,
   hash: {
-    name: 'SHA-256',
+    name: SHA_256.name,
   },
 }
 
@@ -88,32 +100,32 @@ export const deriveKeyPBKDF2 = salt => ({
   ...PBKDF2,
   salt,
   iterations: 50000,
-  hash: 'SHA-256',
+  hash: SHA_256.name,
 })
 
 export function getAlgorithm(algo) {
   switch (algo) {
-    case 'AES-GCM-256':
-    case 'AES-GCM':
-    case 'A256GCM':
+    case AES_GCM_256:
+    case AES_GCM.name:
+    case A256GCM:
       return AES_GCM_ALGO
-    case 'AES-CBC':
-    case 'AES-CBC-256':
-    case 'A256CBC':
+    case AES_CBC_ALGO.name:
+    case AES_CBC_256:
+    case A256CBC:
       return AES_CBC_ALGO
-    case 'RS256':
-    case 'RSASSA-PKCS1-v1_5-2048':
-      return { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
-    case 'RSA2048':
-    case 'RSA-OAEP-256':
-    case 'RSA-OAEP-2048':
-      return { name: 'RSA-OAEP', hash: { name: 'SHA-256' } }
-    case 'ECDSA':
-    case 'ES512':
-    case 'ECDSA-P521':
+    case RS256:
+    case RSASSA_PKCS1_V1_5_2048:
+      return { name: RSASSA_PKCS1_V1_5.name, hash: RSASSA_PKCS1_V1_5.hash }
+    case RSA2048:
+    case RSA_OAEP_256:
+    case RSA_OAEP_2048:
+      return { name: RSA_OAEP_ALGO.name, hash: RSA_OAEP_ALGO.hash }
+    case ECDSA_ALGO.name:
+    case ES512:
+    case ECDSA_P521:
       return ECDSA_ALGO
-    case 'ECDH':
-    case 'ECDH-P521':
+    case ECDH_ALGO.name:
+    case ECDH_P521:
       return ECDH_ALGO
     default:
       break
@@ -123,11 +135,11 @@ export function getAlgorithm(algo) {
 
 export function getSignAlgorithm(algo) {
   switch (algo) {
-    case 'RSASSA-PKCS1-v1_5':
+    case RSASSA_PKCS1_V1_5.name:
       return RSASSA_PKCS1_V1_5
-    case 'ECDSA':
-      return { name: 'ECDSA', hash: { name: 'SHA-256' } }
-    case 'HMAC':
+    case ECDSA_ALGO.name:
+      return { name: ECDSA_ALGO.name, hash: { name: SHA_256.name } }
+    case HMAC_ALGO.name:
       return HMAC
     default:
       break
@@ -137,13 +149,13 @@ export function getSignAlgorithm(algo) {
 
 export function getImportAlgorithm(algo) {
   switch (algo) {
-    case 'RSA':
-    case 'RSASSA-PKCS1-v1_5':
-      return { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
-    case 'EC':
-    case 'ECDSA':
+    case RSA:
+    case RSASSA_PKCS1_V1_5.name:
+      return { name: RSASSA_PKCS1_V1_5.name, hash: { name: SHA_256.name } }
+    case EC:
+    case ECDSA_ALGO.name:
       return ECDSA_ALGO
-    case 'HMAC':
+    case HMAC_ALGO.name:
       return HMAC_ALGO
     default:
       break
