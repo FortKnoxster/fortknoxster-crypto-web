@@ -111,7 +111,7 @@ export function getAlgorithm(algo) {
       return AES_CBC_ALGO
     case RS256:
     case RSASSA_PKCS1_V1_5_2048:
-      return { name: RSASSA_PKCS1_V1_5.name, hash: RSASSA_PKCS1_V1_5.hash }
+      return { name: RSASSA_PKCS1_V1_5.name, hash: RSASSA_PKCS1_V1_5_ALGO.hash }
     case RSA2048:
     case RSA_OAEP_256:
     case RSA_OAEP_2048:
