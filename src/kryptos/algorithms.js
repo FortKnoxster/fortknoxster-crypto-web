@@ -13,6 +13,8 @@ export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
 export const ES512 = 'ES512'
 export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
+export const PSK = 'PSK'
+export const PDK = 'PDK'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
@@ -161,4 +163,37 @@ export function getImportAlgorithm(algo) {
       break
   }
   throw new Error('Invalid import algorithm')
+}
+
+export function getKeyType(mode, type) {
+  if (type === PSK) {
+    if (mode === RSA) {
+      return RSASSA_PKCS1_V1_5_2048
+    }
+    if (mode === EC) {
+      return ECDSA_P521
+    }
+  } else if (type === PDK) {
+    if (mode === RSA) {
+      return RSA_OAEP_2048
+    }
+    if (mode === EC) {
+      return ECDH_P521
+    }
+  }
+  throw new Error('Invalid key mode.')
+}
+
+export function getKeyMode(keyType) {
+  switch (keyType) {
+    case ECDSA_P521:
+    case ECDH_P521:
+      return EC
+    case RSA_OAEP_2048:
+    case RSASSA_PKCS1_V1_5_2048:
+      return RSA
+    default:
+      break
+  }
+  throw new Error('Invalid key type.')
 }

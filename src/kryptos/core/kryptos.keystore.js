@@ -94,8 +94,8 @@ export const KeyStore = function KeyStore(
 
   const setMode = keyStoreMode => {
     switch (keyStoreMode) {
-      case 'RSA':
-      case 'EC':
+      case algorithms.RSA:
+      case algorithms.EC:
         break
       default:
         throw new Error('Invalid algorithm in setMode.')
@@ -103,9 +103,9 @@ export const KeyStore = function KeyStore(
     mode = keyStoreMode
   }
 
-  const isEC = () => mode === 'EC'
+  const isEC = () => mode === algorithms.EC
 
-  const isRSA = () => mode === 'RSA'
+  const isRSA = () => mode === algorithms.RSA
 
   const generateIAK = () =>
     kryptos.subtle.generateKey(
@@ -124,13 +124,13 @@ export const KeyStore = function KeyStore(
 
   const extractKeyProtector = (keyType, protectorType) => {
     let protectors = null
-    if (keyType === 'PDK') {
+    if (keyType === algorithms.PDK) {
       if (keyContainerPDK.keyProtectors) {
         protectors = keyContainerPDK.keyProtectors
       } else {
         throw new Error('Missing key protector.')
       }
-    } else if (keyType === 'PSK') {
+    } else if (keyType === algorithms.PSK) {
       if (keyContainerPSK.keyProtectors) {
         protectors = keyContainerPSK.keyProtectors
       } else {
@@ -350,8 +350,8 @@ export const KeyStore = function KeyStore(
       keyContainerPDK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPDK),
-        keyType: utils.getKeyType(mode, 'PDK'),
-        protectType: 'AES-GCM-256',
+        keyType: utils.getKeyType(mode, algorithms.PDK),
+        protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
       addProtector(keyContainerPDK, wrappedIAKPDK)
@@ -364,8 +364,8 @@ export const KeyStore = function KeyStore(
       keyContainerPSK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPSK),
-        keyType: utils.getKeyType(mode, 'PSK'),
-        protectType: 'AES-GCM-256',
+        keyType: utils.getKeyType(mode, algorithms.PSK),
+        protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
       addPasswordProtector(keyContainerPSK, wrappedIAKPSK)
@@ -497,7 +497,7 @@ export const KeyStore = function KeyStore(
 
   const importPek = (publicKey, usages) => {
     let { alg } = publicKey
-    if (publicKey.kty === 'EC') {
+    if (publicKey.kty === algorithms.EC) {
       alg = algorithms.ECDH_ALGO.name
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
@@ -562,7 +562,7 @@ export const KeyStore = function KeyStore(
    */
   const savePEK = key => {
     exportedPublicEncryptKey = key
-    if (key.kty === 'EC') {
+    if (key.kty === algorithms.EC) {
       delete exportedPublicEncryptKey.ext
     }
   }
@@ -584,7 +584,7 @@ export const KeyStore = function KeyStore(
   const savePVK = key =>
     new Promise(resolve => {
       exportedPublicVerifyKey = key
-      if (key.kty === 'EC') {
+      if (key.kty === algorithms.EC) {
         delete exportedPublicVerifyKey.ext
       }
       resolve(exportedPublicVerifyKey)
@@ -721,7 +721,7 @@ export const KeyStore = function KeyStore(
 
   const importPvk = publicKey => {
     let { alg } = publicKey
-    if (publicKey.kty === 'EC') {
+    if (publicKey.kty === algorithms.EC) {
       alg = algorithms.ECDSA_ALGO.name
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
@@ -848,7 +848,12 @@ export const KeyStore = function KeyStore(
         return null
       }
 
-      return unlockPrivateKey(protector, keyContainerPDK, 'PDK', protectorType)
+      return unlockPrivateKey(
+        protector,
+        keyContainerPDK,
+        algorithms.PDK,
+        protectorType,
+      )
         .then(exportedKey => {
           sessionStorage.setItem(prefixIAKPDK, JSON.stringify(exportedKey))
           resolve()
@@ -866,7 +871,12 @@ export const KeyStore = function KeyStore(
         return null
       }
 
-      return unlockPrivateKey(protector, keyContainerPSK, 'PSK', protectorType)
+      return unlockPrivateKey(
+        protector,
+        keyContainerPSK,
+        algorithms.PSK,
+        protectorType,
+      )
         .then(exportedKey => {
           sessionStorage.setItem(prefixIAKPSK, JSON.stringify(exportedKey))
           resolve()

@@ -346,7 +346,7 @@ export const Encrypter = function Encrypter(
             }),
             key: utils.arrayBufferToBase64(rawAesKey),
             iv: utils.arrayBufferToBase64(iv),
-            enctype: 'AES-GCM-256',
+            enctype: algorithms.AES_GCM_256,
           }
           return resolve(result)
         })

@@ -178,36 +178,3 @@ export function ecJwk(jwk) {
     y: jwk.y,
   }
 }
-
-export function getKeyType(mode, type) {
-  if (type === 'PSK') {
-    if (mode === 'RSA') {
-      return 'RSASSA-PKCS1-v1_5-2048'
-    }
-    if (mode === 'EC') {
-      return 'ECDSA-P521'
-    }
-  } else if (type === 'PDK') {
-    if (mode === 'RSA') {
-      return 'RSA-OAEP-2048'
-    }
-    if (mode === 'EC') {
-      return 'ECDH-P521'
-    }
-  }
-  throw new Error('Invalid key mode.')
-}
-
-export function getKeyMode(keyType) {
-  switch (keyType) {
-    case 'ECDSA-P521':
-    case 'ECDH-P521':
-      return 'EC'
-    case 'RSA-OAEP-2048':
-    case 'RSASSA-PKCS1-v1_5-2048':
-      return 'RSA'
-    default:
-      break
-  }
-  throw new Error('Invalid key type.')
-}
