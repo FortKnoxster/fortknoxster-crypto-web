@@ -52,18 +52,14 @@ export const RSASSA_PKCS1_V1_5_ALGO = {
   name: RSASSA_PKCS1_V1_5.name,
   modulusLength: 2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
-  hash: {
-    name: SHA_256.name,
-  },
+  hash: SHA_256,
 }
 
 export const RSA_OAEP_ALGO = {
   name: 'RSA-OAEP',
   modulusLength: 2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
-  hash: {
-    name: SHA_256.name,
-  },
+  hash: SHA_256,
 }
 
 export const ECDH_ALGO = {
@@ -92,10 +88,8 @@ export const AES_KW_ALGO = {
 }
 
 export const HMAC_ALGO = {
-  name: HMAC,
-  hash: {
-    name: SHA_256.name,
-  },
+  name: HMAC.name,
+  hash: SHA_256,
 }
 
 export const deriveKeyPBKDF2 = salt => ({
@@ -140,7 +134,7 @@ export function getSignAlgorithm(algo) {
     case RSASSA_PKCS1_V1_5.name:
       return RSASSA_PKCS1_V1_5
     case ECDSA_ALGO.name:
-      return { name: ECDSA_ALGO.name, hash: { name: SHA_256.name } }
+      return { name: ECDSA_ALGO.name, hash: SHA_256 }
     case HMAC_ALGO.name:
       return HMAC
     default:
@@ -153,7 +147,7 @@ export function getImportAlgorithm(algo) {
   switch (algo) {
     case RSA:
     case RSASSA_PKCS1_V1_5.name:
-      return { name: RSASSA_PKCS1_V1_5.name, hash: { name: SHA_256.name } }
+      return { name: RSASSA_PKCS1_V1_5.name, hash: SHA_256 }
     case EC:
     case ECDSA_ALGO.name:
       return ECDSA_ALGO
