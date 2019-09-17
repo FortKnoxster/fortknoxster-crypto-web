@@ -167,11 +167,12 @@ export const KeyStore = function KeyStore(
     if (signature) {
       publicKeys.signature = signature
     }
-
-    sessionStorage.setItem(
-      publicKeyPrefix + sessionStorage.getItem('id'),
-      JSON.stringify(publicKeys),
-    )
+    if (Object.keys(publicKeys).length > 0) {
+      sessionStorage.setItem(
+        publicKeyPrefix + sessionStorage.getItem('id'),
+        JSON.stringify(publicKeys),
+      )
+    }
   }
 
   const packageKeyContainers = signedKeys =>
@@ -720,7 +721,6 @@ export const KeyStore = function KeyStore(
   }
 
   const importPvk = publicKey => {
-    console.log('publicKey', publicKey)
     if (publicKey.kty === algorithms.EC) {
       const algo = algorithms.getAlgorithm(algorithms.ECDSA_ALGO.name)
       // eslint-disable-next-line no-param-reassign
