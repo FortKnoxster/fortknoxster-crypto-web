@@ -533,19 +533,14 @@ export const Encrypter = function Encrypter(
     generateSessionKey()
       .then(saveSessionKey)
       .then(encryptPlainText)
-
       .then(saveEncryptedPlainText)
       .then(exportSessionKey)
       .then(saveExportedSessionKey)
       .then(keyStore.getPsk)
-
       .then(signEncryptedPlainText)
-
       .then(saveSignature)
       .then(keyStore.getPek)
-
       .then(encryptSessionKey)
-
       .then(key => {
         const result = {
           message: utils.arrayBufferToBase64(encryptedPlainText[1]),
