@@ -1,6 +1,6 @@
-import { Encrypter } from '../legacy/kryptos.encrypter'
-import { Decrypter } from '../legacy/kryptos.decrypter'
-import { base64ToArrayBuffer, dummyCB } from './utils'
+import { Encrypter } from './core/kryptos.encrypter'
+import { Decrypter } from './core/kryptos.decrypter'
+import { base64ToArrayBuffer } from './utils'
 
 const storage = {
   keyStore: null,
@@ -17,32 +17,32 @@ export function initStorage(keyStore) {
 export function encryptItems(items) {
   const { keyStore } = storage
   return items.map(item => {
-    const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
+    const encrypter = new Encrypter(keyStore, item.d, null)
     return encrypter.encryptNewItem(item.rid)
   })
 }
 
 export function encryptExistingItem(item) {
   const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
+  const encrypter = new Encrypter(keyStore, item.d, null)
   return encrypter.encryptExistingItem(base64ToArrayBuffer(item.key))
 }
 
 export function encryptFilePart(filePart, partNo, itemId) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, null, null, null)
-  return encrypter.encryptFilePart(filePart, itemId, partNo, dummyCB)
+  return encrypter.encryptFilePart(filePart, itemId, partNo)
 }
 
 export function encryptNewItemAssignment(item) {
   const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, item.d, null, dummyCB)
+  const encrypter = new Encrypter(keyStore, item.d, null)
   return encrypter.encryptNewItemAssignment()
 }
 
 export function encryptItemAssignment(item, usernames) {
   const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, '', usernames, dummyCB)
+  const encrypter = new Encrypter(keyStore, '', usernames)
   return encrypter.encryptItemAssignment(base64ToArrayBuffer(item.key))
 }
 
@@ -54,10 +54,6 @@ export function decryptFilePart(itemId, partItem, filePart) {
     base64ToArrayBuffer(k),
     base64ToArrayBuffer(iv),
     filePart,
-    null,
-    null,
-    null,
-    dummyCB,
   )
   return decrypter.decryptFilePart(itemId, p)
 }
@@ -71,8 +67,6 @@ export function decryptItem(id, rid, key, metaData, publicKey) {
     base64ToArrayBuffer(metaData.d),
     base64ToArrayBuffer(metaData.s),
     publicKey || keyStore.getPvk(true),
-    null,
-    dummyCB,
   )
   return decrypter.decryptItem(id, rid)
 }
@@ -91,8 +85,6 @@ export function decryptItemAssignment(data, publicKey) {
     base64ToArrayBuffer(metaData.d),
     base64ToArrayBuffer(metaData.s),
     publicKey || keyStore.getPvk(true),
-    null,
-    dummyCB,
   )
   return decrypter.decryptItemAssignment()
 }

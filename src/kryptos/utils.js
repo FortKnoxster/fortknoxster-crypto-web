@@ -1,3 +1,4 @@
+import { kryptos } from './kryptos'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -12,6 +13,25 @@ export function stringToArrayBuffer(str) {
     bufView[i] = str.charCodeAt(i)
   }
   return buf
+}
+
+export function arrayBufferToString(buf) {
+  let str = ''
+  const byteArray = new Uint8Array(buf)
+  for (let i = 0; i < byteArray.length; i += 1) {
+    str += String.fromCharCode(byteArray[i])
+  }
+  return str
+}
+
+export function hexToArrayBuffer(hex) {
+  const hexString = hex.length % 2 !== 0 ? `0${hex}` : hex
+  const numBytes = hexString.length / 2
+  const byteArray = new Uint8Array(numBytes)
+  for (let i = 0; i < numBytes; i += 1) {
+    byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
+  }
+  return byteArray
 }
 
 /**
@@ -76,8 +96,7 @@ export function arrayBufferToBase64(buffer, base64Url) {
 
 export function randomValue(bytes) {
   const typedArray = new Uint8Array(bytes)
-  const cryptoObj = window.crypto || window.msCrypto
-  return cryptoObj.getRandomValues(typedArray)
+  return kryptos.getRandomValues(typedArray)
 }
 
 export function generateId(bytes) {
@@ -130,6 +149,14 @@ export function dataUrlToBlob(dataurl) {
   return new Blob([u8arr], { type: mime })
 }
 
+export function objectToArrayBuffer(jwk) {
+  return stringToArrayBuffer(JSON.stringify(jwk))
+}
+
+export function arrayBufferToObject(arrayBuffer) {
+  return JSON.parse(arrayBufferToString(arrayBuffer))
+}
+
 export function rsaJwk(jwk) {
   return {
     alg: jwk.alg,
@@ -150,28 +177,4 @@ export function ecJwk(jwk) {
     x: jwk.x,
     y: jwk.y,
   }
-}
-
-export function getKeyType(mode, type) {
-  if (type === 'PSK') {
-    if (mode === 'RSA') {
-      return 'RSASSA-PKCS1-v1_5-2048'
-    }
-    if (mode === 'EC') {
-      return 'ECDSA-P521'
-    }
-  } else if (type === 'PDK') {
-    if (mode === 'RSA') {
-      return 'RSA-OAEP-2048'
-    }
-    if (mode === 'EC') {
-      return 'ECDH-P521'
-    }
-  }
-  throw new Error('Invalid key type')
-}
-
-// eslint-disable-next-line no-unused-vars
-export function dummyCB(success, result) {
-  // console.log(`success: ${success} result: ${result}`)
 }
