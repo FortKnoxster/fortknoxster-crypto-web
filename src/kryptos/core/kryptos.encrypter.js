@@ -531,16 +531,45 @@ export const Encrypter = function Encrypter(
 
   const encryptNewItemAssignment = () =>
     generateSessionKey()
+      .catch(error => {
+        console.log('encryptNewItemAssignment 1')
+        console.error(error)
+        return error
+      })
       .then(saveSessionKey)
       .then(encryptPlainText)
+      .catch(error => {
+        console.log('encryptNewItemAssignment 2')
+        console.error(error)
+        return error
+      })
       .then(saveEncryptedPlainText)
       .then(exportSessionKey)
       .then(saveExportedSessionKey)
       .then(keyStore.getPsk)
+      .catch(error => {
+        console.log('encryptNewItemAssignment 3')
+        console.error(error)
+        return error
+      })
       .then(signEncryptedPlainText)
+      .catch(error => {
+        console.log('encryptNewItemAssignment 4')
+        console.error(error)
+        return error
+      })
       .then(saveSignature)
       .then(keyStore.getPek)
+      .catch(error => {
+        console.log('encryptNewItemAssignment 5')
+        console.error(error)
+        return error
+      })
       .then(encryptSessionKey)
+      .catch(error => {
+        console.error(error)
+        return error
+      })
       .then(key => {
         const result = {
           message: utils.arrayBufferToBase64(encryptedPlainText[1]),
