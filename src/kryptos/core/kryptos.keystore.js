@@ -350,7 +350,7 @@ export const KeyStore = function KeyStore(
       keyContainerPDK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPDK),
-        keyType: utils.getKeyType(mode, algorithms.PDK),
+        keyType: algorithms.getKeyType(mode, algorithms.PDK),
         protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
@@ -364,7 +364,7 @@ export const KeyStore = function KeyStore(
       keyContainerPSK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPSK),
-        keyType: utils.getKeyType(mode, algorithms.PSK),
+        keyType: algorithms.getKeyType(mode, algorithms.PSK),
         protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
@@ -1081,7 +1081,7 @@ export const KeyStore = function KeyStore(
   const init = () => {
     keyContainerPDK = JSON.parse(sessionStorage.getItem(prefixPDK))
     keyContainerPSK = JSON.parse(sessionStorage.getItem(prefixPSK))
-    setMode(utils.getKeyMode(keyContainerPSK.keyType))
+    setMode(algorithms.getKeyMode(keyContainerPSK.keyType))
   }
 
   return {
