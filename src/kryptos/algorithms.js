@@ -1,3 +1,5 @@
+import { LENGTH_256, LENGTH_2048 } from './constants'
+
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
 export const EC = 'EC'
@@ -26,6 +28,7 @@ export const SHA_256 = {
 
 export const RSA_OAEP = {
   name: 'RSA-OAEP',
+  hash: SHA_256,
 }
 
 export const AES_CBC = {
@@ -46,18 +49,19 @@ export const HMAC = {
 
 export const RSASSA_PKCS1_V1_5 = {
   name: 'RSASSA-PKCS1-v1_5',
+  hash: SHA_256,
 }
 
 export const RSASSA_PKCS1_V1_5_ALGO = {
   name: RSASSA_PKCS1_V1_5.name,
-  modulusLength: 2048,
+  modulusLength: LENGTH_2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: SHA_256,
 }
 
 export const RSA_OAEP_ALGO = {
   name: 'RSA-OAEP',
-  modulusLength: 2048,
+  modulusLength: LENGTH_2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: SHA_256,
 }
@@ -74,17 +78,17 @@ export const ECDSA_ALGO = {
 
 export const AES_CBC_ALGO = {
   name: AES_CBC.name,
-  length: 256,
+  length: LENGTH_256,
 }
 
 export const AES_GCM_ALGO = {
   name: AES_GCM.name,
-  length: 256,
+  length: LENGTH_256,
 }
 
 export const AES_KW_ALGO = {
   name: 'AES-KW',
-  length: 256,
+  length: LENGTH_256,
 }
 
 export const HMAC_ALGO = {
@@ -111,11 +115,11 @@ export function getAlgorithm(algo) {
       return AES_CBC_ALGO
     case RS256:
     case RSASSA_PKCS1_V1_5_2048:
-      return { name: RSASSA_PKCS1_V1_5.name, hash: RSASSA_PKCS1_V1_5_ALGO.hash }
+      return RSASSA_PKCS1_V1_5
     case RSA2048:
     case RSA_OAEP_256:
     case RSA_OAEP_2048:
-      return { name: RSA_OAEP_ALGO.name, hash: RSA_OAEP_ALGO.hash }
+      return RSA_OAEP
     case ECDSA_ALGO.name:
     case ES512:
     case ECDSA_P521:
@@ -147,7 +151,7 @@ export function getImportAlgorithm(algo) {
   switch (algo) {
     case RSA:
     case RSASSA_PKCS1_V1_5.name:
-      return { name: RSASSA_PKCS1_V1_5.name, hash: SHA_256 }
+      return RSASSA_PKCS1_V1_5
     case EC:
     case ECDSA_ALGO.name:
       return ECDSA_ALGO
