@@ -167,11 +167,12 @@ export const KeyStore = function KeyStore(
     if (signature) {
       publicKeys.signature = signature
     }
-
-    sessionStorage.setItem(
-      publicKeyPrefix + sessionStorage.getItem('id'),
-      JSON.stringify(publicKeys),
-    )
+    if (Object.keys(publicKeys).length > 0) {
+      sessionStorage.setItem(
+        publicKeyPrefix + sessionStorage.getItem('id'),
+        JSON.stringify(publicKeys),
+      )
+    }
   }
 
   const packageKeyContainers = signedKeys =>
@@ -720,13 +721,15 @@ export const KeyStore = function KeyStore(
   }
 
   const importPvk = publicKey => {
-    let { alg } = publicKey
     if (publicKey.kty === algorithms.EC) {
-      alg = algorithms.ECDSA_ALGO.name
+      const algo = algorithms.getAlgorithm(algorithms.ECDSA_ALGO.name)
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
+      return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, [
+        'verify',
+      ])
     }
-    const algo = algorithms.getAlgorithm(alg)
+    const algo = algorithms.getAlgorithm(publicKey.alg)
     return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, [
       'verify',
     ])
