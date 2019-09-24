@@ -1,6 +1,5 @@
-import { Encrypter } from './core/kryptos.encrypter'
-import { Decrypter } from './core/kryptos.decrypter'
-import { base64ToArrayBuffer } from './utils'
+import { generateSessionKey, encryptSign } from './core/encrypter'
+import * as algorithms from './algorithms'
 
 const chat = {
   keyStore: null,
@@ -10,21 +9,29 @@ export function initChat(keyStore) {
   chat.keyStore = keyStore
 }
 
-export function encryptChatMessage(plainText, recipients) {
-  const { keyStore } = chat
-  const encrypter = new Encrypter(keyStore, plainText, recipients)
-  return encrypter.encryptChatMessage()
+export async function encryptChatMessage(plainText, publicKeys) {
+  return new Promise(async (resolve, reject) => {
+    const { keyStore } = chat
+    try {
+      const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
+      const privateKey = await keyStore.getPsk()
+      const result = encryptSign(plainText, sessionKey, privateKey, publicKeys)
+      resolve(result)
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
-export function decryptItem(id, rid, key, metaData, publicKey) {
-  const { keyStore } = chat
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(key),
-    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-    base64ToArrayBuffer(metaData.d),
-    base64ToArrayBuffer(metaData.s),
-    publicKey || keyStore.getPvk(true),
-  )
-  return decrypter.decryptItem(id, rid)
+export async function encryptGroupChatMessage(plainText, sessionKey) {
+  return new Promise(async (resolve, reject) => {
+    const { keyStore } = chat
+    try {
+      const privateKey = await keyStore.getPsk()
+      const result = encryptSign(plainText, sessionKey, privateKey)
+      resolve(result)
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
