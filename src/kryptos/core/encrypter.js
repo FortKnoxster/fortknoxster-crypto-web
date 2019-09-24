@@ -6,18 +6,20 @@ import { signData } from './signer'
 import { NONEXTRACTABLE, LENGTH_128 } from '../constants'
 
 // used to be EXTRACTABLE
-export const generateSessionKey = (usages, algorithm) =>
-  kryptos.subtle.generateKey(
+export function generateSessionKey(usages, algorithm) {
+  return kryptos.subtle.generateKey(
     algorithm || algorithms.AES_CBC_ALGO,
     NONEXTRACTABLE,
     usages || usage.ENCRYPT,
   )
+}
 
 // Todo: implement wrapKey as non-extractable
-const encryptSessionKey = (sessionKey, publicKey) =>
-  kryptos.subtle.encrypt(algorithms.RSA_OAEP_ALGO, publicKey, sessionKey)
+export function encryptSessionKey(sessionKey, publicKey) {
+  return kryptos.subtle.encrypt(algorithms.RSA_OAEP_ALGO, publicKey, sessionKey)
+}
 
-export const encryptData = (arrayBuffer, iv, key) => {
+export function encryptData(arrayBuffer, iv, key) {
   const algorithm = { name: key.algorithm.name, iv }
   if (algorithm.name === algorithms.AES_GCM.name) {
     algorithm.tagLength = LENGTH_128
@@ -27,19 +29,14 @@ export const encryptData = (arrayBuffer, iv, key) => {
     .then(cipherText => [iv, new Uint8Array(cipherText)])
 }
 
-export const encrypt = async (plainText, sessionKey) => {
+export async function encrypt(plainText, sessionKey) {
   const iv = utils.nonce()
   const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
   const cipherText = await encryptData(data, iv, sessionKey)
   return { m: cipherText, iv }
 }
 
-export const encryptIt = async (
-  plainText,
-  sessionKey,
-  privateKey,
-  publicKeys,
-) => {
+export async function encryptIt(plainText, sessionKey, privateKey, publicKeys) {
   // const sessionKey = await getSessionKey(usage.ENCRYPT, algo,key)
   const iv = utils.nonce()
   const data = utils.stringToArrayBuffer(JSON.stringify(plainText))

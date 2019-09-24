@@ -4,25 +4,27 @@ import * as formats from '../formats'
 import * as usage from '../usages'
 import { NONEXTRACTABLE } from '../constants'
 
-export const importSessionKey = (keyBytes, algorithm) =>
-  kryptos.subtle.importKey(
+export function importSessionKey(keyBytes, algorithm) {
+  return kryptos.subtle.importKey(
     formats.RAW,
     keyBytes,
     algorithm || algorithms.AES_CBC_ALGO,
     NONEXTRACTABLE,
     usage.ENCRYPT,
   )
+}
 
-export const importEncryptionKey = (keyBytes, algorithm) =>
-  kryptos.subtle.importKey(
+export function importEncryptionKey(keyBytes, algorithm) {
+  return kryptos.subtle.importKey(
     formats.RAW,
     keyBytes,
     algorithm || algorithms.AES_CBC_ALGO,
     NONEXTRACTABLE,
     usage.ENCRYPT,
   )
+}
 
-export const importPublicVerifyKey = publicKey => {
+export function importPublicVerifyKey(publicKey) {
   if (publicKey.kty === algorithms.EC) {
     const algorithm = algorithms.getAlgorithm(algorithms.ECDSA_ALGO.name)
     // eslint-disable-next-line no-param-reassign
@@ -45,7 +47,7 @@ export const importPublicVerifyKey = publicKey => {
   )
 }
 
-export const importPublicEncryptionKey = publicKey => {
+export function importPublicEncryptionKey(publicKey) {
   if (publicKey.kty === algorithms.EC) {
     const algorithm = algorithms.getAlgorithm(algorithms.ECDH_ALGO.name)
     // eslint-disable-next-line no-param-reassign

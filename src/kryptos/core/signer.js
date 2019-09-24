@@ -5,7 +5,7 @@ import * as formats from '../formats'
 import * as usage from '../usages'
 import { NONEXTRACTABLE } from '../constants'
 
-export const signData = (arrayBuffer, privateKey) => {
+export function signData(arrayBuffer, privateKey) {
   if (!privateKey) {
     throw new Error('Missing crypto key.')
   }
@@ -20,7 +20,7 @@ export const signData = (arrayBuffer, privateKey) => {
   )
 }
 
-export const signIt = async (plainText, privateKey) => {
+export async function signIt(plainText, privateKey) {
   try {
     const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
     const signature = await signData(data, privateKey)
@@ -31,16 +31,17 @@ export const signIt = async (plainText, privateKey) => {
   }
 }
 
-const importHmacKey = raw =>
-  kryptos.subtle.importKey(
+export function importHmacKey(raw) {
+  return kryptos.subtle.importKey(
     formats.RAW,
     raw,
     algorithms.HMAC_ALGO,
     NONEXTRACTABLE,
     usage.SIGN,
   )
+}
 
-export const hmacSignIt = async (plainText, rawKey) => {
+export async function hmacSignIt(plainText, rawKey) {
   try {
     const data = utils.stringToArrayBuffer(plainText)
     const signKey = await importHmacKey(utils.stringToArrayBuffer(rawKey))
