@@ -31,7 +31,7 @@ import * as formats from '../formats'
 import * as usage from '../usages'
 import { NONEXTRACTABLE } from '../constants'
 
-export function signData(arrayBuffer, privateKey) {
+export function sign(arrayBuffer, privateKey) {
   if (!privateKey) {
     throw new Error('Missing crypto key.')
   }
@@ -49,7 +49,7 @@ export function signData(arrayBuffer, privateKey) {
 export async function signIt(plainText, privateKey) {
   try {
     const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
-    const signature = await signData(data, privateKey)
+    const signature = await sign(data, privateKey)
     return utils.arrayBufferToBase64(signature)
   } catch (error) {
     console.error(error)
@@ -71,7 +71,7 @@ export async function hmacSignIt(plainText, rawKey) {
   try {
     const data = utils.stringToArrayBuffer(plainText)
     const signKey = await importHmacKey(utils.stringToArrayBuffer(rawKey))
-    const signature = await signData(data, signKey)
+    const signature = await sign(data, signKey)
     return utils.arrayBufferToBase64(signature)
   } catch (error) {
     console.error(error)
