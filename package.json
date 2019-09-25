@@ -6,7 +6,6 @@
   "module": "./src/index.js",
   "scripts": {
     "lint": "eslint src/**/*.js",
-    "precommit": "lint-staged",
     "test": "nyc ava --verbose",
     "test:watch": "nyc ava --verbose --watch"
   },
@@ -53,5 +52,10 @@
     "node-webcrypto-ossl": "^1.0.48",
     "nyc": "^14.1.1",
     "prettier": "^1.18.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
