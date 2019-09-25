@@ -1,4 +1,6 @@
-import { generateSessionKey, encryptSign } from './core/encrypter'
+/* eslint-disable no-async-promise-executor */
+import { encryptSign } from './core/encrypter'
+import { generateSessionKey } from './core/keys'
 import * as algorithms from './algorithms'
 
 const chat = {
@@ -9,7 +11,7 @@ export function initChat(keyStore) {
   chat.keyStore = keyStore
 }
 
-export async function encryptChatMessage(plainText, publicKeys) {
+export function encryptChatMessage(plainText, publicKeys) {
   return new Promise(async (resolve, reject) => {
     const { keyStore } = chat
     try {
@@ -23,7 +25,7 @@ export async function encryptChatMessage(plainText, publicKeys) {
   })
 }
 
-export async function encryptGroupChatMessage(plainText, sessionKey) {
+export function encryptGroupChatMessage(plainText, sessionKey) {
   return new Promise(async (resolve, reject) => {
     const { keyStore } = chat
     try {

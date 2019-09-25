@@ -28,12 +28,13 @@ import { kryptos } from '../kryptos'
 import * as utils from '../utils'
 import * as algorithms from '../algorithms'
 import * as usage from '../usages'
-import { signData } from './signer'
+import { sign } from './signer'
 import { NONEXTRACTABLE, LENGTH_128 } from '../constants'
 
 /**
  * Generate a new symmetric key.
  * Change: Used to be EXTRACTABLE
+ *
  * @param {Object} algorithm
  */
 export function generateSessionKey(algorithm) {
@@ -84,7 +85,7 @@ export async function encryptSign(
     const iv = utils.nonce()
     const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
     const cipherText = await encrypt(data, iv, sessionKey)
-    const signature = await signData(cipherText, privateKey)
+    const signature = await sign(cipherText, privateKey)
     const promises = publicKeys.map(publicKey =>
       encryptSessionKey(sessionKey, publicKey),
     )

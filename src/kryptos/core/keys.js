@@ -97,3 +97,13 @@ export function importPublicEncryptKey(publicKey) {
     usage.ENCRYPT_ONLY,
   )
 }
+
+/**
+ * Generate a new symmetric key.
+ * Change: Used to be EXTRACTABLE
+ *
+ * @param {Object} algorithm
+ */
+export function generateSessionKey(algorithm) {
+  return kryptos.subtle.generateKey(algorithm, NONEXTRACTABLE, usage.ENCRYPT)
+}
