@@ -16,6 +16,7 @@
   "ava": {
     "require": [
       "@babel/register",
+      "@babel/polyfill",
       "./src/test/helpers/_setup-browser-env.js"
     ]
   },
@@ -33,6 +34,7 @@
   "author": "FortKnoxster",
   "license": "ISC",
   "devDependencies": {
+    "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.6.2",
     "@babel/register": "^7.6.2",
     "ava": "^2.4.0",
