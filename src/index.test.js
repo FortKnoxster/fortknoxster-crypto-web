@@ -2,7 +2,7 @@ import test from 'ava'
 import * as kryptos from './index'
 import { generateIdentityKeys } from './kryptos/keyStore'
 import { setupKeys } from './kryptos/core/keystore'
-import { generateSigningKeyPair } from './kryptos/core/keys'
+import { generateSigningKeyPair, generateSessionKey } from './kryptos/core/keys'
 // import { encryptGroupChatMessage } from './kryptos/chat'
 import * as algorithms from './kryptos/algorithms'
 
@@ -86,5 +86,23 @@ test('Test Elliptic Curve keys setup', async t => {
       keyContainers.psk.keyProtectors[0] &&
       keyContainers.pdk.encryptedKey &&
       keyContainers.pdk.keyProtectors[0],
+  )
+})
+
+test('Test generateSessionKey AES-CBC', async t => {
+  const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
+  console.log('sessionKey', sessionKey)
+  t.assert(
+    sessionKey.algorithm.name === algorithms.AES_CBC_ALGO.name &&
+      sessionKey.algorithm.length === algorithms.AES_CBC_ALGO.length,
+  )
+})
+
+test('Test generateSessionKey AES-GCM', async t => {
+  const sessionKey = await generateSessionKey(algorithms.AES_GCM_ALGO)
+  console.log('sessionKey', sessionKey)
+  t.assert(
+    sessionKey.algorithm.name === algorithms.AES_GCM_ALGO.name &&
+      sessionKey.algorithm.length === algorithms.AES_GCM_ALGO.length,
   )
 })
