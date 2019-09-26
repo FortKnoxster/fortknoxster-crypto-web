@@ -27,19 +27,8 @@
 import { kryptos } from '../kryptos'
 import * as utils from '../utils'
 import * as algorithms from '../algorithms'
-import * as usage from '../usages'
 import { sign } from './signer'
-import { NONEXTRACTABLE, LENGTH_128 } from '../constants'
-
-/**
- * Generate a new symmetric key.
- * Change: Used to be EXTRACTABLE
- *
- * @param {Object} algorithm
- */
-export function generateSessionKey(algorithm) {
-  return kryptos.subtle.generateKey(algorithm, NONEXTRACTABLE, usage.ENCRYPT)
-}
+import { LENGTH_128 } from '../constants'
 
 /**
  * Encrypt a symmetric key with an asymmetric public key.
@@ -97,7 +86,6 @@ export async function encryptSign(
       keys,
     }
   } catch (error) {
-    console.error(error)
     return Promise.reject(error)
   }
 }
