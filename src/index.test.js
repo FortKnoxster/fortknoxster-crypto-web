@@ -91,7 +91,6 @@ test('Test Elliptic Curve keys setup', async t => {
 
 test('Test generateSessionKey AES-CBC', async t => {
   const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
-  console.log('sessionKey', sessionKey)
   t.assert(
     sessionKey.algorithm.name === algorithms.AES_CBC_ALGO.name &&
       sessionKey.algorithm.length === algorithms.AES_CBC_ALGO.length,
@@ -100,7 +99,6 @@ test('Test generateSessionKey AES-CBC', async t => {
 
 test('Test generateSessionKey AES-GCM', async t => {
   const sessionKey = await generateSessionKey(algorithms.AES_GCM_ALGO)
-  console.log('sessionKey', sessionKey)
   t.assert(
     sessionKey.algorithm.name === algorithms.AES_GCM_ALGO.name &&
       sessionKey.algorithm.length === algorithms.AES_GCM_ALGO.length,
