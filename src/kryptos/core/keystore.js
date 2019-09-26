@@ -79,7 +79,7 @@ export async function setupIdentityKeys(password, algorithm) {
     const keyContainer = newKeyContainer(
       wrappedPrivateKey,
       iv,
-      algorithms.keyType(algorithm),
+      algorithms.keyContainerType(algorithm),
     )
     const passwordProtector = newKeyProtector(
       wrappedIntermediateKey,
