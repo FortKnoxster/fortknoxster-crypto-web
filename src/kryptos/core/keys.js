@@ -28,7 +28,8 @@ import { kryptos } from '../kryptos'
 import * as algorithms from '../algorithms'
 import * as formats from '../formats'
 import * as usage from '../usages'
-import { NONEXTRACTABLE } from '../constants'
+import { objectToArrayBuffer } from '../utils'
+import { NONEXTRACTABLE, EXTRACTABLE } from '../constants'
 
 export function importSessionKey(keyBytes, algorithm) {
   return kryptos.subtle.importKey(
@@ -106,4 +107,52 @@ export function importPublicEncryptKey(publicKey) {
  */
 export function generateSessionKey(algorithm) {
   return kryptos.subtle.generateKey(algorithm, NONEXTRACTABLE, usage.ENCRYPT)
+}
+
+export function generateWrapKey() {
+  return kryptos.subtle.generateKey(
+    algorithms.AES_GCM_ALGO,
+    EXTRACTABLE,
+    usage.WRAP.concat(usage.ENCRYPT),
+  )
+}
+
+export function wrapKey(key, wrappingKey) {
+  return kryptos.subtle.wrapKey(
+    formats.RAW,
+    key,
+    wrappingKey,
+    algorithms.AES_KW,
+  )
+}
+
+export function wrapPrivateKey(privateKey, iv, wrappingKey) {
+  return kryptos.subtle.wrapKey(formats.JWK, privateKey, wrappingKey, {
+    name: algorithms.AES_GCM.name,
+    iv,
+  })
+}
+
+/**
+ * Generate the signing key pair using the given algorithm.
+ *
+ * @param {Object} algorithm
+ */
+export function generateSigningKeyPair(algorithm) {
+  return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.SIGN)
+}
+
+export function exportPublicKey(publicKey) {
+  return kryptos.subtle.exportKey(formats.JWK, publicKey)
+}
+
+/**
+ *
+ * @param {*} key
+ */
+export function fingerprint(key) {
+  return kryptos.subtle.digest(
+    algorithms.SHA_256.name,
+    objectToArrayBuffer(key),
+  )
 }
