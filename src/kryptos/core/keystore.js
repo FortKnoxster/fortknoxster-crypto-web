@@ -29,13 +29,13 @@ import { deriveKeyFromPassword } from '../derive'
 import {
   generateWrapKey,
   wrapKey,
-  generateSigningKeyPair,
+  generateKeyPair,
   wrapPrivateKey,
   exportPublicKey,
   fingerprint,
 } from './keys'
 import * as algorithms from '../algorithms'
-// import { sign } from './signer'
+import { signIt } from './signer'
 import { PROTECTOR_TYPES, PROTECTOR_ITERATIONS, LENGTH_32 } from '../constants'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
@@ -59,23 +59,18 @@ function newKeyProtector(wrappedKey, algorithm, type) {
   }
 }
 
-export async function setupIdentityKeys(password, algorithm) {
+export async function setupKeyPair(derivedKey, algorithm, protectorAlgorithm) {
   try {
-    const salt = utils.randomValue(LENGTH_32)
-    const iterations = PROTECTOR_ITERATIONS
-    const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
     const intermediateKey = await generateWrapKey()
     const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
-    const signingKeyPair = await generateSigningKeyPair(algorithm)
+    const keyPair = await generateKeyPair(algorithm)
     const iv = utils.nonce()
     const wrappedPrivateKey = await wrapPrivateKey(
-      signingKeyPair.privateKey,
+      keyPair.privateKey,
       iv,
       intermediateKey,
     )
-    const exportedPublicKey = await exportPublicKey(signingKeyPair.publicKey)
-    delete exportedPublicKey.ext
-    const keyFingerprint = await fingerprint(exportedPublicKey)
+    const exportedPublicKey = await exportPublicKey(keyPair.publicKey)
     const keyContainer = newKeyContainer(
       wrappedPrivateKey,
       iv,
@@ -83,15 +78,73 @@ export async function setupIdentityKeys(password, algorithm) {
     )
     const passwordProtector = newKeyProtector(
       wrappedIntermediateKey,
-      algorithms.deriveKeyPBKDF2(salt, iterations),
+      protectorAlgorithm,
       PROTECTOR_TYPES.password,
     )
-
     keyContainer.keyProtectors.push(passwordProtector)
     return {
-      psk: keyContainer,
-      pvk: exportedPublicKey,
+      keyContainer,
+      publicKey: exportedPublicKey,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function setupIdentityKeys(password, algorithm) {
+  try {
+    const salt = utils.randomValue(LENGTH_32)
+    const iterations = PROTECTOR_ITERATIONS
+    const PBKDF2 = algorithms.deriveKeyPBKDF2(salt, iterations)
+    const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+    const container = await setupKeyPair(derivedKey, algorithm, PBKDF2)
+    const keyFingerprint = await fingerprint(container.publicKey)
+    return {
+      psk: container.keyContainer,
+      pvk: container.publicKey,
       fingerprint: utils.arrayBufferToHex(keyFingerprint),
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export function signPublicKeys(identity, publicEncryptKey, publicVerifyKey) {
+  const publicKeys = {
+    pek: utils.toJwk(publicEncryptKey),
+    pvk: utils.toJwk(publicVerifyKey),
+  }
+  return signIt(publicKeys, identity)
+}
+
+export async function setupKeys(
+  password,
+  identityKey,
+  signAlgorithm,
+  encryptAlgorithm,
+) {
+  try {
+    const salt = utils.randomValue(LENGTH_32)
+    const iterations = PROTECTOR_ITERATIONS
+    const PBKDF2 = algorithms.deriveKeyPBKDF2(salt, iterations)
+    const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+    const signContainer = await setupKeyPair(derivedKey, signAlgorithm, PBKDF2)
+    const encryptContainer = await setupKeyPair(
+      derivedKey,
+      encryptAlgorithm,
+      PBKDF2,
+    )
+    const signature = await signPublicKeys(
+      identityKey,
+      encryptContainer.publicKey,
+      signContainer.publicKey,
+    )
+    return {
+      pdk: signContainer.keyContainer,
+      psk: encryptContainer.keyContainer,
+      pek: encryptContainer.publicKey,
+      pvk: signContainer.publicKey,
+      signature,
     }
   } catch (e) {
     return Promise.reject(e)

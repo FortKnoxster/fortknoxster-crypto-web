@@ -5,7 +5,7 @@ export {
   newKeyStore,
   newKeyStores,
   setupKeys,
-  generateSignKeys,
+  generateIdentityKeys,
   unlockKeyStores,
   lockKeyStores,
   verifyKeyProtector,

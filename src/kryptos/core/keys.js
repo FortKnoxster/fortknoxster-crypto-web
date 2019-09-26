@@ -142,10 +142,53 @@ export function generateSigningKeyPair(algorithm) {
   return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.SIGN)
 }
 
-export function exportPublicKey(publicKey) {
-  return kryptos.subtle.exportKey(formats.JWK, publicKey)
+/**
+ * Generate the encrypting key pair using the given algorithm.
+ *
+ * @param {Object} algorithm
+ */
+export function generateEncryptionKeyPair(algorithm) {
+  return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, [
+    ...usage.ENCRYPT,
+    ...usage.WRAP,
+  ])
 }
 
+/**
+ * Generate the encrypting key pair using the given algorithm.
+ *
+ * @param {Object} algorithm
+ */
+export function generateDerivationKeyPair(algorithm) {
+  return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.DERIVE)
+}
+
+export async function exportPublicKey(publicKey) {
+  const exportedPublicKey = await kryptos.subtle.exportKey(
+    formats.JWK,
+    publicKey,
+  )
+  if (exportedPublicKey.kty === algorithms.EC) {
+    // EC fix
+    delete exportedPublicKey.ext
+  }
+  return Promise.resolve(exportedPublicKey)
+}
+
+export function generateKeyPair(algorithm) {
+  switch (algorithm.name) {
+    case algorithms.RSASSA_PKCS1_V1_5_ALGO.name:
+    case algorithms.ECDSA_ALGO.name:
+      return generateSigningKeyPair(algorithm)
+    case algorithms.RSA_OAEP_ALGO.name:
+      return generateEncryptionKeyPair(algorithm)
+    case algorithms.ECDH_ALGO.name:
+      return generateDerivationKeyPair(algorithm)
+    default:
+      break
+  }
+  throw new Error('Invalid key pair algorithm.')
+}
 /**
  *
  * @param {*} key

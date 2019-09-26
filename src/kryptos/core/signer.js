@@ -32,13 +32,6 @@ import * as usage from '../usages'
 import { NONEXTRACTABLE } from '../constants'
 
 export function sign(arrayBuffer, privateKey) {
-  if (!privateKey) {
-    throw new Error('Missing crypto key.')
-  }
-  if (!(privateKey instanceof CryptoKey)) {
-    throw new Error('Invalid crypto key.')
-  }
-
   return kryptos.subtle.sign(
     algorithms.getSignAlgorithm(privateKey.algorithm.name),
     privateKey,
@@ -52,7 +45,6 @@ export async function signIt(plainText, privateKey) {
     const signature = await sign(data, privateKey)
     return utils.arrayBufferToBase64(signature)
   } catch (error) {
-    console.error(error)
     return Promise.reject(error)
   }
 }
@@ -74,7 +66,6 @@ export async function hmacSignIt(plainText, rawKey) {
     const signature = await sign(data, signKey)
     return utils.arrayBufferToBase64(signature)
   } catch (error) {
-    console.error(error)
     return Promise.reject(error)
   }
 }

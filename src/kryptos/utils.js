@@ -1,4 +1,5 @@
 import { kryptos } from './kryptos'
+import { EC } from './algorithms'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -157,6 +158,11 @@ export function arrayBufferToObject(arrayBuffer) {
   return JSON.parse(arrayBufferToString(arrayBuffer))
 }
 
+/**
+ * Ensure explicit object keys order for RSA JWK.
+ *
+ * @param {Object} jwk
+ */
 export function rsaJwk(jwk) {
   return {
     alg: jwk.alg,
@@ -168,6 +174,11 @@ export function rsaJwk(jwk) {
   }
 }
 
+/**
+ * Ensure explicit object keys order for EC JWK.
+ *
+ * @param {Object} jwk
+ */
 export function ecJwk(jwk) {
   return {
     crv: jwk.crv,
@@ -177,4 +188,11 @@ export function ecJwk(jwk) {
     x: jwk.x,
     y: jwk.y,
   }
+}
+
+export function toJwk(jwk) {
+  if (jwk.kty === EC) {
+    return ecJwk(jwk)
+  }
+  return rsaJwk(jwk)
 }
