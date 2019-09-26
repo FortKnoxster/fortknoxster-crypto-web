@@ -89,7 +89,7 @@ export async function encryptSign(
     const promises = publicKeys.map(publicKey =>
       encryptSessionKey(sessionKey, publicKey),
     )
-    const keys = Promise.all(promises)
+    const keys = await Promise.all(promises)
     return {
       iv: utils.arrayBufferToBase64(iv),
       m: utils.arrayBufferToBase64(cipherText),
