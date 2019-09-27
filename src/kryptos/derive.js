@@ -28,7 +28,7 @@ export async function deriveAccountPassword(username, password, domain) {
 
     return arrayBufferToHex(exportedKey)
   } catch (e) {
-    return e
+    return Promise.reject(e)
   }
 }
 
