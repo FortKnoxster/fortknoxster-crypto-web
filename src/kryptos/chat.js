@@ -1,6 +1,6 @@
 /* eslint-disable no-async-promise-executor */
-import { encryptSign } from './core/encrypter'
-import { generateSessionKey } from './core/keys'
+import { encryptSign } from './encrypter'
+import { generateSessionKey } from './keys'
 import * as algorithms from './algorithms'
 
 const chat = {

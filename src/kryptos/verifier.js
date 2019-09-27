@@ -24,9 +24,9 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { kryptos } from '../kryptos'
-import * as utils from '../utils'
-import * as algorithms from '../algorithms'
+import { kryptos } from './kryptos'
+import * as utils from './utils'
+import * as algorithms from './algorithms'
 
 /**
  * Verify given signature and verified signature of the given cipher text.

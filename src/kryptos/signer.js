@@ -24,12 +24,12 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { kryptos } from '../kryptos'
-import * as utils from '../utils'
-import * as algorithms from '../algorithms'
-import * as formats from '../formats'
-import * as usage from '../usages'
-import { NONEXTRACTABLE } from '../constants'
+import { kryptos } from './kryptos'
+import * as utils from './utils'
+import * as algorithms from './algorithms'
+import * as formats from './formats'
+import * as usage from './usages'
+import { NONEXTRACTABLE } from './constants'
 
 export function sign(arrayBuffer, privateKey) {
   return kryptos.subtle.sign(

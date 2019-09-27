@@ -9,7 +9,7 @@ export {
   unlockKeyStores,
   lockKeyStores,
   verifyKeyProtector,
-} from './kryptos/keyStore'
+} from './kryptos/serviceKeyStore'
 export {
   generateId,
   blobToDataUrl,

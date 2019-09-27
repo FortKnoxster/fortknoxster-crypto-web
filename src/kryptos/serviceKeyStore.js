@@ -1,5 +1,5 @@
 import { KeyStore } from './core/kryptos.keystore'
-import { setupIdentityKeys } from './core/keystore'
+import { setupIdentityKeys } from './keystore'
 import { ECDSA_ALGO } from './algorithms'
 
 export function unlockKeyStores(keys, password, type) {
