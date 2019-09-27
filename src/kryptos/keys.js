@@ -159,6 +159,7 @@ export function generateEncryptionKeyPair(algorithm) {
  * @param {Object} algorithm
  */
 export function generateDerivationKeyPair(algorithm) {
+  console.log('test')
   return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.DERIVE)
 }
 
