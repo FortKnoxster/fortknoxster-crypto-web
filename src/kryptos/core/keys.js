@@ -52,13 +52,13 @@ export function importEncryptionKey(keyBytes, algorithm) {
 }
 
 export function importPublicVerifyKey(publicKey) {
-  if (publicKey.kty === algorithms.EC) {
+  const clonedPublicKey = { ...publicKey }
+  if (clonedPublicKey.kty === algorithms.EC) {
     const algorithm = algorithms.getAlgorithm(algorithms.ECDSA_ALGO.name)
-    // eslint-disable-next-line no-param-reassign
-    delete publicKey.alg
+    delete clonedPublicKey.alg
     return kryptos.subtle.importKey(
       formats.JWK,
-      publicKey,
+      clonedPublicKey,
       algorithm,
       NONEXTRACTABLE,
       usage.VERIFY_ONLY,
@@ -75,15 +75,14 @@ export function importPublicVerifyKey(publicKey) {
 }
 
 export function importPublicEncryptKey(publicKey) {
-  if (publicKey.kty === algorithms.EC) {
+  const clonedPublicKey = { ...publicKey }
+  if (clonedPublicKey.kty === algorithms.EC) {
     const algorithm = algorithms.getAlgorithm(algorithms.ECDH_ALGO.name)
-    // eslint-disable-next-line no-param-reassign
-    delete publicKey.alg
-    // eslint-disable-next-line no-param-reassign
-    delete publicKey.key_ops
+    delete clonedPublicKey.alg
+    delete clonedPublicKey.key_ops
     return kryptos.subtle.importKey(
       formats.JWK,
-      publicKey,
+      clonedPublicKey,
       algorithm,
       NONEXTRACTABLE,
       usage.ENCRYPT_ONLY,
