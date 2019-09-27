@@ -1,9 +1,10 @@
 import test from 'ava'
 import * as kryptos from './index'
 import { generateIdentityKeys } from './kryptos/serviceKeyStore'
-import { setupKeys } from './kryptos/keystore'
+import { setupKeys, unlock } from './kryptos/keystore'
 import { generateSigningKeyPair, generateSessionKey } from './kryptos/keys'
 import * as algorithms from './kryptos/algorithms'
+import { PROTECTOR_TYPES } from './kryptos/constants'
 
 test.before(async t => {
   t.log('Start test')
@@ -22,7 +23,7 @@ test('Test deriveAccountPassword', async t => {
   t.is(encryptedPassword.length, 64)
 })
 
-test('Test Identity keys setup.', async t => {
+test('Test Identity key store setup.', async t => {
   const keyContainer = await generateIdentityKeys(t.context.password)
   t.assert(
     keyContainer.psk &&
@@ -33,46 +34,62 @@ test('Test Identity keys setup.', async t => {
   )
 })
 
-test('Test RSA keys setup', async t => {
+test('Test RSA key store setup', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
-  const keyContainers = await setupKeys(
+  const keyStore = await setupKeys(
     t.context.password,
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
   )
   t.assert(
-    keyContainers.psk &&
-      keyContainers.pvk &&
-      keyContainers.pdk &&
-      keyContainers.pek &&
-      keyContainers.signature &&
-      keyContainers.psk.encryptedKey &&
-      keyContainers.psk.keyProtectors[0] &&
-      keyContainers.pdk.encryptedKey &&
-      keyContainers.pdk.keyProtectors[0],
+    keyStore.psk &&
+      keyStore.pvk &&
+      keyStore.pdk &&
+      keyStore.pek &&
+      keyStore.signature &&
+      keyStore.psk.encryptedKey &&
+      keyStore.psk.keyProtectors[0] &&
+      keyStore.pdk.encryptedKey &&
+      keyStore.pdk.keyProtectors[0],
   )
 })
 
-test('Test Elliptic Curve keys setup', async t => {
+test('Test Elliptic Curve key store setup', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
-  const keyContainers = await setupKeys(
+  const keyStore = await setupKeys(
     t.context.password,
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
   )
   t.assert(
-    keyContainers.psk &&
-      keyContainers.pvk &&
-      keyContainers.pdk &&
-      keyContainers.pek &&
-      keyContainers.signature &&
-      keyContainers.psk.encryptedKey &&
-      keyContainers.psk.keyProtectors[0] &&
-      keyContainers.pdk.encryptedKey &&
-      keyContainers.pdk.keyProtectors[0],
+    keyStore.psk &&
+      keyStore.pvk &&
+      keyStore.pdk &&
+      keyStore.pek &&
+      keyStore.signature &&
+      keyStore.psk.encryptedKey &&
+      keyStore.psk.keyProtectors[0] &&
+      keyStore.pdk.encryptedKey &&
+      keyStore.pdk.keyProtectors[0],
   )
+})
+
+test('Test RSA key store unlock', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const keyStore = await setupKeys(
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+  )
+  const unlockedKeyStore = await unlock(
+    keyStore,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+  )
+  t.assert(unlockedKeyStore)
 })
 
 test('Test generateSessionKey AES-CBC-256', async t => {
