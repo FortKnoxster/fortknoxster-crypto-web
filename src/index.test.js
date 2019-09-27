@@ -1,8 +1,8 @@
 import test from 'ava'
 import * as kryptos from './index'
-import { generateIdentityKeys } from './kryptos/keyStore'
-import { setupKeys } from './kryptos/core/keystore'
-import { generateSigningKeyPair, generateSessionKey } from './kryptos/core/keys'
+import { generateIdentityKeys } from './kryptos/serviceKeyStore'
+import { setupKeys } from './kryptos/keystore'
+import { generateSigningKeyPair, generateSessionKey } from './kryptos/keys'
 import * as algorithms from './kryptos/algorithms'
 
 test.before(async t => {
@@ -75,7 +75,7 @@ test('Test Elliptic Curve keys setup', async t => {
   )
 })
 
-test('Test generateSessionKey AES-CBC', async t => {
+test('Test generateSessionKey AES-CBC-256', async t => {
   const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
   t.assert(
     sessionKey.algorithm.name === algorithms.AES_CBC_ALGO.name &&
@@ -83,7 +83,7 @@ test('Test generateSessionKey AES-CBC', async t => {
   )
 })
 
-test('Test generateSessionKey AES-GCM', async t => {
+test('Test generateSessionKey AES-GCM-256', async t => {
   const sessionKey = await generateSessionKey(algorithms.AES_GCM_ALGO)
   t.assert(
     sessionKey.algorithm.name === algorithms.AES_GCM_ALGO.name &&
