@@ -49,5 +49,3 @@ export {
   verifyContact,
 } from './kryptos/identity'
 export { KeyStore } from './kryptos/core/kryptos.keystore'
-
-console.log()
