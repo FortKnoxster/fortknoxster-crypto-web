@@ -1,4 +1,6 @@
 import { KeyStore } from './core/kryptos.keystore'
+import { setupIdentityKeys } from './keystore'
+import { ECDSA_ALGO } from './algorithms'
 
 export function unlockKeyStores(keys, password, type) {
   return Object.keys(keys).map(key =>
@@ -23,8 +25,10 @@ export function verifyKeyProtector(keys, password, type) {
   return Promise.all(promises)
 }
 
-export function generateSignKeys(key, password) {
-  return key.setupSignKeys(password)
+export function generateIdentityKeys(password) {
+  // Todo: implement new from /core/keystore
+  return setupIdentityKeys(password, ECDSA_ALGO)
+  // return key.setupSignKeys(password)
 }
 
 export function newKeyStore(service, mode) {

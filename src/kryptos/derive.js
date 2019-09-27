@@ -6,10 +6,10 @@ import { RAW } from './formats'
 import { EXTRACTABLE, NONEXTRACTABLE } from './constants'
 
 export async function deriveAccountPassword(username, password, domain) {
-  const salt = stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
-  const bufferedPassword = stringToArrayBuffer(password)
-
   try {
+    const salt = stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
+    const bufferedPassword = stringToArrayBuffer(password)
+
     const key = await kryptos.subtle.importKey(
       RAW,
       bufferedPassword,
@@ -28,7 +28,29 @@ export async function deriveAccountPassword(username, password, domain) {
 
     return arrayBufferToHex(exportedKey)
   } catch (e) {
-    return e
-    // TODO ?? return KRYPTOS.getDerivedPassword(salt, password)
+    return Promise.reject(e)
+  }
+}
+
+export async function deriveKeyFromPassword(password, salt, iterations) {
+  try {
+    const bufferedPassword = stringToArrayBuffer(password)
+
+    const key = await kryptos.subtle.importKey(
+      RAW,
+      bufferedPassword,
+      PBKDF2,
+      NONEXTRACTABLE,
+      DERIVE,
+    )
+    return kryptos.subtle.deriveKey(
+      deriveKeyPBKDF2(salt, iterations),
+      key,
+      AES_KW_ALGO,
+      NONEXTRACTABLE,
+      WRAP,
+    )
+  } catch (e) {
+    return Promise.reject(e)
   }
 }

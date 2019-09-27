@@ -506,7 +506,13 @@ export const KeyStore = function KeyStore(
       delete publicKey.key_ops
     }
     const algo = algorithms.getAlgorithm(alg)
-    return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, usages)
+    return kryptos.subtle.importKey(
+      formats.JWK,
+      publicKey,
+      algo,
+      NONEXTRACTABLE,
+      usages,
+    )
   }
 
   const setDeriveKeyAlgo = algo => {
@@ -725,14 +731,22 @@ export const KeyStore = function KeyStore(
       const algo = algorithms.getAlgorithm(algorithms.ECDSA_ALGO.name)
       // eslint-disable-next-line no-param-reassign
       delete publicKey.alg
-      return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, [
-        'verify',
-      ])
+      return kryptos.subtle.importKey(
+        formats.JWK,
+        publicKey,
+        algo,
+        NONEXTRACTABLE,
+        ['verify'],
+      )
     }
     const algo = algorithms.getAlgorithm(publicKey.alg)
-    return kryptos.subtle.importKey(formats.JWK, publicKey, algo, false, [
-      'verify',
-    ])
+    return kryptos.subtle.importKey(
+      formats.JWK,
+      publicKey,
+      algo,
+      NONEXTRACTABLE,
+      ['verify'],
+    )
   }
 
   const getPvk = jwk => {

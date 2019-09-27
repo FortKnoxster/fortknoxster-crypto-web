@@ -96,10 +96,10 @@ export const HMAC_ALGO = {
   hash: SHA_256,
 }
 
-export const deriveKeyPBKDF2 = salt => ({
+export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
   ...PBKDF2,
   salt,
-  iterations: 50000,
+  iterations,
   hash: SHA_256.name,
 })
 
@@ -194,4 +194,20 @@ export function getKeyMode(keyType) {
       break
   }
   throw new Error('Invalid key type.')
+}
+
+export function keyContainerType(algorithm) {
+  switch (algorithm) {
+    case ECDSA_ALGO:
+      return ECDSA_P521
+    case ECDH_ALGO:
+      return ECDH_P521
+    case RSASSA_PKCS1_V1_5_ALGO:
+      return RSASSA_PKCS1_V1_5_2048
+    case RSA_OAEP_ALGO:
+      return RSA_OAEP_2048
+    default:
+      break
+  }
+  throw new Error('Invalid key mode.')
 }

@@ -1,6 +1,7 @@
-import { Encrypter } from './core/kryptos.encrypter'
-import { Decrypter } from './core/kryptos.decrypter'
-import { base64ToArrayBuffer } from './utils'
+/* eslint-disable no-async-promise-executor */
+import { encryptSign } from './encrypter'
+import { generateSessionKey } from './keys'
+import * as algorithms from './algorithms'
 
 const chat = {
   keyStore: null,
@@ -10,21 +11,23 @@ export function initChat(keyStore) {
   chat.keyStore = keyStore
 }
 
-export function encryptChatMessage(plainText, recipients) {
+export async function encryptChatMessage(plainText, publicKeys) {
   const { keyStore } = chat
-  const encrypter = new Encrypter(keyStore, plainText, recipients)
-  return encrypter.encryptChatMessage()
+  try {
+    const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
+    const privateKey = await keyStore.getPsk()
+    return encryptSign(plainText, sessionKey, privateKey, publicKeys)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
-export function decryptItem(id, rid, key, metaData, publicKey) {
+export async function encryptGroupChatMessage(plainText, sessionKey) {
   const { keyStore } = chat
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(key),
-    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-    base64ToArrayBuffer(metaData.d),
-    base64ToArrayBuffer(metaData.s),
-    publicKey || keyStore.getPvk(true),
-  )
-  return decrypter.decryptItem(id, rid)
+  try {
+    const privateKey = await keyStore.getPsk()
+    return encryptSign(plainText, sessionKey, privateKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
