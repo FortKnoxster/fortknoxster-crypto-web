@@ -24,13 +24,13 @@ test('Test deriveAccountPassword', async t => {
 })
 
 test('Test Identity key store setup.', async t => {
-  const keyContainer = await generateIdentityKeys(t.context.password)
+  const keyStore = await generateIdentityKeys(t.context.password)
   t.assert(
-    keyContainer.psk &&
-      keyContainer.pvk &&
-      keyContainer.fingerprint &&
-      keyContainer.psk.encryptedKey &&
-      keyContainer.psk.keyProtectors[0],
+    keyStore.psk &&
+      keyStore.pvk &&
+      keyStore.fingerprint &&
+      keyStore.psk.encryptedKey &&
+      keyStore.psk.keyProtectors[0],
   )
 })
 
@@ -76,6 +76,23 @@ test('Test Elliptic Curve key store setup', async t => {
   )
 })
 
+test('Test Identity key store unlock.', async t => {
+  const keyStore = await generateIdentityKeys(t.context.password)
+  t.assert(
+    keyStore.psk &&
+      keyStore.pvk &&
+      keyStore.fingerprint &&
+      keyStore.psk.encryptedKey &&
+      keyStore.psk.keyProtectors[0],
+  )
+  const unlockedKeyStore = await unlock(
+    keyStore,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+  )
+  t.assert(unlockedKeyStore)
+})
+
 test('Test RSA key store unlock', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
@@ -83,6 +100,22 @@ test('Test RSA key store unlock', async t => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+  )
+  const unlockedKeyStore = await unlock(
+    keyStore,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+  )
+  t.assert(unlockedKeyStore)
+})
+
+test('Test Elliptic Curve key store unlock', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const keyStore = await setupKeys(
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.ECDSA_ALGO,
+    algorithms.ECDH_ALGO,
   )
   const unlockedKeyStore = await unlock(
     keyStore,
