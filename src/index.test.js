@@ -3,7 +3,6 @@ import * as kryptos from './index'
 import { generateIdentityKeys } from './kryptos/keyStore'
 import { setupKeys } from './kryptos/core/keystore'
 import { generateSigningKeyPair, generateSessionKey } from './kryptos/core/keys'
-// import { encryptGroupChatMessage } from './kryptos/chat'
 import * as algorithms from './kryptos/algorithms'
 
 test.before(async t => {
@@ -22,19 +21,6 @@ test('Test deriveAccountPassword', async t => {
   )
   t.is(encryptedPassword.length, 64)
 })
-
-test('Test Web Crypto API is supported.', t => {
-  t.assert(kryptos.isCryptoSupported)
-})
-/*
-test('Test generate encryption key AES-CBC', async t => {
-  const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
-  console.log(sessionKey)
-  const result = await encryptGroupChatMessage('Test', sessionKey)
-  console.log(result)
-  t.is(sessionKey, ArrayBuffer)
-})
-*/
 
 test('Test Identity keys setup.', async t => {
   const keyContainer = await generateIdentityKeys(t.context.password)
