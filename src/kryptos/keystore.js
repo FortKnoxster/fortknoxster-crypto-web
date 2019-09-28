@@ -182,6 +182,53 @@ export async function unlockPrivateKey(keyContainer, protector, protectorKey) {
 }
 
 export async function unlock(
+  keyContainers,
+  password,
+  type = PROTECTOR_TYPES.password,
+) {
+  try {
+    const promises = keyContainers.map(async keyContainer => {
+      const keyProtector = keyContainer.keyProtectors.find(
+        protector => protector.type === type,
+      )
+      const salt = utils.base64ToArrayBuffer(keyProtector.salt)
+      const { iterations } = keyProtector
+      const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+      return unlockPrivateKey(keyContainer, keyProtector, derivedKey)
+    })
+
+    /*
+    
+        const signKeyProtector = keyStore.psk.keyProtectors.find(
+          protector => protector.type === type,
+        )
+    
+        const salt = utils.base64ToArrayBuffer(signKeyProtector.salt)
+        const { iterations } = signKeyProtector
+        const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+    
+      
+    
+        const promises = []
+        promises.push(unlockPrivateKey(keyStore.psk, signKeyProtector, derivedKey))
+    
+        if (keyStore.pdk) {
+          const decryptKeyProtector = keyStore.pdk.keyProtectors.find(
+            protector => protector.type === type,
+          )
+          promises.push(
+            unlockPrivateKey(keyStore.pdk, decryptKeyProtector, derivedKey),
+          )
+        }
+    */
+
+    return Promise.all(promises)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function lock(
   keyStore,
   password,
   type = PROTECTOR_TYPES.password,
@@ -195,30 +242,7 @@ export async function unlock(
     const { iterations } = signKeyProtector
     const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
 
-    const promises = []
-    promises.push(unlockPrivateKey(keyStore.psk, signKeyProtector, derivedKey))
-
-    if (keyStore.pdk) {
-      const decryptKeyProtector = keyStore.pdk.keyProtectors.find(
-        protector => protector.type === type,
-      )
-      promises.push(
-        unlockPrivateKey(keyStore.pdk, decryptKeyProtector, derivedKey),
-      )
-    }
-    return Promise.all(promises)
-  } catch (e) {
-    return Promise.reject(e)
-  }
-}
-
-export async function lock(
-  keyStore,
-  password,
-  type = PROTECTOR_TYPES.password,
-) {
-  try {
-    return { password, keyStore, type }
+    return derivedKey
   } catch (e) {
     return Promise.reject(e)
   }

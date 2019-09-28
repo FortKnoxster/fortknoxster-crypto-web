@@ -85,8 +85,9 @@ test('Test Identity key store unlock.', async t => {
       keyStore.psk.encryptedKey &&
       keyStore.psk.keyProtectors[0],
   )
+  const keyContainers = [keyStore.psk]
   const unlockedKeyStore = await unlock(
-    keyStore,
+    keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )
@@ -101,8 +102,9 @@ test('Test RSA key store unlock', async t => {
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
   )
+  const keyContainers = [keyStore.psk, keyStore.pdk]
   const unlockedKeyStore = await unlock(
-    keyStore,
+    keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )
@@ -117,8 +119,9 @@ test('Test Elliptic Curve key store unlock', async t => {
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
   )
+  const keyContainers = [keyStore.psk, keyStore.pdk]
   const unlockedKeyStore = await unlock(
-    keyStore,
+    keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )
