@@ -196,32 +196,6 @@ export async function unlock(
       const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
       return unlockPrivateKey(keyContainer, keyProtector, derivedKey)
     })
-
-    /*
-    
-        const signKeyProtector = keyStore.psk.keyProtectors.find(
-          protector => protector.type === type,
-        )
-    
-        const salt = utils.base64ToArrayBuffer(signKeyProtector.salt)
-        const { iterations } = signKeyProtector
-        const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
-    
-      
-    
-        const promises = []
-        promises.push(unlockPrivateKey(keyStore.psk, signKeyProtector, derivedKey))
-    
-        if (keyStore.pdk) {
-          const decryptKeyProtector = keyStore.pdk.keyProtectors.find(
-            protector => protector.type === type,
-          )
-          promises.push(
-            unlockPrivateKey(keyStore.pdk, decryptKeyProtector, derivedKey),
-          )
-        }
-    */
-
     return Promise.all(promises)
   } catch (e) {
     return Promise.reject(e)
