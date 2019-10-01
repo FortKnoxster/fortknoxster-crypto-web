@@ -130,7 +130,7 @@ export function getAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid algorithm')
+  throw new Error('Invalid algorithm.')
 }
 
 export function getSignAlgorithm(algo) {
@@ -144,7 +144,7 @@ export function getSignAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid sign algorithm')
+  throw new Error('Invalid sign algorithm.')
 }
 
 export function getImportAlgorithm(algo) {
@@ -160,7 +160,7 @@ export function getImportAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid import algorithm')
+  throw new Error('Invalid import algorithm.')
 }
 
 export function getKeyType(mode, type) {

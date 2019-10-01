@@ -33,8 +33,11 @@ import {
   wrapPrivateKey,
   exportPublicKey,
   fingerprint,
+  unwrapKey,
+  unwrapPrivateKey,
 } from './keys'
 import * as algorithms from './algorithms'
+import { getUsage } from './usages'
 import { signIt } from './signer'
 import { PROTECTOR_TYPES, PROTECTOR_ITERATIONS, LENGTH_32 } from './constants'
 
@@ -146,6 +149,74 @@ export async function setupKeys(
       pvk: signContainer.publicKey,
       signature,
     }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function unlockPrivateKey(keyContainer, protector, protectorKey) {
+  try {
+    const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
+    const encryptedKey = utils.base64ToArrayBuffer(keyContainer.encryptedKey)
+    const iv = utils.base64ToArrayBuffer(keyContainer.iv)
+    const intermediateKey = await unwrapKey(
+      utils.base64ToArrayBuffer(protector.encryptedKey),
+      protectorKey,
+      protectAlgorithm,
+    )
+
+    const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
+    const usages = getUsage(keyContainer.keyType)
+
+    const privateKey = await unwrapPrivateKey(
+      encryptedKey,
+      intermediateKey,
+      { name: protectAlgorithm.name, iv },
+      unwrappedKeyAlgorithm,
+      usages,
+    )
+    return privateKey
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function unlock(
+  keyContainers,
+  password,
+  type = PROTECTOR_TYPES.password,
+) {
+  try {
+    const promises = keyContainers.map(async keyContainer => {
+      const keyProtector = keyContainer.keyProtectors.find(
+        protector => protector.type === type,
+      )
+      const salt = utils.base64ToArrayBuffer(keyProtector.salt)
+      const { iterations } = keyProtector
+      const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+      return unlockPrivateKey(keyContainer, keyProtector, derivedKey)
+    })
+    return Promise.all(promises)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function lock(
+  keyStore,
+  password,
+  type = PROTECTOR_TYPES.password,
+) {
+  try {
+    const signKeyProtector = keyStore.psk.keyProtectors.find(
+      protector => protector.type === type,
+    )
+
+    const salt = utils.base64ToArrayBuffer(signKeyProtector.salt)
+    const { iterations } = signKeyProtector
+    const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+
+    return derivedKey
   } catch (e) {
     return Promise.reject(e)
   }
