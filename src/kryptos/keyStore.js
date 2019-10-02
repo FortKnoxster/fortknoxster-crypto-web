@@ -1,21 +1,19 @@
-import { KeyStore } from '../legacy/kryptos.keystore'
+import { KeyStore } from './core/kryptos.keystore'
 
-export function unlockKeyStores(keys, password) {
-  const json = JSON.parse(keys)
-  const promises = Object.keys(json).map(key =>
-    new KeyStore(key, json[key].pdk, json[key].psk).unlock(
+export function unlockKeyStores(keys, password, type) {
+  return Object.keys(keys).map(key =>
+    new KeyStore(key, keys[key].pdk, keys[key].psk).unlock(
       password,
-      json[key].pek,
-      json[key].pvk,
-      json[key].signature,
+      keys[key].pek,
+      keys[key].pvk,
+      keys[key].signature,
+      type,
     ),
   )
-  return Promise.all(promises)
 }
 
 export function lockKeyStores(keys, password, type) {
-  const promises = Object.values(keys).map(k => k.lock(password, type))
-  return Promise.all(promises)
+  return Object.values(keys).map(k => k.lock(password, type))
 }
 
 export function verifyKeyProtector(keys, password, type) {
@@ -23,4 +21,22 @@ export function verifyKeyProtector(keys, password, type) {
     k.verifyProtector(password, type),
   )
   return Promise.all(promises)
+}
+
+export function generateSignKeys(key, password) {
+  return key.setupSignKeys(password)
+}
+
+export function newKeyStore(service, mode) {
+  return new KeyStore(service, null, null, mode)
+}
+
+export function newKeyStores(serviceKeys) {
+  return serviceKeys.map(serviceKey =>
+    newKeyStore(serviceKey.service, serviceKey.mode),
+  )
+}
+
+export function setupKeys(keys, password, identityKeyStore) {
+  return keys.map(key => key.setupKeys(password, identityKeyStore))
 }

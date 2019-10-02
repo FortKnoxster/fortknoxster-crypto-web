@@ -1,13 +1,12 @@
 import { RSA } from './algorithms'
 import {
   base64ToArrayBuffer,
-  dummyCB,
   ecJwk,
   rsaJwk,
   stringToArrayBuffer,
 } from './utils'
-import { Decrypter } from '../legacy/kryptos.decrypter'
-import { Encrypter } from '../legacy/kryptos.encrypter'
+import { Decrypter } from './core/kryptos.decrypter'
+import { Encrypter } from './core/kryptos.encrypter'
 
 let keyStore
 
@@ -53,7 +52,7 @@ export function verifyContactKeys(contact) {
 }
 
 function signContactKeys(keys, hmacKey) {
-  const encrypter = new Encrypter(keyStore, null, null, dummyCB)
+  const encrypter = new Encrypter(keyStore)
   return encrypter.macSignIt(keys, hmacKey)
 }
 
@@ -66,9 +65,19 @@ export async function signContact(contactToSign, hmacKey) {
     const signedKeys = await signContactKeys(contact_keys, hmacKey)
     // eslint-disable-next-line camelcase
     contact.contacts_keys_hmac = signedKeys.signature
-    const encrypter = new Encrypter(keyStore, null, null, dummyCB)
+    const encrypter = new Encrypter(keyStore)
     return encrypter.signIt(contact, false)
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+export function createIdentity(identityKeyStore, id, pvk) {
+  const encrypter = new Encrypter(identityKeyStore)
+  const identity = {
+    id,
+    pvk,
+    signature: '',
+  }
+  return encrypter.signIt(identity, true)
 }
