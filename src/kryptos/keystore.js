@@ -88,13 +88,14 @@ export async function setupKeyPair(derivedKey, algorithm, protectorAlgorithm) {
     return {
       keyContainer,
       publicKey: exportedPublicKey,
+      privateKey: keyPair.privateKey,
     }
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
-export async function setupIdentityKeys(password, algorithm) {
+export async function setupIdentityKeys(id, password, algorithm) {
   try {
     const salt = utils.randomValue(LENGTH_32)
     const iterations = PROTECTOR_ITERATIONS
@@ -103,9 +104,13 @@ export async function setupIdentityKeys(password, algorithm) {
     const container = await setupKeyPair(derivedKey, algorithm, PBKDF2)
     const keyFingerprint = await fingerprint(container.publicKey)
     return {
-      psk: container.keyContainer,
-      pvk: container.publicKey,
-      fingerprint: utils.arrayBufferToHex(keyFingerprint),
+      id,
+      keyContainers: {
+        psk: container.keyContainer,
+        pvk: container.publicKey,
+        fingerprint: utils.arrayBufferToHex(keyFingerprint),
+      },
+      pskPrivateKey: container.privateKey,
     }
   } catch (e) {
     return Promise.reject(e)
@@ -121,6 +126,7 @@ export function signPublicKeys(identity, publicEncryptKey, publicVerifyKey) {
 }
 
 export async function setupKeys(
+  id,
   password,
   identityKey,
   signAlgorithm,
@@ -143,11 +149,16 @@ export async function setupKeys(
       signContainer.publicKey,
     )
     return {
-      pdk: signContainer.keyContainer,
-      psk: encryptContainer.keyContainer,
-      pek: encryptContainer.publicKey,
-      pvk: signContainer.publicKey,
-      signature,
+      id,
+      keyContainers: {
+        pdk: signContainer.keyContainer,
+        psk: encryptContainer.keyContainer,
+        pek: encryptContainer.publicKey,
+        pvk: signContainer.publicKey,
+        signature,
+      },
+      pskPrivateKey: signContainer.privateKey,
+      pdkPrivateKey: encryptContainer.privateKey,
     }
   } catch (e) {
     return Promise.reject(e)
@@ -202,21 +213,34 @@ export async function unlock(
   }
 }
 
+// Todo: implement
+export async function lockPrivateKey(type) {
+  return type
+}
+
+/**
+ * Todo: implement
+ * Lock key containers with a new protector. Key containers must unlock the intermediate key
+ * with the password protector.
+ *
+ * @param {Array} keyContainers
+ * @param {String} password
+ * @param {String} newProtector
+ * @param {String} type
+ */
 export async function lock(
-  keyStore,
+  keyContainers,
   password,
+  newProtector,
   type = PROTECTOR_TYPES.password,
 ) {
   try {
-    const signKeyProtector = keyStore.psk.keyProtectors.find(
-      protector => protector.type === type,
-    )
-
-    const salt = utils.base64ToArrayBuffer(signKeyProtector.salt)
-    const { iterations } = signKeyProtector
+    const salt = utils.randomValue(LENGTH_32)
+    const iterations = PROTECTOR_ITERATIONS
+    const PBKDF2 = algorithms.deriveKeyPBKDF2(salt, iterations)
     const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
 
-    return derivedKey
+    return { keyContainers, newProtector, type, PBKDF2, derivedKey }
   } catch (e) {
     return Promise.reject(e)
   }
