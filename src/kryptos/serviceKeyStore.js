@@ -31,9 +31,7 @@ export function verifyKeyProtector(keys, password, type) {
 }
 
 export function generateIdentityKeys(password) {
-  // Todo: implement new from /core/keystore
   return setupIdentityKeys('identity', password, ECDSA_ALGO)
-  // return key.setupSignKeys(password)
 }
 
 export function newKeyStore(service, mode) {
@@ -57,5 +55,4 @@ export function setupKeyStore(service, password, identityKeyStore, rsa = true) {
     )
   }
   return setupKeys(service, password, identityKeyStore, ECDSA_ALGO, ECDH_ALGO)
-  // return keys.map(key => key.setupKeys(password, identityKeyStore))
 }

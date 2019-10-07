@@ -79,7 +79,11 @@ export async function createIdentity(identityPrivateKey, id, pvk) {
     pvk,
     signature: '',
   }
-  const signature = await signIt(identity, identityPrivateKey)
-  identity.signature = signature
-  return identity
+  try {
+    const signature = await signIt(identity, identityPrivateKey)
+    identity.signature = signature
+    return identity
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
