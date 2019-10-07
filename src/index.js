@@ -4,7 +4,7 @@ export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
   newKeyStore,
   newKeyStores,
-  setupKeys,
+  setupKeyStore,
   generateIdentityKeys,
   unlockKeyStores,
   lockKeyStores,

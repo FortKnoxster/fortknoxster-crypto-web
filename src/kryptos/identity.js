@@ -7,6 +7,7 @@ import {
 } from './utils'
 import { Decrypter } from './core/kryptos.decrypter'
 import { Encrypter } from './core/kryptos.encrypter'
+import { signIt } from './signer'
 
 let keyStore
 
@@ -72,12 +73,17 @@ export async function signContact(contactToSign, hmacKey) {
   }
 }
 
-export function createIdentity(identityKeyStore, id, pvk) {
-  const encrypter = new Encrypter(identityKeyStore)
+export async function createIdentity(identityPrivateKey, id, pvk) {
   const identity = {
     id,
     pvk,
     signature: '',
   }
-  return encrypter.signIt(identity, true)
+  try {
+    const signature = await signIt(identity, identityPrivateKey)
+    identity.signature = signature
+    return identity
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }

@@ -1,6 +1,11 @@
 import { KeyStore } from './core/kryptos.keystore'
-import { setupIdentityKeys } from './keystore'
-import { ECDSA_ALGO } from './algorithms'
+import { setupIdentityKeys, setupKeys } from './keystore'
+import {
+  ECDSA_ALGO,
+  ECDH_ALGO,
+  RSASSA_PKCS1_V1_5_ALGO,
+  RSA_OAEP_ALGO,
+} from './algorithms'
 
 export function unlockKeyStores(keys, password, type) {
   return Object.keys(keys).map(key =>
@@ -26,9 +31,7 @@ export function verifyKeyProtector(keys, password, type) {
 }
 
 export function generateIdentityKeys(password) {
-  // Todo: implement new from /core/keystore
-  return setupIdentityKeys(password, ECDSA_ALGO)
-  // return key.setupSignKeys(password)
+  return setupIdentityKeys('identity', password, ECDSA_ALGO)
 }
 
 export function newKeyStore(service, mode) {
@@ -41,6 +44,15 @@ export function newKeyStores(serviceKeys) {
   )
 }
 
-export function setupKeys(keys, password, identityKeyStore) {
-  return keys.map(key => key.setupKeys(password, identityKeyStore))
+export function setupKeyStore(service, password, identityKeyStore, rsa = true) {
+  if (rsa) {
+    return setupKeys(
+      service,
+      password,
+      identityKeyStore,
+      RSASSA_PKCS1_V1_5_ALGO,
+      RSA_OAEP_ALGO,
+    )
+  }
+  return setupKeys(service, password, identityKeyStore, ECDSA_ALGO, ECDH_ALGO)
 }
