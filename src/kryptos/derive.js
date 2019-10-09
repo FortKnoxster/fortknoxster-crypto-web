@@ -47,7 +47,7 @@ export async function deriveKeyFromPassword(password, salt, iterations) {
       deriveKeyPBKDF2(salt, iterations),
       key,
       AES_KW_ALGO,
-      NONEXTRACTABLE,
+      EXTRACTABLE,
       WRAP,
     )
   } catch (e) {

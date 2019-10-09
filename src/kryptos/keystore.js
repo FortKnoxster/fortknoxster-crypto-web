@@ -35,6 +35,7 @@ import {
   fingerprint,
   unwrapKey,
   unwrapPrivateKey,
+  exportKey,
 } from './keys'
 import * as algorithms from './algorithms'
 import { getUsage } from './usages'
@@ -103,6 +104,7 @@ export async function setupIdentityKeys(id, password, algorithm) {
     const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
     const container = await setupKeyPair(derivedKey, algorithm, PBKDF2)
     const keyFingerprint = await fingerprint(container.publicKey)
+    const exportedDerivedKey = await exportKey(derivedKey)
     return {
       id,
       keyContainers: {
@@ -111,6 +113,10 @@ export async function setupIdentityKeys(id, password, algorithm) {
         fingerprint: utils.arrayBufferToHex(keyFingerprint),
       },
       pskPrivateKey: container.privateKey,
+      publicKeys: {
+        verify: container.publicKey,
+      },
+      protector: exportedDerivedKey,
     }
   } catch (e) {
     return Promise.reject(e)
@@ -148,6 +154,7 @@ export async function setupKeys(
       encryptContainer.publicKey,
       signContainer.publicKey,
     )
+    const exportedDerivedKey = await exportKey(derivedKey)
     return {
       id,
       keyContainers: {
@@ -159,6 +166,11 @@ export async function setupKeys(
       },
       pskPrivateKey: signContainer.privateKey,
       pdkPrivateKey: encryptContainer.privateKey,
+      publicKeys: {
+        encrypt: encryptContainer.publicKey,
+        verify: signContainer.publicKey,
+      },
+      protector: exportedDerivedKey,
     }
   } catch (e) {
     return Promise.reject(e)

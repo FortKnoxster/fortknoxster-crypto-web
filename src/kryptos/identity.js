@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
 import { RSA } from './algorithms'
 import {
   base64ToArrayBuffer,
@@ -6,8 +8,7 @@ import {
   stringToArrayBuffer,
 } from './utils'
 import { Decrypter } from './core/kryptos.decrypter'
-import { Encrypter } from './core/kryptos.encrypter'
-import { signIt } from './signer'
+import { signIt, hmacSignIt } from './signer'
 
 let keyStore
 
@@ -52,22 +53,17 @@ export function verifyContactKeys(contact) {
     })
 }
 
-function signContactKeys(keys, hmacKey) {
-  const encrypter = new Encrypter(keyStore)
-  return encrypter.macSignIt(keys, hmacKey)
-}
-
-export async function signContact(contactToSign, hmacKey) {
+export async function signContact(contactToSign, hmacKey, privateKey) {
   const {
     contact,
     contact_keys: { contact_keys },
   } = contactToSign
   try {
-    const signedKeys = await signContactKeys(contact_keys, hmacKey)
-    // eslint-disable-next-line camelcase
-    contact.contacts_keys_hmac = signedKeys.signature
-    const encrypter = new Encrypter(keyStore)
-    return encrypter.signIt(contact, false)
+    const signature = await hmacSignIt(contact_keys, hmacKey)
+    contact.contacts_keys_hmac = signature
+    const contactSignature = await signIt(contact, privateKey)
+    contactToSign.contact_signature = contactSignature
+    return contactToSign
   } catch (e) {
     return Promise.reject(e)
   }

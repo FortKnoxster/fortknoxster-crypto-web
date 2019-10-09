@@ -31,10 +31,10 @@ import * as formats from './formats'
 import * as usage from './usages'
 import { NONEXTRACTABLE } from './constants'
 
-export function sign(arrayBuffer, privateKey) {
+export function sign(arrayBuffer, signKey) {
   return kryptos.subtle.sign(
-    algorithms.getSignAlgorithm(privateKey.algorithm.name),
-    privateKey,
+    algorithms.getSignAlgorithm(signKey.algorithm.name),
+    signKey,
     new Uint8Array(arrayBuffer),
   )
 }

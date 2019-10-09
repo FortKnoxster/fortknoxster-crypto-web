@@ -201,6 +201,10 @@ export async function exportPublicKey(publicKey) {
   return Promise.resolve(exportedPublicKey)
 }
 
+export function exportKey(key) {
+  return kryptos.subtle.exportKey(formats.JWK, key)
+}
+
 export function generateKeyPair(algorithm) {
   switch (algorithm.name) {
     case algorithms.RSASSA_PKCS1_V1_5_ALGO.name:
