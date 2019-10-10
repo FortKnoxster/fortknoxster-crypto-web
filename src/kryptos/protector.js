@@ -1,10 +1,36 @@
+/**
+ * Copyright 2019 FortKnoxster Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @name Kryptos
+ * @file protector.js
+ * @copyright Copyright © FortKnoxster Ltd. 2019.
+ * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
+ * @author Mickey Johnnysson <mj@fortknoxster.com>
+ * @author Christian Zwergius <cz@fortknoxster.com>
+ * @version 2.0
+ * @description Kryptos is a cryptographic library wrapping and implementing the
+ * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
+ * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
+ */
 import { getAlgorithm, deriveKeyPBKDF2 } from './algorithms'
 import { randomValue, arrayBufferToBase64 } from './utils'
 import { deriveKeyFromPassword } from './derive'
 import { importWrapKey } from './keys'
 import { PROTECTOR_ITERATIONS, LENGTH_32 } from './constants'
 
-export function packProtector(wrappedKey, algorithm, type) {
+export function packProtector(wrappedKey, algorithm, type, label) {
   return {
     encryptedKey: arrayBufferToBase64(wrappedKey),
     type,
@@ -12,7 +38,7 @@ export function packProtector(wrappedKey, algorithm, type) {
     ...(algorithm.salt && { salt: arrayBufferToBase64(algorithm.salt) }),
     ...(algorithm.iterations && { iterations: algorithm.iterations }),
     hash: algorithm.hash, // Todo extract name from hash object when type asymmetric
-    // Todo: add id/label to identify admin user
+    ...(label && { label }),
   }
 }
 

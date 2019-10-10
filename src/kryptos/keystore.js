@@ -58,6 +58,7 @@ export async function setupKeyPair(
   algorithm,
   protectorAlgorithm,
   protectorType,
+  protectorLabel,
 ) {
   try {
     const intermediateKey = await generateWrapKey()
@@ -79,6 +80,7 @@ export async function setupKeyPair(
       wrappedIntermediateKey,
       protectorAlgorithm,
       protectorType,
+      protectorLabel,
     )
     keyContainer.keyProtectors.push(passwordProtector)
     return {
@@ -96,6 +98,7 @@ export async function setupIdentityKeys(
   protectorKey,
   algorithm,
   protectorType = PROTECTOR_TYPES.password,
+  protectorLabel,
 ) {
   try {
     const protector = await getProtector(protectorKey)
@@ -105,6 +108,7 @@ export async function setupIdentityKeys(
       algorithm,
       protector.algorithm,
       protectorType,
+      protectorLabel,
     )
     const keyFingerprint = await fingerprint(container.publicKey)
     const exportedDerivedKey = await exportKey(protector.key)
@@ -141,6 +145,7 @@ export async function setupKeys(
   signAlgorithm,
   encryptAlgorithm,
   protectorType = PROTECTOR_TYPES.password,
+  protectorLabel,
 ) {
   try {
     const protector = await getProtector(protectorKey)
@@ -149,12 +154,14 @@ export async function setupKeys(
       signAlgorithm,
       protector.algorithm,
       protectorType,
+      protectorLabel,
     )
     const encryptContainer = await setupKeyPair(
       protector.key,
       encryptAlgorithm,
       protector.algorithm,
       protectorType,
+      protectorLabel,
     )
     const signature = await signPublicKeys(
       identityKey,
