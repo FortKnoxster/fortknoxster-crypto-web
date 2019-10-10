@@ -50,6 +50,7 @@ export function setupKeyStore(
   identityKeyStore,
   protectorType,
   rsa = true,
+  protectorIdentifier,
 ) {
   if (rsa) {
     return setupKeys(
@@ -59,6 +60,7 @@ export function setupKeyStore(
       RSASSA_PKCS1_V1_5_ALGO,
       RSA_OAEP_ALGO,
       protectorType,
+      protectorIdentifier,
     )
   }
   return setupKeys(
@@ -68,5 +70,6 @@ export function setupKeyStore(
     ECDSA_ALGO,
     ECDH_ALGO,
     protectorType,
+    protectorIdentifier,
   )
 }
