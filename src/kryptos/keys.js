@@ -51,6 +51,17 @@ export function importEncryptionKey(keyBytes, algorithm) {
   )
 }
 
+export function importWrapKey(key) {
+  const algorithm = algorithms.getAlgorithm(key.alg)
+  return kryptos.subtle.importKey(
+    formats.JWK,
+    key,
+    algorithm,
+    EXTRACTABLE,
+    usage.WRAP_ONLY,
+  )
+}
+
 export function importPublicVerifyKey(publicKey) {
   const clonedPublicKey = { ...publicKey }
   if (clonedPublicKey.kty === algorithms.EC) {

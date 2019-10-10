@@ -15,6 +15,7 @@ export const SERVICES = {
   mail: 'mail',
   storage: 'storage',
   protocol: 'protocol',
+  company: 'company',
 }
 export const SERVICE_MODES = {
   rsa: 'RSA',
