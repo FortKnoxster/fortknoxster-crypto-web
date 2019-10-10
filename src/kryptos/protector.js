@@ -30,7 +30,7 @@ import { deriveKeyFromPassword } from './derive'
 import { importWrapKey } from './keys'
 import { PROTECTOR_ITERATIONS, LENGTH_32 } from './constants'
 
-export function packProtector(wrappedKey, algorithm, type, label) {
+export function packProtector(wrappedKey, algorithm, type, identifier) {
   return {
     encryptedKey: arrayBufferToBase64(wrappedKey),
     type,
@@ -38,7 +38,7 @@ export function packProtector(wrappedKey, algorithm, type, label) {
     ...(algorithm.salt && { salt: arrayBufferToBase64(algorithm.salt) }),
     ...(algorithm.iterations && { iterations: algorithm.iterations }),
     hash: algorithm.hash, // Todo extract name from hash object when type asymmetric
-    ...(label && { label }),
+    ...(identifier && { identifier }),
   }
 }
 
