@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-param-reassign */
 import { RSA } from './algorithms'
 import {
   base64ToArrayBuffer,
