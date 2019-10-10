@@ -11,6 +11,7 @@ export const ENCRYPT = ['encrypt', 'decrypt']
 export const SIGN = ['sign', 'verify']
 export const VERIFY_ONLY = ['verify']
 export const ENCRYPT_ONLY = ['encrypt']
+export const WRAP_ONLY = ['wrapKey']
 
 export function getUsage(algorithm) {
   switch (algorithm) {

@@ -44,15 +44,29 @@ export function newKeyStores(serviceKeys) {
   )
 }
 
-export function setupKeyStore(service, password, identityKeyStore, rsa = true) {
+export function setupKeyStore(
+  service,
+  protector,
+  identityKeyStore,
+  protectorType,
+  rsa = true,
+) {
   if (rsa) {
     return setupKeys(
       service,
-      password,
+      protector,
       identityKeyStore,
       RSASSA_PKCS1_V1_5_ALGO,
       RSA_OAEP_ALGO,
+      protectorType,
     )
   }
-  return setupKeys(service, password, identityKeyStore, ECDSA_ALGO, ECDH_ALGO)
+  return setupKeys(
+    service,
+    protector,
+    identityKeyStore,
+    ECDSA_ALGO,
+    ECDH_ALGO,
+    protectorType,
+  )
 }
