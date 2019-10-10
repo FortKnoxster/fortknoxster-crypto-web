@@ -41,10 +41,11 @@ export {
 
 export { initChat, encryptChatMessage } from './kryptos/chat'
 
+export { signIt, hmacSignIt } from './kryptos/signer'
+
 export {
   createIdentity,
   initIdentity,
-  signContact,
   verifyContactKeys,
   verifyContact,
 } from './kryptos/identity'

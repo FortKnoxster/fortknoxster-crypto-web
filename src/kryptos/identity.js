@@ -8,7 +8,7 @@ import {
   stringToArrayBuffer,
 } from './utils'
 import { Decrypter } from './core/kryptos.decrypter'
-import { signIt, hmacSignIt } from './signer'
+import { signIt } from './signer'
 
 let keyStore
 
@@ -51,22 +51,6 @@ export function verifyContactKeys(contact) {
       }
       return verifyIt(keysToVerify, signature, contact)
     })
-}
-
-export async function signContact(contactToSign, hmacKey, privateKey) {
-  const {
-    contact,
-    contact_keys: { contact_keys },
-  } = contactToSign
-  try {
-    const signature = await hmacSignIt(contact_keys, hmacKey)
-    contact.contacts_keys_hmac = signature
-    const contactSignature = await signIt(contact, privateKey)
-    contactToSign.contact_signature = contactSignature
-    return contactToSign
-  } catch (e) {
-    return Promise.reject(e)
-  }
 }
 
 export async function createIdentity(identityPrivateKey, id, pvk) {
