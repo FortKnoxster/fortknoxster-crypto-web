@@ -37,7 +37,7 @@ export function packProtector(wrappedKey, algorithm, type, identifier) {
     name: algorithm.name,
     ...(algorithm.salt && { salt: arrayBufferToBase64(algorithm.salt) }),
     ...(algorithm.iterations && { iterations: algorithm.iterations }),
-    hash: algorithm.hash, // Todo extract name from hash object when type asymmetric
+    hash: algorithm.hash.name || algorithm.hash,
     ...(identifier && { identifier }),
   }
 }
@@ -66,14 +66,15 @@ export function getProtector(protector) {
   if (typeof protector === 'string') {
     return newSymmetricProtector(protector)
   }
-  if (typeof protector === 'object') {
-    return importProtector(protector)
-  }
-  if (protector instanceof CryptoKey) {
+  if (typeof protector === 'object' && protector.algorithm) {
     return {
-      algorithm: getAlgorithm(protector.alg),
+      algorithm: getAlgorithm(protector.algorithm.name),
       key: protector,
     }
   }
+  if (typeof protector === 'object') {
+    return importProtector(protector)
+  }
+
   throw new Error('Invalid protector.')
 }
