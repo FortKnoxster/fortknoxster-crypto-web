@@ -1,6 +1,9 @@
 import test from 'ava'
 import { setupIdentityKeys, setupKeys, unlock } from './kryptos/keystore'
-import { generateSigningKeyPair } from './kryptos/keys'
+import {
+  generateSigningKeyPair,
+  generateEncryptionKeyPair,
+} from './kryptos/keys'
 import * as algorithms from './kryptos/algorithms'
 import { PROTECTOR_TYPES } from './kryptos/constants'
 
@@ -20,7 +23,7 @@ test('Test Identity key store setup.', async t => {
   t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
 })
 
-test('Test RSA key store setup', async t => {
+test('Test RSA key store setup with password protector', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
     'storage',
@@ -28,13 +31,30 @@ test('Test RSA key store setup', async t => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   t.assert(
     keyStore.keyContainers && keyStore.pdkPrivateKey && keyStore.pskPrivateKey,
   )
 })
 
-test('Test Elliptic Curve key store setup', async t => {
+test('Test RSA key store setup with asymmetric protector', async t => {
+  const keyPair = await generateEncryptionKeyPair(algorithms.RSA_OAEP_ALGO)
+  const signingKeyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const keyStore = await setupKeys(
+    'storage',
+    keyPair.publicKey,
+    signingKeyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.asymmetric,
+  )
+  t.assert(
+    keyStore.keyContainers && keyStore.pdkPrivateKey && keyStore.pskPrivateKey,
+  )
+})
+
+test('Test Elliptic Curve key store setup with password protector', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
     'storage',
@@ -42,6 +62,21 @@ test('Test Elliptic Curve key store setup', async t => {
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
+  )
+  t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
+})
+
+test('Test Elliptic Curve key store setup with asymmetric protector', async t => {
+  const keyPair = await generateEncryptionKeyPair(algorithms.RSA_OAEP_ALGO)
+  const signingKeyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const keyStore = await setupKeys(
+    'storage',
+    keyPair.publicKey,
+    signingKeyPair.privateKey,
+    algorithms.ECDSA_ALGO,
+    algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.asymmetric,
   )
   t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
 })

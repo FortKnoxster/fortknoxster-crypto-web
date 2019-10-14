@@ -119,6 +119,7 @@ export function getAlgorithm(algo) {
     case RSA2048:
     case RSA_OAEP_256:
     case RSA_OAEP_2048:
+    case RSA_OAEP.name:
       return RSA_OAEP
     case ECDSA_ALGO.name:
     case ES512:
