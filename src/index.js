@@ -1,10 +1,51 @@
-const defaultAwesomeFunction = name => {
-  const returnStr = `I am the Default Awesome Function, fellow comrade! - ${name}`
-  return returnStr
-}
+export { isCryptoSupported } from './kryptos/kryptos'
+export { deriveAccountPassword } from './kryptos/derive'
+export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
+export {
+  newKeyStore,
+  newKeyStores,
+  setupKeys,
+  generateSignKeys,
+  unlockKeyStores,
+  lockKeyStores,
+  verifyKeyProtector,
+} from './kryptos/keyStore'
+export {
+  generateId,
+  blobToDataUrl,
+  dataUrlToBlob,
+  randomString,
+} from './kryptos/utils'
+export {
+  initProtocol,
+  encryptProtocol,
+  decryptProtocol,
+  generalSettingsType,
+  requestEmailChangeType,
+  confirmEmailChangeType,
+  requestPhoneChangeType,
+  confirmPhoneChangeType,
+} from './kryptos/protocol'
 
-const awesomeFunction = () => 'I am just an Awesome Function'
+export {
+  initStorage,
+  encryptItemAssignment,
+  encryptNewItemAssignment,
+  encryptItems,
+  encryptExistingItem,
+  encryptFilePart,
+  decryptFilePart,
+  decryptItemAssignment,
+  decryptItem,
+} from './kryptos/storage'
 
-export default defaultAwesomeFunction
+export { initChat, encryptChatMessage } from './kryptos/chat'
 
-export { awesomeFunction }
+export {
+  createIdentity,
+  initIdentity,
+  signContact,
+  verifyContactKeys,
+  verifyContact,
+} from './kryptos/identity'
+export { KeyStore } from './kryptos/core/kryptos.keystore'
