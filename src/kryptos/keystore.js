@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Copyright 2019 FortKnoxster Ltd.
  *
@@ -119,11 +120,13 @@ export async function setupIdentityKeys(
         pvk: container.publicKey,
         fingerprint: utils.arrayBufferToHex(keyFingerprint),
       },
-      pskPrivateKey: container.privateKey,
+      psk: {
+        privateKey: container.privateKey,
+        protector: exportedDerivedKey,
+      },
       publicKeys: {
         verify: container.publicKey,
       },
-      protector: exportedDerivedKey,
     }
   } catch (e) {
     return Promise.reject(e)
@@ -178,27 +181,37 @@ export async function setupKeys(
         pvk: signContainer.publicKey,
         signature,
       },
-      pskPrivateKey: signContainer.privateKey,
-      pdkPrivateKey: encryptContainer.privateKey,
+      psk: {
+        privateKey: signContainer.privateKey,
+        protector: exportedDerivedKey,
+      },
+      pdk: {
+        privateKey: encryptContainer.privateKey,
+        protector: exportedDerivedKey,
+      },
       publicKeys: {
         encrypt: encryptContainer.publicKey,
         verify: signContainer.publicKey,
       },
-      protector: exportedDerivedKey,
     }
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
-export async function unlockPrivateKey(keyContainer, protector, protectorKey) {
+export async function unlockPrivateKey(
+  keyType,
+  keyContainer,
+  protector,
+  protectorKey,
+) {
   try {
     const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
     const encryptedKey = utils.base64ToArrayBuffer(keyContainer.encryptedKey)
     const iv = utils.base64ToArrayBuffer(keyContainer.iv)
     const intermediateKey = await unwrapKey(
       utils.base64ToArrayBuffer(protector.encryptedKey),
-      protectorKey,
+      protectorKey.key,
       protectAlgorithm,
     )
 
@@ -212,36 +225,52 @@ export async function unlockPrivateKey(keyContainer, protector, protectorKey) {
       unwrappedKeyAlgorithm,
       usages,
     )
-    return privateKey
+    const exportedDerivedKey = await exportKey(protectorKey.key)
+    return {
+      [keyType]: {
+        privateKey,
+        protector: exportedDerivedKey,
+      },
+    }
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
 export async function unlock(
+  id,
   keyContainers,
-  password,
+  protectorKey,
   type = PROTECTOR_TYPES.password,
 ) {
   try {
-    const promises = keyContainers.map(async keyContainer => {
-      const keyProtector = keyContainer.keyProtectors.find(
-        protector => protector.type === type,
-      )
-      const salt = utils.base64ToArrayBuffer(keyProtector.salt)
-      const { iterations } = keyProtector
-      const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
-      return unlockPrivateKey(keyContainer, keyProtector, derivedKey)
-    })
-    return Promise.all(promises)
+    const promises = Object.keys(keyContainers)
+      .filter(key => ['pdk', 'psk'].includes(key))
+      .map(async keyIndex => {
+        const keyProtector = keyContainers[keyIndex].keyProtectors.find(
+          protector => protector.type === type,
+        )
+        const salt = utils.base64ToArrayBuffer(keyProtector.salt)
+        const { iterations } = keyProtector
+        const protector = await getProtector(protectorKey, salt, iterations)
+        return unlockPrivateKey(
+          keyIndex,
+          keyContainers[keyIndex],
+          keyProtector,
+          protector,
+        )
+      })
+    const privateKeys = await Promise.all(promises)
+    return Object.assign(
+      {
+        id,
+        keyContainers,
+      },
+      ...privateKeys,
+    )
   } catch (e) {
     return Promise.reject(e)
   }
-}
-
-// Todo: implement
-export async function lockPrivateKey(type) {
-  return type
 }
 
 /**

@@ -140,7 +140,7 @@ export function unwrapKey(wrappedKey, unwrappingKey, wrappedKeyAlgorithm) {
     unwrappingKey,
     unwrappingKey.algorithm.name,
     wrappedKeyAlgorithm,
-    EXTRACTABLE,
+    NONEXTRACTABLE,
     usage.WRAP.concat(usage.ENCRYPT),
   )
 }

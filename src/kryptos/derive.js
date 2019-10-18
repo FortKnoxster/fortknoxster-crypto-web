@@ -32,7 +32,12 @@ export async function deriveAccountPassword(username, password, domain) {
   }
 }
 
-export async function deriveKeyFromPassword(password, salt, iterations) {
+export async function deriveKeyFromPassword(
+  password,
+  salt,
+  iterations,
+  extractable = EXTRACTABLE,
+) {
   try {
     const bufferedPassword = stringToArrayBuffer(password)
 
@@ -47,7 +52,7 @@ export async function deriveKeyFromPassword(password, salt, iterations) {
       deriveKeyPBKDF2(salt, iterations),
       key,
       AES_KW_ALGO,
-      EXTRACTABLE,
+      extractable,
       WRAP,
     )
   } catch (e) {
