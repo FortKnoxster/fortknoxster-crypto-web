@@ -20,7 +20,7 @@ test('Test Identity key store setup.', async t => {
     t.context.password,
     algorithms.ECDSA_ALGO,
   )
-  t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
+  t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
 
 test('Test RSA key store setup with password protector', async t => {
@@ -34,7 +34,9 @@ test('Test RSA key store setup with password protector', async t => {
     PROTECTOR_TYPES.password,
   )
   t.assert(
-    keyStore.keyContainers && keyStore.pdkPrivateKey && keyStore.pskPrivateKey,
+    keyStore.keyContainers &&
+      keyStore.pdk.privateKey &&
+      keyStore.psk.privateKey,
   )
 })
 
@@ -50,7 +52,9 @@ test('Test RSA key store setup with asymmetric protector', async t => {
     PROTECTOR_TYPES.asymmetric,
   )
   t.assert(
-    keyStore.keyContainers && keyStore.pdkPrivateKey && keyStore.pskPrivateKey,
+    keyStore.keyContainers &&
+      keyStore.pdk.privateKey &&
+      keyStore.psk.privateKey,
   )
 })
 
@@ -64,7 +68,7 @@ test('Test Elliptic Curve key store setup with password protector', async t => {
     algorithms.ECDH_ALGO,
     PROTECTOR_TYPES.password,
   )
-  t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
+  t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
 
 test('Test Elliptic Curve key store setup with asymmetric protector', async t => {
@@ -78,19 +82,19 @@ test('Test Elliptic Curve key store setup with asymmetric protector', async t =>
     algorithms.ECDH_ALGO,
     PROTECTOR_TYPES.asymmetric,
   )
-  t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
+  t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
 
 test('Test Identity key store unlock.', async t => {
+  const service = 'identity'
   const keyStore = await setupIdentityKeys(
-    'identity',
+    service,
     t.context.password,
     algorithms.ECDSA_ALGO,
   )
-  t.assert(keyStore.keyContainers && keyStore.pskPrivateKey)
-  const keyContainers = [keyStore.keyContainers.psk]
   const unlockedKeyStore = await unlock(
-    keyContainers,
+    service,
+    keyStore.keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )
@@ -99,16 +103,17 @@ test('Test Identity key store unlock.', async t => {
 
 test('Test RSA key store unlock', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = 'storage'
   const keyStore = await setupKeys(
-    'storage',
+    service,
     t.context.password,
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
   )
-  const keyContainers = [keyStore.keyContainers.psk, keyStore.keyContainers.pdk]
   const unlockedKeyStore = await unlock(
-    keyContainers,
+    service,
+    keyStore.keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )
@@ -117,16 +122,17 @@ test('Test RSA key store unlock', async t => {
 
 test('Test Elliptic Curve key store unlock', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = 'protocol'
   const keyStore = await setupKeys(
-    'storage',
+    service,
     t.context.password,
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
   )
-  const keyContainers = [keyStore.keyContainers.psk, keyStore.keyContainers.pdk]
   const unlockedKeyStore = await unlock(
-    keyContainers,
+    service,
+    keyStore.keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
   )

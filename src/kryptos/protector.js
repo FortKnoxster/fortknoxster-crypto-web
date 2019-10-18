@@ -42,9 +42,13 @@ export function packProtector(wrappedKey, algorithm, type, identifier) {
   }
 }
 
-export async function newSymmetricProtector(password) {
-  const salt = randomValue(LENGTH_32)
-  const iterations = PROTECTOR_ITERATIONS
+export async function getSymmetricProtector(
+  password,
+  givenSalt,
+  givenIterations,
+) {
+  const salt = givenSalt || randomValue(LENGTH_32)
+  const iterations = givenIterations || PROTECTOR_ITERATIONS
   const algorithm = deriveKeyPBKDF2(salt, iterations)
   const key = await deriveKeyFromPassword(password, salt, iterations)
   return {
@@ -62,9 +66,9 @@ export async function importProtector(protector) {
   }
 }
 
-export function getProtector(protector) {
+export function getProtector(protector, salt, iterations) {
   if (typeof protector === 'string') {
-    return newSymmetricProtector(protector)
+    return getSymmetricProtector(protector, salt, iterations)
   }
   if (typeof protector === 'object' && protector.algorithm) {
     return {
