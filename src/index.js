@@ -2,10 +2,9 @@ export { isCryptoSupported } from './kryptos/kryptos'
 export { deriveAccountPassword } from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
-  newKeyStore,
-  newKeyStores,
   setupKeyStore,
   generateIdentityKeys,
+  initKeyStores,
   unlockKeyStores,
   lockKeyStores,
   verifyKeyProtector,
@@ -16,19 +15,9 @@ export {
   dataUrlToBlob,
   randomString,
 } from './kryptos/utils'
-export {
-  initProtocol,
-  encryptProtocol,
-  decryptProtocol,
-  generalSettingsType,
-  requestEmailChangeType,
-  confirmEmailChangeType,
-  requestPhoneChangeType,
-  confirmPhoneChangeType,
-} from './kryptos/protocol'
+export { encryptProtocol, decryptProtocol } from './kryptos/protocol'
 
 export {
-  initStorage,
   encryptItemAssignment,
   encryptNewItemAssignment,
   encryptItems,
@@ -39,13 +28,12 @@ export {
   decryptItem,
 } from './kryptos/storage'
 
-export { initChat, encryptChatMessage } from './kryptos/chat'
+export { encryptChatMessage } from './kryptos/chat'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 
 export {
   createIdentity,
-  initIdentity,
   verifyContactKeys,
   verifyContact,
 } from './kryptos/identity'

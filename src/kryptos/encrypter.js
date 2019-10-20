@@ -57,9 +57,27 @@ export function encrypt(arrayBuffer, iv, key) {
 }
 
 /**
- * Encrypt message with symmetric sessionKey, sign encrypted message and wrap sessionKey with given publicKeys.
+ * Encrypt given plain text with given symmetric sessionKey.
  *
- * @param {String} plainText
+ * @param {Object} plainText
+ * @param {CryptoKey} sessionKey
+ */
+export async function encryptIt(plainText, sessionKey) {
+  const iv = utils.nonce()
+  const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
+  const cipherText = await encrypt(data, iv, sessionKey)
+  return {
+    iv,
+    cipherText,
+  }
+}
+
+/**
+ * Encrypt given plain text with given symmetric sessionKey,
+ * sign encrypted message with given private key and wrap
+ * sessionKey with given publicKeys.
+ *
+ * @param {Object} plainText
  * @param {CryptoKey} sessionKey
  * @param {CryptoKey} privateKey
  * @param {Array} publicKeys
@@ -71,9 +89,7 @@ export async function encryptSign(
   publicKeys = [],
 ) {
   try {
-    const iv = utils.nonce()
-    const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
-    const cipherText = await encrypt(data, iv, sessionKey)
+    const { iv, cipherText } = await encryptIt(plainText, sessionKey)
     const signature = await sign(cipherText, privateKey)
     const promises = publicKeys.map(publicKey =>
       encryptSessionKey(sessionKey, publicKey),

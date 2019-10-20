@@ -58,7 +58,7 @@ export function importWrapKey(key) {
     key,
     algorithm,
     EXTRACTABLE,
-    usage.WRAP_ONLY,
+    key.key_ops,
   )
 }
 
@@ -85,7 +85,7 @@ export function importPublicVerifyKey(publicKey) {
   )
 }
 
-export function importPublicEncryptKey(publicKey) {
+export function importPublicEncryptKey(publicKey, usages) {
   const clonedPublicKey = { ...publicKey }
   if (clonedPublicKey.kty === algorithms.EC) {
     const algorithm = algorithms.getAlgorithm(algorithms.ECDH_ALGO.name)
@@ -96,7 +96,7 @@ export function importPublicEncryptKey(publicKey) {
       clonedPublicKey,
       algorithm,
       NONEXTRACTABLE,
-      usage.ENCRYPT_ONLY,
+      usages || usage.ENCRYPT_ONLY, // EC import key requires []
     )
   }
   const algorithm = algorithms.getAlgorithm(publicKey.alg)

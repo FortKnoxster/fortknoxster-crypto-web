@@ -12,6 +12,8 @@ export function addStoragePublicKeys(publicKeys) {
 
 export function initStorage(keyStore) {
   storage.keyStore = keyStore
+  Object.freeze(storage.keyStore)
+  Object.freeze(storage)
 }
 
 export function encryptItems(items) {

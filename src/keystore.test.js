@@ -6,6 +6,9 @@ import {
 } from './kryptos/keys'
 import * as algorithms from './kryptos/algorithms'
 import { PROTECTOR_TYPES } from './kryptos/constants'
+import { initKeyStores, unlockKeyStores } from './kryptos/serviceKeyStore'
+import keyStoresJson from './test/json/keyStores'
+import initKeyStoresJson from './test/json/initKeyStores'
 
 test.before(async t => {
   // eslint-disable-next-line no-param-reassign
@@ -137,4 +140,16 @@ test('Test Elliptic Curve key store unlock', async t => {
     PROTECTOR_TYPES.password,
   )
   t.assert(unlockedKeyStore)
+})
+
+test('Test unlock user key stores', async t => {
+  const serviceKeyStores = await Promise.all(
+    unlockKeyStores(keyStoresJson, 'Test123456', PROTECTOR_TYPES.password),
+  )
+  t.assert(serviceKeyStores)
+})
+
+test('Test init unlock user key stores with existing derived password protector', async t => {
+  const success = await initKeyStores(initKeyStoresJson)
+  t.assert(success)
 })

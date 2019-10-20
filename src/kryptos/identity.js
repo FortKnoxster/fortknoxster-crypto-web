@@ -8,13 +8,19 @@ import {
 import { Decrypter } from './core/kryptos.decrypter'
 import { signIt } from './signer'
 
-let keyStore
-
-export function initIdentity(kStore) {
-  keyStore = kStore
+const identity = {
+  keyStore: null,
 }
 
+export function initIdentity(keyStore) {
+  identity.keyStore = keyStore
+  Object.freeze(identity.keyStore)
+  Object.freeze(identity)
+}
+
+// Todo: remove legacy
 export function verifyIt(data, signature, contact) {
+  const { keyStore } = identity
   const decrypter = new Decrypter(
     keyStore,
     null,
@@ -25,7 +31,9 @@ export function verifyIt(data, signature, contact) {
   return decrypter.verifyIt(contact, contact.contactUserId)
 }
 
+// Todo: remove legacy
 export function verifyContact(contactToVerify, contact) {
+  const { keyStore } = identity
   const { signature } = contact
   const decrypter = new Decrypter(
     keyStore,
@@ -52,15 +60,15 @@ export function verifyContactKeys(contact) {
 }
 
 export async function createIdentity(identityPrivateKey, id, pvk) {
-  const identity = {
+  const certificate = {
     id,
     pvk,
     signature: '',
   }
   try {
-    const signature = await signIt(identity, identityPrivateKey)
-    identity.signature = signature
-    return identity
+    const signature = await signIt(certificate, identityPrivateKey)
+    certificate.signature = signature
+    return certificate
   } catch (e) {
     return Promise.reject(e)
   }

@@ -35,13 +35,16 @@ import * as algorithms from './algorithms'
  * @param {String} base64Signature
  * @param {ArrayBuffer} cipherText
  */
-export function verify(publicKey, signature, cipherText) {
-  return kryptos.subtle.verify(
+export async function verify(publicKey, signature, cipherText) {
+  const result = await kryptos.subtle.verify(
     algorithms.getSignAlgorithm(publicKey.algorithm.name),
     publicKey,
     signature,
     cipherText,
   )
+  if (!result)
+    throw new Error('Verification Error: The signature could not be verified.')
+  return true
 }
 
 /**
@@ -54,8 +57,7 @@ export function verify(publicKey, signature, cipherText) {
 export async function verifyIt(publicKey, base64Signature, cipherText) {
   try {
     const signature = utils.base64ToArrayBuffer(base64Signature)
-    await verify(publicKey, signature, cipherText)
-    return true
+    return verify(publicKey, signature, cipherText)
   } catch (error) {
     return Promise.reject(error)
   }

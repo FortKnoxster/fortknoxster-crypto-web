@@ -116,7 +116,9 @@ export async function setupIdentityKeys(
     return {
       id,
       keyContainers: {
+        pdk: null,
         psk: container.keyContainer,
+        pek: null,
         pvk: container.publicKey,
         fingerprint: utils.arrayBufferToHex(keyFingerprint),
       },
@@ -204,6 +206,7 @@ export async function unlockPrivateKey(
   keyContainer,
   protector,
   protectorKey,
+  includeProtector = false,
 ) {
   try {
     const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
@@ -225,11 +228,18 @@ export async function unlockPrivateKey(
       unwrappedKeyAlgorithm,
       usages,
     )
-    const exportedDerivedKey = await exportKey(protectorKey.key)
+    if (includeProtector) {
+      const exportedDerivedKey = await exportKey(protectorKey.key)
+      return {
+        [keyType]: {
+          privateKey,
+          protector: exportedDerivedKey,
+        },
+      }
+    }
     return {
       [keyType]: {
         privateKey,
-        protector: exportedDerivedKey,
       },
     }
   } catch (e) {
@@ -245,7 +255,7 @@ export async function unlock(
 ) {
   try {
     const promises = Object.keys(keyContainers)
-      .filter(key => ['pdk', 'psk'].includes(key))
+      .filter(key => ['pdk', 'psk'].includes(key) && keyContainers[key])
       .map(async keyIndex => {
         const keyProtector = keyContainers[keyIndex].keyProtectors.find(
           protector => protector.type === type,
@@ -258,6 +268,7 @@ export async function unlock(
           keyContainers[keyIndex],
           keyProtector,
           protector,
+          true,
         )
       })
     const privateKeys = await Promise.all(promises)
@@ -265,6 +276,38 @@ export async function unlock(
       {
         id,
         keyContainers,
+      },
+      ...privateKeys,
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
+  try {
+    const promises = Object.keys(keyStore.keyContainers)
+      .filter(
+        key => ['pdk', 'psk'].includes(key) && keyStore.keyContainers[key],
+      )
+      .map(async keyIndex => {
+        const keyProtector = keyStore.keyContainers[
+          keyIndex
+        ].keyProtectors.find(protector => protector.type === type)
+        const protector = await getProtector(keyStore[keyIndex].protector)
+        return unlockPrivateKey(
+          keyIndex,
+          keyStore.keyContainers[keyIndex],
+          keyProtector,
+          protector,
+          false,
+        )
+      })
+    const privateKeys = await Promise.all(promises)
+    return Object.assign(
+      {
+        id,
+        keyContainers: keyStore.keyContainers,
       },
       ...privateKeys,
     )
