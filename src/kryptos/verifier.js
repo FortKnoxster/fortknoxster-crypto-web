@@ -25,7 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import * as utils from './utils'
+import { base64ToArrayBuffer, stringToArrayBuffer } from './utils'
 import * as algorithms from './algorithms'
 
 /**
@@ -35,16 +35,13 @@ import * as algorithms from './algorithms'
  * @param {String} base64Signature
  * @param {ArrayBuffer} cipherText
  */
-export async function verify(publicKey, signature, cipherText) {
-  const result = await kryptos.subtle.verify(
+export function verify(publicKey, signature, cipherText) {
+  return kryptos.subtle.verify(
     algorithms.getSignAlgorithm(publicKey.algorithm.name),
     publicKey,
     signature,
     cipherText,
   )
-  if (!result)
-    throw new Error('Verification Error: The signature could not be verified.')
-  return true
 }
 
 /**
@@ -52,11 +49,12 @@ export async function verify(publicKey, signature, cipherText) {
  *
  * @param {CryptoKey} publicKey
  * @param {String} base64Signature
- * @param {ArrayBuffer} cipherText
+ * @param {Object} data
  */
-export async function verifyIt(publicKey, base64Signature, cipherText) {
+export async function verifyIt(publicKey, base64Signature, data) {
   try {
-    const signature = utils.base64ToArrayBuffer(base64Signature)
+    const signature = base64ToArrayBuffer(base64Signature)
+    const cipherText = stringToArrayBuffer(JSON.stringify(data))
     return verify(publicKey, signature, cipherText)
   } catch (error) {
     return Promise.reject(error)
