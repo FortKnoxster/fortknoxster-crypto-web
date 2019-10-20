@@ -25,11 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { EC_AES_GCM_256, AES_GCM_ALGO } from './algorithms'
-import {
-  base64ToArrayBuffer,
-  stringToArrayBuffer,
-  arrayBufferToBase64,
-} from './utils'
+import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
 import { importPublicEncryptKey, importPublicVerifyKey } from './keys'
 import { deriveSessionKey } from './derive'
 import { encryptIt } from './encrypter'
@@ -160,10 +156,9 @@ export async function decryptProtocol(
     const { Sign } = data
     const message = data.ServiceData
     data.Sign = null // TODO handle this in decrypter
-    const cipherText = stringToArrayBuffer(JSON.stringify(data))
     const importedPvk = await importPublicVerifyKey(nodePvk)
 
-    await verifyIt(importedPvk, Sign, cipherText)
+    await verifyIt(importedPvk, Sign, data)
     if (verifyOnly) {
       return message
     }

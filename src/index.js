@@ -32,9 +32,11 @@ export { encryptChatMessage } from './kryptos/chat'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 
+export { verifyIt } from './kryptos/verifier'
+
 export {
   createIdentity,
   verifyContactKeys,
-  verifyContact,
+  verifyData,
 } from './kryptos/identity'
 export { KeyStore } from './kryptos/core/kryptos.keystore'

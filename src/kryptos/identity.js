@@ -1,12 +1,8 @@
 import { RSA } from './algorithms'
-import {
-  base64ToArrayBuffer,
-  ecJwk,
-  rsaJwk,
-  stringToArrayBuffer,
-} from './utils'
-import { Decrypter } from './core/kryptos.decrypter'
+import { ecJwk, rsaJwk } from './utils'
+import { importPublicVerifyKey } from './keys'
 import { signIt } from './signer'
+import { verifyIt } from './verifier'
 
 const identity = {
   keyStore: null,
@@ -18,31 +14,11 @@ export function initIdentity(keyStore) {
   Object.freeze(identity)
 }
 
-// Todo: remove legacy
-export function verifyIt(data, signature, contact) {
-  const { keyStore } = identity
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(data)),
-    base64ToArrayBuffer(signature),
+export async function verifyData(data, signature) {
+  const importedPvk = await importPublicVerifyKey(
+    identity.keyStore.keyContainers.pvk,
   )
-  return decrypter.verifyIt(contact, contact.contactUserId)
-}
-
-// Todo: remove legacy
-export function verifyContact(contactToVerify, contact) {
-  const { keyStore } = identity
-  const { signature } = contact
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(contactToVerify)),
-    base64ToArrayBuffer(signature),
-  )
-  return decrypter.verifyIt(contact.userId, contact.contactUserId)
+  return verifyIt(importedPvk, signature, data)
 }
 
 export function verifyContactKeys(contact) {
