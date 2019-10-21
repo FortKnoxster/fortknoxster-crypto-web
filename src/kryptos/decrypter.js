@@ -53,9 +53,13 @@ export function decrypt(arrayBuffer, iv, key) {
  * @param {String} base64Iv
  */
 export async function decryptIt(cipherText, sessionKey, base64Iv) {
-  const iv = utils.base64ToArrayBuffer(base64Iv)
-  const plainText = await decrypt(cipherText, iv, sessionKey)
-  return utils.arrayBufferToObject(plainText)
+  try {
+    const iv = utils.base64ToArrayBuffer(base64Iv)
+    const plainText = await decrypt(cipherText, iv, sessionKey)
+    return utils.arrayBufferToObject(plainText)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -74,6 +78,10 @@ export async function verifyDecrypt(
   base64Signature,
   publicKey,
 ) {
-  await verifyIt(publicKey, base64Signature, cipherText)
-  return decryptIt(cipherText, base64Iv, sessionKey)
+  try {
+    await verifyIt(publicKey, base64Signature, cipherText)
+    return decryptIt(cipherText, base64Iv, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

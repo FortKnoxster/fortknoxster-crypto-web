@@ -63,12 +63,16 @@ export function encrypt(arrayBuffer, iv, key) {
  * @param {CryptoKey} sessionKey
  */
 export async function encryptIt(plainText, sessionKey) {
-  const iv = utils.nonce()
-  const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
-  const cipherText = await encrypt(data, iv, sessionKey)
-  return {
-    iv,
-    cipherText,
+  try {
+    const iv = utils.nonce()
+    const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
+    const cipherText = await encrypt(data, iv, sessionKey)
+    return {
+      iv,
+      cipherText,
+    }
+  } catch (error) {
+    return Promise.reject(error)
   }
 }
 
