@@ -116,9 +116,7 @@ export async function setupIdentityKeys(
     return {
       id,
       keyContainers: {
-        pdk: null,
         psk: container.keyContainer,
-        pek: null,
         pvk: container.publicKey,
         fingerprint: utils.arrayBufferToHex(keyFingerprint),
       },
