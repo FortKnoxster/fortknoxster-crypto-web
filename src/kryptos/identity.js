@@ -51,10 +51,13 @@ export async function createIdentity(identityPrivateKey, id, pvk) {
 export async function verifyIdentity(certificate) {
   try {
     const importedPvk = await importPublicVerifyKey(certificate.pvk)
-    const { signature } = certificate
-    // eslint-disable-next-line no-param-reassign
-    certificate.signature = ''
-    return verifyIt(importedPvk, signature, certificate)
+    const { id, pvk, signature } = certificate
+    const certificateToVerify = {
+      id,
+      pvk,
+      signature: '',
+    }
+    return verifyIt(importedPvk, signature, certificateToVerify)
   } catch (e) {
     return Promise.reject(e)
   }
