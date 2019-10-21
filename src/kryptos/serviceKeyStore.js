@@ -13,22 +13,27 @@ import { initProtocol } from './protocol'
 import { initChat } from './chat'
 
 export async function initKeyStores(keyStores, type, nodeId, userId) {
-  const serviceKeyStores = await Promise.all(
-    keyStores.map(keyStore => init(keyStore.id, keyStore, type)),
-  )
-  initProtocol(
-    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.protocol),
-    nodeId,
-    userId,
-  )
-  initIdentity(
-    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
-  )
-  initStorage(
-    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.storage),
-  )
-  initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
-  return true
+  try {
+    const serviceKeyStores = await Promise.all(
+      keyStores.map(keyStore => init(keyStore.id, keyStore, type)),
+    )
+    await initIdentity(
+      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
+      userId,
+    )
+    initProtocol(
+      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.protocol),
+      nodeId,
+      userId,
+    )
+    initStorage(
+      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.storage),
+    )
+    initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
+    return true
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function unlockKeyStores(keyStores, password, type) {

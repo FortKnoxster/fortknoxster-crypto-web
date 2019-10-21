@@ -35,13 +35,17 @@ import * as algorithms from './algorithms'
  * @param {String} base64Signature
  * @param {ArrayBuffer} cipherText
  */
-export function verify(publicKey, signature, cipherText) {
-  return kryptos.subtle.verify(
+export async function verify(publicKey, signature, cipherText) {
+  const result = await kryptos.subtle.verify(
     algorithms.getSignAlgorithm(publicKey.algorithm.name),
     publicKey,
     signature,
     cipherText,
   )
+  if (!result) {
+    return Promise.reject()
+  }
+  return result
 }
 
 /**
@@ -51,7 +55,7 @@ export function verify(publicKey, signature, cipherText) {
  * @param {String} base64Signature
  * @param {Object} data
  */
-export async function verifyIt(publicKey, base64Signature, data) {
+export function verifyIt(publicKey, base64Signature, data) {
   try {
     const signature = base64ToArrayBuffer(base64Signature)
     const cipherText = stringToArrayBuffer(JSON.stringify(data))
