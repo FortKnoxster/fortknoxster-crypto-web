@@ -37,30 +37,51 @@ import { LENGTH_128 } from './constants'
  * @param {ArrayBuffer} arrayBuffer
  * @param {CryptoKey} key
  */
-export function decrypt(arrayBuffer, key) {
-  const algorithm = { name: key.name, length: key.length }
-  if (key.name === algorithms.AES_GCM.name) {
+export function decrypt(arrayBuffer, iv, key) {
+  const algorithm = { name: key.algorithm.name, iv }
+  if (algorithm.name === algorithms.AES_GCM.name) {
     algorithm.tagLength = LENGTH_128
   }
   return kryptos.subtle.decrypt(algorithm, key, arrayBuffer)
 }
 
 /**
+ * Decrypt cipherText with given sessionKey and iv.
+ *
+ * @param {ArrayBuffer} cipherText
+ * @param {CryptoKey} sessionKey
+ * @param {String} base64Iv
+ */
+export async function decryptIt(cipherText, sessionKey, base64Iv) {
+  try {
+    const iv = utils.base64ToArrayBuffer(base64Iv)
+    const plainText = await decrypt(cipherText, iv, sessionKey)
+    return utils.arrayBufferToObject(plainText)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
  * Verify the signature of the encrypted cipherText, then decrypt the cipherText
  *
  * @param {ArrayBuffer} cipherText
- * @param {String} iv
- * @param {String} signature
+ * @param {CryptoKey} sessionKey
+ * @param {String} base64Iv
+ * @param {String} base64Signature
  * @param {CryptoKey} publicKey
  */
 export async function verifyDecrypt(
   cipherText,
+  sessionKey,
   base64Iv,
   base64Signature,
   publicKey,
 ) {
-  await verifyIt(publicKey, base64Signature, cipherText)
-  const iv = utils.base64ToArrayBuffer(base64Iv)
-  const plainText = await decrypt(cipherText, iv)
-  return utils.arrayBufferToObject(plainText)
+  try {
+    await verifyIt(publicKey, base64Signature, cipherText)
+    return decryptIt(cipherText, base64Iv, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

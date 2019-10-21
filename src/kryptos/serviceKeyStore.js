@@ -1,21 +1,39 @@
 import { KeyStore } from './core/kryptos.keystore'
-import { setupIdentityKeys, setupKeys } from './keystore'
+import { setupIdentityKeys, setupKeys, unlock, init } from './keystore'
 import {
   ECDSA_ALGO,
   ECDH_ALGO,
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
 } from './algorithms'
+import { SERVICES } from './constants'
+import { initIdentity } from './identity'
+import { initStorage } from './storage'
+import { initProtocol } from './protocol'
+import { initChat } from './chat'
 
-export function unlockKeyStores(keys, password, type) {
-  return Object.keys(keys).map(key =>
-    new KeyStore(key, keys[key].pdk, keys[key].psk).unlock(
-      password,
-      keys[key].pek,
-      keys[key].pvk,
-      keys[key].signature,
-      type,
-    ),
+export async function initKeyStores(keyStores, type, nodeId, userId) {
+  const serviceKeyStores = await Promise.all(
+    keyStores.map(keyStore => init(keyStore.id, keyStore, type)),
+  )
+  initProtocol(
+    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.protocol),
+    nodeId,
+    userId,
+  )
+  initIdentity(
+    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
+  )
+  initStorage(
+    serviceKeyStores.find(keyStore => keyStore.id === SERVICES.storage),
+  )
+  initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
+  return true
+}
+
+export function unlockKeyStores(keyStores, password, type) {
+  return Object.keys(keyStores).map(service =>
+    unlock(service, keyStores[service], password, type),
   )
 }
 

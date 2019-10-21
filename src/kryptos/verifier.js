@@ -25,7 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import * as utils from './utils'
+import { base64ToArrayBuffer, stringToArrayBuffer } from './utils'
 import * as algorithms from './algorithms'
 
 /**
@@ -49,13 +49,13 @@ export function verify(publicKey, signature, cipherText) {
  *
  * @param {CryptoKey} publicKey
  * @param {String} base64Signature
- * @param {ArrayBuffer} cipherText
+ * @param {Object} data
  */
-export async function verifyIt(publicKey, base64Signature, cipherText) {
+export async function verifyIt(publicKey, base64Signature, data) {
   try {
-    const signature = utils.base64ToArrayBuffer(base64Signature)
-    await verify(publicKey, signature, cipherText)
-    return true
+    const signature = base64ToArrayBuffer(base64Signature)
+    const cipherText = stringToArrayBuffer(JSON.stringify(data))
+    return verify(publicKey, signature, cipherText)
   } catch (error) {
     return Promise.reject(error)
   }

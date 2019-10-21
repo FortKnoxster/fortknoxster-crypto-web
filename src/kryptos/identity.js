@@ -1,40 +1,24 @@
 import { RSA } from './algorithms'
-import {
-  base64ToArrayBuffer,
-  ecJwk,
-  rsaJwk,
-  stringToArrayBuffer,
-} from './utils'
-import { Decrypter } from './core/kryptos.decrypter'
+import { ecJwk, rsaJwk } from './utils'
+import { importPublicVerifyKey } from './keys'
 import { signIt } from './signer'
+import { verifyIt } from './verifier'
 
-let keyStore
-
-export function initIdentity(kStore) {
-  keyStore = kStore
+const identity = {
+  keyStore: null,
 }
 
-export function verifyIt(data, signature, contact) {
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(data)),
-    base64ToArrayBuffer(signature),
-  )
-  return decrypter.verifyIt(contact, contact.contactUserId)
+export function initIdentity(keyStore) {
+  identity.keyStore = keyStore
+  Object.freeze(identity.keyStore)
+  Object.freeze(identity)
 }
 
-export function verifyContact(contactToVerify, contact) {
-  const { signature } = contact
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(contactToVerify)),
-    base64ToArrayBuffer(signature),
+export async function verifyData(data, signature) {
+  const importedPvk = await importPublicVerifyKey(
+    identity.keyStore.keyContainers.pvk,
   )
-  return decrypter.verifyIt(contact.userId, contact.contactUserId)
+  return verifyIt(importedPvk, signature, data)
 }
 
 export function verifyContactKeys(contact) {
@@ -52,15 +36,15 @@ export function verifyContactKeys(contact) {
 }
 
 export async function createIdentity(identityPrivateKey, id, pvk) {
-  const identity = {
+  const certificate = {
     id,
     pvk,
     signature: '',
   }
   try {
-    const signature = await signIt(identity, identityPrivateKey)
-    identity.signature = signature
-    return identity
+    const signature = await signIt(certificate, identityPrivateKey)
+    certificate.signature = signature
+    return certificate
   } catch (e) {
     return Promise.reject(e)
   }

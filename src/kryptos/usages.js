@@ -12,14 +12,16 @@ export const SIGN = ['sign', 'verify']
 export const VERIFY_ONLY = ['verify']
 export const ENCRYPT_ONLY = ['encrypt']
 export const WRAP_ONLY = ['wrapKey']
+export const SIGN_ONLY = ['sign']
+export const DECRYPT_UNWRAP = ['decrypt', 'unwrapKey']
 
 export function getUsage(algorithm) {
   switch (algorithm) {
     case ECDSA_P521:
     case RSASSA_PKCS1_V1_5_2048:
-      return SIGN
+      return SIGN_ONLY
     case RSA_OAEP_2048:
-      return ENCRYPT
+      return DECRYPT_UNWRAP
     case ECDH_P521:
       return DERIVE
     default:

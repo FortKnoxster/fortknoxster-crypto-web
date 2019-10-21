@@ -8,6 +8,7 @@ export const AES_GCM_256 = 'AES-GCM-256'
 export const A256GCM = 'A256GCM'
 export const AES_CBC_256 = 'AES-CBC-256'
 export const A256CBC = 'A256CBC'
+export const A256KW = 'A256KW'
 export const RS256 = 'RS256'
 export const RSA2048 = 'RSA2048'
 export const RSA_OAEP_256 = 'RSA-OAEP-256'
@@ -105,6 +106,8 @@ export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
 
 export function getAlgorithm(algo) {
   switch (algo) {
+    case A256KW:
+      return AES_KW_ALGO
     case AES_GCM_256:
     case AES_GCM.name:
     case A256GCM:
@@ -131,7 +134,7 @@ export function getAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid algorithm.')
+  throw new Error(`Invalid algorithm ${algo}.`)
 }
 
 export function getSignAlgorithm(algo) {
