@@ -256,16 +256,16 @@ export async function unlock(
   try {
     const promises = Object.keys(keyContainers)
       .filter(key => ['pdk', 'psk'].includes(key) && keyContainers[key])
-      .map(async keyIndex => {
-        const keyProtector = keyContainers[keyIndex].keyProtectors.find(
+      .map(async key => {
+        const keyProtector = keyContainers[key].keyProtectors.find(
           protector => protector.type === type,
         )
         const salt = utils.base64ToArrayBuffer(keyProtector.salt)
         const { iterations } = keyProtector
         const protector = await getProtector(protectorKey, salt, iterations)
         return unlockPrivateKey(
-          keyIndex,
-          keyContainers[keyIndex],
+          key,
+          keyContainers[key],
           keyProtector,
           protector,
           true,
@@ -290,14 +290,14 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
       .filter(
         key => ['pdk', 'psk'].includes(key) && keyStore.keyContainers[key],
       )
-      .map(async keyIndex => {
-        const keyProtector = keyStore.keyContainers[
-          keyIndex
-        ].keyProtectors.find(protector => protector.type === type)
-        const protector = await getProtector(keyStore[keyIndex].protector)
+      .map(async key => {
+        const keyProtector = keyStore.keyContainers[key].keyProtectors.find(
+          protector => protector.type === type,
+        )
+        const protector = await getProtector(keyStore[key].protector)
         return unlockPrivateKey(
-          keyIndex,
-          keyStore.keyContainers[keyIndex],
+          key,
+          keyStore.keyContainers[key],
           keyProtector,
           protector,
           false,
