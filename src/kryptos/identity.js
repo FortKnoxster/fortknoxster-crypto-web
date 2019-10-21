@@ -8,17 +8,15 @@ const identity = {
   keyStore: null,
 }
 
-export function initIdentity(keyStore) {
-  identity.keyStore = keyStore
-  Object.freeze(identity.keyStore)
-  Object.freeze(identity)
-}
-
 export async function verifyData(data, signature) {
-  const importedPvk = await importPublicVerifyKey(
-    identity.keyStore.keyContainers.pvk,
-  )
-  return verifyIt(importedPvk, signature, data)
+  try {
+    const importedPvk = await importPublicVerifyKey(
+      identity.keyStore.keyContainers.pvk,
+    )
+    return verifyIt(importedPvk, signature, data)
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function verifyContactKeys(contact) {
@@ -45,6 +43,34 @@ export async function createIdentity(identityPrivateKey, id, pvk) {
     const signature = await signIt(certificate, identityPrivateKey)
     certificate.signature = signature
     return certificate
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function verifyIdentity(certificate) {
+  try {
+    const importedPvk = await importPublicVerifyKey(certificate.pvk)
+    const { signature } = certificate
+    // eslint-disable-next-line no-param-reassign
+    certificate.signature = ''
+    return verifyIt(importedPvk, signature, certificate)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function initIdentity(keyStore, id) {
+  identity.keyStore = keyStore
+  Object.freeze(identity.keyStore)
+  Object.freeze(identity)
+  try {
+    const certificate = await createIdentity(
+      identity.keyStore.psk.privateKey,
+      id,
+      identity.keyStore.keyContainers.pvk,
+    )
+    return verifyIdentity(certificate)
   } catch (e) {
     return Promise.reject(e)
   }

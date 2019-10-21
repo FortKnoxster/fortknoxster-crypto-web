@@ -55,7 +55,11 @@ export async function verifyIt(publicKey, base64Signature, data) {
   try {
     const signature = base64ToArrayBuffer(base64Signature)
     const cipherText = stringToArrayBuffer(JSON.stringify(data))
-    return verify(publicKey, signature, cipherText)
+    const result = await verify(publicKey, signature, cipherText)
+    if (!result) {
+      return Promise.reject()
+    }
+    return true
   } catch (error) {
     return Promise.reject(error)
   }
