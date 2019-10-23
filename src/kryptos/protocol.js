@@ -98,9 +98,13 @@ function tryParseResult(result) {
 }
 
 async function getSessionKey(nodePek) {
-  const { keyStore } = protocol
-  const importedPek = await importPublicEncryptKey(nodePek, []) // EC import public key requires empty usages
-  return deriveSessionKey(AES_GCM_ALGO, keyStore.pdk.privateKey, importedPek)
+  try {
+    const { keyStore } = protocol
+    const importedPek = await importPublicEncryptKey(nodePek, []) // EC import public key requires empty usages
+    return deriveSessionKey(AES_GCM_ALGO, keyStore.pdk.privateKey, importedPek)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -114,16 +118,13 @@ async function getSessionKey(nodePek) {
 export async function encryptProtocol(type, data, nodePek) {
   try {
     const { keyStore } = protocol
-
     const message = protocolMessage(type)
     const envelope = messageEnvelope(EC_AES_GCM_256)
     const sessionKey = await getSessionKey(nodePek)
     const { iv, cipherText } = await encryptIt(data, sessionKey)
-
     envelope.iv = arrayBufferToBase64(iv)
     envelope.data = arrayBufferToBase64(cipherText)
     message.ServiceData = envelope
-
     const signature = await signIt(message, keyStore.psk.privateKey)
     message.Sign = signature
     return message
