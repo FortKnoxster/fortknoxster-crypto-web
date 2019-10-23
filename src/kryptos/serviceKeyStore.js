@@ -1,4 +1,3 @@
-import { KeyStore } from './core/kryptos.keystore'
 import { setupIdentityKeys, setupKeys, unlock, init } from './keystore'
 import {
   ECDSA_ALGO,
@@ -6,16 +5,26 @@ import {
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
 } from './algorithms'
-import { SERVICES } from './constants'
+import { SERVICES, PROTECTOR_TYPES } from './constants'
 import { initIdentity } from './identity'
 import { initStorage } from './storage'
 import { initProtocol } from './protocol'
 import { initChat } from './chat'
 
+const serviceKeyStore = {
+  keyStores: null,
+}
+
 export async function initKeyStores(keyStores, type, nodeId, userId) {
   try {
     const serviceKeyStores = await Promise.all(
-      keyStores.map(keyStore => init(keyStore.id, keyStore, type)),
+      keyStores
+        .filter(keyStore =>
+          keyStore.keyContainers.psk.keyProtectors.find(
+            keyProtector => keyProtector.type === PROTECTOR_TYPES.password,
+          ),
+        )
+        .map(keyStore => init(keyStore.id, keyStore, type)),
     )
     await initIdentity(
       serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
@@ -26,20 +35,54 @@ export async function initKeyStores(keyStores, type, nodeId, userId) {
       nodeId,
       userId,
     )
-    initStorage(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.storage),
+    const storageKeyStore = serviceKeyStores.find(
+      keyStore => keyStore.id === SERVICES.storage,
     )
+    initStorage(storageKeyStore)
     initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
+
+    const asymmetricKeyStores = await Promise.all(
+      keyStores
+        .filter(keyStore =>
+          keyStore.keyContainers.psk.keyProtectors.find(
+            keyProtector =>
+              keyProtector.type === PROTECTOR_TYPES.asymmetric &&
+              keyProtector.type !== PROTECTOR_TYPES.password,
+          ),
+        )
+        .map(keyStore =>
+          unlock(
+            keyStore.id,
+            keyStore.keyContainers,
+            storageKeyStore.pdk.privateKey,
+            PROTECTOR_TYPES.asymmetric,
+          ),
+        ),
+    )
+    // Todo: keep company keystore here or in separate file like other service key stores?
+    serviceKeyStore.keyStores = asymmetricKeyStores
+    Object.freeze(serviceKeyStore)
     return true
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
-export function unlockKeyStores(keyStores, password, type) {
-  return Object.keys(keyStores).map(service =>
-    unlock(service, keyStores[service], password, type),
-  )
+export async function unlockKeyStores(keyStores, password, type) {
+  try {
+    const serviceKeyStores = await Promise.all(
+      Object.keys(keyStores)
+        .filter(service =>
+          keyStores[service].psk.keyProtectors.find(
+            keyProtector => keyProtector.type === type,
+          ),
+        )
+        .map(service => unlock(service, keyStores[service], password, type)),
+    )
+    return serviceKeyStores
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function lockKeyStores(keys, password, type) {
@@ -55,16 +98,6 @@ export function verifyKeyProtector(keys, password, type) {
 
 export function generateIdentityKeys(password) {
   return setupIdentityKeys('identity', password, ECDSA_ALGO)
-}
-
-export function newKeyStore(service, mode) {
-  return new KeyStore(service, null, null, mode)
-}
-
-export function newKeyStores(serviceKeys) {
-  return serviceKeys.map(serviceKey =>
-    newKeyStore(serviceKey.service, serviceKey.mode),
-  )
 }
 
 export function setupKeyStore(
