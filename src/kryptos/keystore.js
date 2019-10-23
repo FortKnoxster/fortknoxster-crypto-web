@@ -175,8 +175,8 @@ export async function setupKeys(
     return {
       id,
       keyContainers: {
-        pdk: signContainer.keyContainer,
-        psk: encryptContainer.keyContainer,
+        pdk: encryptContainer.keyContainer,
+        psk: signContainer.keyContainer,
         pek: encryptContainer.publicKey,
         pvk: signContainer.publicKey,
         signature,
@@ -266,7 +266,7 @@ export async function unlock(
           keyContainers[key],
           keyProtector,
           protector,
-          true,
+          type !== PROTECTOR_TYPES.asymmetric,
         )
       })
     const privateKeys = await Promise.all(promises)
