@@ -21,3 +21,7 @@ export const SERVICE_MODES = {
   rsa: 'RSA',
   ec: 'EC',
 }
+export const PSK = 'psk' // Private Sign Key
+export const PDK = 'pdk' // Private Decrypt Key
+export const PVK = 'pvk' // Publick Verify Key
+export const PEK = 'pek' // Public Encrypt Key

@@ -10,12 +10,18 @@ export function addStoragePublicKeys(publicKeys) {
   storage.keyStore.setPublicKeys(publicKeys)
 }
 
-export function initStorage(keyStore) {
-  storage.keyStore = keyStore
-  Object.freeze(storage.keyStore)
-  Object.freeze(storage)
+/*
+async function e() {
+  const { keyStore } = storage
+  try {
+    const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
+    const privateKey = await keyStore.getPsk()
+    return encryptSign(plainText, sessionKey, privateKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
-
+*/
 export function encryptItems(items) {
   const { keyStore } = storage
   return items.map(item => {

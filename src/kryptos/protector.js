@@ -25,7 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getAlgorithm, deriveKeyPBKDF2 } from './algorithms'
-import { randomValue, arrayBufferToBase64 } from './utils'
+import { randomValue, arrayBufferToBase64, base64ToArrayBuffer } from './utils'
 import { deriveKeyFromPassword } from './derive'
 import { importWrapKey } from './keys'
 import { PROTECTOR_ITERATIONS, LENGTH_32 } from './constants'
@@ -47,7 +47,7 @@ export async function getSymmetricProtector(
   givenSalt,
   givenIterations,
 ) {
-  const salt = givenSalt || randomValue(LENGTH_32)
+  const salt = base64ToArrayBuffer(givenSalt) || randomValue(LENGTH_32)
   const iterations = givenIterations || PROTECTOR_ITERATIONS
   const algorithm = deriveKeyPBKDF2(salt, iterations)
   const key = await deriveKeyFromPassword(password, salt, iterations)

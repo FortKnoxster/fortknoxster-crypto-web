@@ -15,7 +15,11 @@ export {
   dataUrlToBlob,
   randomString,
 } from './kryptos/utils'
-export { encryptProtocol, decryptProtocol } from './kryptos/protocol'
+export {
+  initProtocol,
+  encryptProtocol,
+  decryptProtocol,
+} from './kryptos/protocol'
 
 export {
   encryptItemAssignment,
@@ -35,6 +39,7 @@ export { signIt, hmacSignIt } from './kryptos/signer'
 export { verifyIt } from './kryptos/verifier'
 
 export {
+  initIdentity,
   createIdentity,
   verifyContactKeys,
   verifyData,

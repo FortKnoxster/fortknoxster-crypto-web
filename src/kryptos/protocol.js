@@ -24,6 +24,8 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
+import { getPrivateKey } from './serviceKeyStore'
+import { PSK, PDK, SERVICES } from './constants'
 import { EC_AES_GCM_256, AES_GCM_ALGO } from './algorithms'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
 import { importPublicEncryptKey, importPublicVerifyKey } from './keys'
@@ -34,17 +36,13 @@ import { signIt } from './signer'
 import { verifyIt } from './verifier'
 
 const protocol = {
-  keyStore: null,
   nodeId: null,
   userId: null,
 }
 
-export function initProtocol(keyStore, nodeId, userId) {
-  protocol.keyStore = keyStore
+export function initProtocol(nodeId, userId) {
   protocol.nodeId = nodeId
   protocol.userId = userId
-  Object.freeze(protocol.keyStore)
-  Object.freeze(protocol)
 }
 
 /**
@@ -98,9 +96,16 @@ function tryParseResult(result) {
 }
 
 async function getSessionKey(nodePek) {
-  const { keyStore } = protocol
-  const importedPek = await importPublicEncryptKey(nodePek, []) // EC import public key requires empty usages
-  return deriveSessionKey(AES_GCM_ALGO, keyStore.pdk.privateKey, importedPek)
+  try {
+    const importedPek = await importPublicEncryptKey(nodePek, []) // EC import public key requires empty usages
+    return deriveSessionKey(
+      AES_GCM_ALGO,
+      getPrivateKey(SERVICES.protocol, PDK),
+      importedPek,
+    )
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -113,18 +118,17 @@ async function getSessionKey(nodePek) {
  */
 export async function encryptProtocol(type, data, nodePek) {
   try {
-    const { keyStore } = protocol
-
     const message = protocolMessage(type)
     const envelope = messageEnvelope(EC_AES_GCM_256)
     const sessionKey = await getSessionKey(nodePek)
     const { iv, cipherText } = await encryptIt(data, sessionKey)
-
     envelope.iv = arrayBufferToBase64(iv)
     envelope.data = arrayBufferToBase64(cipherText)
     message.ServiceData = envelope
-
-    const signature = await signIt(message, keyStore.psk.privateKey)
+    const signature = await signIt(
+      message,
+      getPrivateKey(SERVICES.protocol, PSK),
+    )
     message.Sign = signature
     return message
   } catch (error) {

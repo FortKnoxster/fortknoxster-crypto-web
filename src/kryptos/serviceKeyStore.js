@@ -1,4 +1,3 @@
-import { KeyStore } from './core/kryptos.keystore'
 import { setupIdentityKeys, setupKeys, unlock, init } from './keystore'
 import {
   ECDSA_ALGO,
@@ -6,40 +5,90 @@ import {
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
 } from './algorithms'
-import { SERVICES } from './constants'
-import { initIdentity } from './identity'
-import { initStorage } from './storage'
-import { initProtocol } from './protocol'
-import { initChat } from './chat'
+import { SERVICES, PROTECTOR_TYPES } from './constants'
 
-export async function initKeyStores(keyStores, type, nodeId, userId) {
+const serviceKeyStore = {
+  keyStores: null,
+}
+
+export function getPublicKey(service, type) {
+  return serviceKeyStore.keyStores[service].keyContainers[type]
+}
+
+export function getPrivateKey(service, type) {
+  return serviceKeyStore.keyStores[service][type].privateKey
+}
+
+export async function initKeyStores(keyStores, type) {
   try {
     const serviceKeyStores = await Promise.all(
-      keyStores.map(keyStore => init(keyStore.id, keyStore, type)),
+      keyStores
+        .filter(keyStore =>
+          keyStore.keyContainers.psk.keyProtectors.find(
+            keyProtector => keyProtector.type === PROTECTOR_TYPES.password,
+          ),
+        )
+        .map(keyStore => init(keyStore.id, keyStore, type)),
     )
-    await initIdentity(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
-      userId,
+
+    const storageKeyStore = serviceKeyStores.find(
+      keyStore => keyStore.id === SERVICES.storage,
     )
-    initProtocol(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.protocol),
-      nodeId,
-      userId,
+
+    const asymmetricKeyStores = await Promise.all(
+      keyStores
+        .filter(keyStore =>
+          keyStore.keyContainers.psk.keyProtectors.find(
+            keyProtector =>
+              keyProtector.type === PROTECTOR_TYPES.asymmetric &&
+              keyProtector.type !== PROTECTOR_TYPES.password,
+          ),
+        )
+        .map(keyStore =>
+          unlock(
+            keyStore.id,
+            keyStore.keyContainers,
+            storageKeyStore.pdk.privateKey,
+            PROTECTOR_TYPES.asymmetric,
+          ),
+        ),
     )
-    initStorage(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.storage),
-    )
-    initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
+    if (!Object.isFrozen(serviceKeyStore)) {
+      serviceKeyStore.keyStores = [
+        ...serviceKeyStores,
+        ...asymmetricKeyStores,
+      ].reduce(
+        (acc, keyStore) => Object.assign(acc, { [keyStore.id]: keyStore }),
+        {},
+      )
+      Object.freeze(serviceKeyStore)
+      Object.freeze(serviceKeyStore.keyStores)
+    }
     return true
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
-export function unlockKeyStores(keyStores, password, type) {
-  return Object.keys(keyStores).map(service =>
-    unlock(service, keyStores[service], password, type),
-  )
+export async function unlockKeyStores(keyStores, password, type) {
+  try {
+    const serviceKeyStores = await Promise.all(
+      Object.keys(keyStores).map(service => {
+        const isPasswordProtector = keyStores[service].psk.keyProtectors.find(
+          keyProtector => keyProtector.type === type,
+        )
+        if (isPasswordProtector)
+          return unlock(service, keyStores[service], password, type)
+        return {
+          id: service,
+          keyContainers: keyStores[service],
+        }
+      }),
+    )
+    return serviceKeyStores
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function lockKeyStores(keys, password, type) {
@@ -55,16 +104,6 @@ export function verifyKeyProtector(keys, password, type) {
 
 export function generateIdentityKeys(password) {
   return setupIdentityKeys('identity', password, ECDSA_ALGO)
-}
-
-export function newKeyStore(service, mode) {
-  return new KeyStore(service, null, null, mode)
-}
-
-export function newKeyStores(serviceKeys) {
-  return serviceKeys.map(serviceKey =>
-    newKeyStore(serviceKey.service, serviceKey.mode),
-  )
 }
 
 export function setupKeyStore(

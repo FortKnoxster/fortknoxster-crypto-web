@@ -1,17 +1,15 @@
+import { getPublicKey, getPrivateKey } from './serviceKeyStore'
+import { PSK, PVK, SERVICES } from './constants'
 import { RSA } from './algorithms'
 import { ecJwk, rsaJwk } from './utils'
 import { importPublicVerifyKey } from './keys'
 import { signIt } from './signer'
 import { verifyIt } from './verifier'
 
-const identity = {
-  keyStore: null,
-}
-
 export async function verifyData(data, signature) {
   try {
     const importedPvk = await importPublicVerifyKey(
-      identity.keyStore.keyContainers.pvk,
+      getPublicKey(SERVICES.identity, PVK),
     )
     return verifyIt(importedPvk, signature, data)
   } catch (e) {
@@ -22,7 +20,7 @@ export async function verifyData(data, signature) {
 export function verifyContactKeys(contact) {
   const { keys } = contact
   return Object.keys(keys)
-    .filter(key => key !== 'identity')
+    .filter(key => key !== SERVICES.identity)
     .map(key => {
       const { encrypt, verify, signature } = keys[key]
       const keysToVerify = {
@@ -63,15 +61,12 @@ export async function verifyIdentity(certificate) {
   }
 }
 
-export async function initIdentity(keyStore, id) {
-  identity.keyStore = keyStore
-  Object.freeze(identity.keyStore)
-  Object.freeze(identity)
+export async function initIdentity(id) {
   try {
     const certificate = await createIdentity(
-      identity.keyStore.psk.privateKey,
+      getPrivateKey(SERVICES.identity, PSK),
       id,
-      identity.keyStore.keyContainers.pvk,
+      getPublicKey(SERVICES.identity, PVK),
     )
     return verifyIdentity(certificate)
   } catch (e) {
