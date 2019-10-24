@@ -35,14 +35,22 @@ import { decryptIt } from './decrypter'
 import { signIt } from './signer'
 import { verifyIt } from './verifier'
 
+// Todo store nodePek and nodePvk here
 const protocol = {
   nodeId: null,
   userId: null,
+  nodePek: null,
+  nodePvk: null,
 }
 
-export function initProtocol(nodeId, userId) {
-  protocol.nodeId = nodeId
-  protocol.userId = userId
+export function initProtocol(nodeId, userId, nodePek, nodePvk) {
+  if (!Object.isFrozen(protocol)) {
+    protocol.nodeId = nodeId
+    protocol.userId = userId
+    protocol.nodePek = nodePek
+    protocol.nodePvk = nodePvk
+    Object.freeze(protocol)
+  }
 }
 
 /**
@@ -116,8 +124,9 @@ async function getSessionKey(nodePek) {
  * @param {Object} nodePek
  * @returns {Promise}
  */
-export async function encryptProtocol(type, data, nodePek) {
+export async function encryptProtocol(type, data) {
   try {
+    const { nodePek } = protocol
     const message = protocolMessage(type)
     const envelope = messageEnvelope(EC_AES_GCM_256)
     const sessionKey = await getSessionKey(nodePek)
@@ -146,14 +155,9 @@ export async function encryptProtocol(type, data, nodePek) {
  * @param {Object} nodePvk
  * @returns {void}
  */
-export async function decryptProtocol(
-  result,
-  isError,
-  verifyOnly,
-  nodePek,
-  nodePvk,
-) {
+export async function decryptProtocol(result, isError, verifyOnly) {
   try {
+    const { nodePek, nodePvk } = protocol
     const data = isError
       ? JSON.parse(result.errors.message)
       : tryParseResult(result)
