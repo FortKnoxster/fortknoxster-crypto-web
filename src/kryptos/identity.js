@@ -6,6 +6,10 @@ import { importPublicVerifyKey } from './keys'
 import { signIt } from './signer'
 import { verifyIt } from './verifier'
 
+export function signData(data, service) {
+  return signIt(data, getPrivateKey(service, PSK))
+}
+
 export async function verifyData(data, signature) {
   try {
     const importedPvk = await importPublicVerifyKey(
