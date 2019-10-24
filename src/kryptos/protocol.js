@@ -44,13 +44,13 @@ const protocol = {
 }
 
 export function initProtocol(nodeId, userId, nodePek, nodePvk) {
-  if (!Object.isFrozen(protocol)) {
-    protocol.nodeId = nodeId
-    protocol.userId = userId
-    protocol.nodePek = nodePek
-    protocol.nodePvk = nodePvk
-    Object.freeze(protocol)
-  }
+  // if (!Object.isFrozen(protocol)) {
+  protocol.nodeId = nodeId
+  protocol.userId = userId
+  protocol.nodePek = nodePek
+  protocol.nodePvk = nodePvk
+  // Object.freeze(protocol)
+  // }
 }
 
 /**
