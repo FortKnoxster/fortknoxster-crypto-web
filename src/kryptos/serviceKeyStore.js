@@ -19,7 +19,7 @@ export function getPrivateKey(service, type) {
   return serviceKeyStore.keyStores[service][type].privateKey
 }
 
-export async function initKeyStores(keyStores, type) {
+export async function initKeyStores(keyStores) {
   try {
     const serviceKeyStores = await Promise.all(
       keyStores
@@ -28,7 +28,7 @@ export async function initKeyStores(keyStores, type) {
             keyProtector => keyProtector.type === PROTECTOR_TYPES.password,
           ),
         )
-        .map(keyStore => init(keyStore.id, keyStore, type)),
+        .map(keyStore => init(keyStore.id, keyStore, PROTECTOR_TYPES.password)),
     )
 
     const storageKeyStore = serviceKeyStores.find(
@@ -53,20 +53,24 @@ export async function initKeyStores(keyStores, type) {
           ),
         ),
     )
-    if (!Object.isFrozen(serviceKeyStore)) {
-      serviceKeyStore.keyStores = [
-        ...serviceKeyStores,
-        ...asymmetricKeyStores,
-      ].reduce(
-        (acc, keyStore) => Object.assign(acc, { [keyStore.id]: keyStore }),
-        {},
-      )
-      Object.freeze(serviceKeyStore)
-      Object.freeze(serviceKeyStore.keyStores)
-    }
+
+    serviceKeyStore.keyStores = [
+      ...serviceKeyStores,
+      ...asymmetricKeyStores,
+    ].reduce(
+      (acc, keyStore) => Object.assign(acc, { [keyStore.id]: keyStore }),
+      {},
+    )
     return true
   } catch (e) {
     return Promise.reject(e)
+  }
+}
+
+export function freezeKeyStores() {
+  if (!Object.isFrozen(serviceKeyStore)) {
+    Object.freeze(serviceKeyStore)
+    Object.freeze(serviceKeyStore.keyStores)
   }
 }
 

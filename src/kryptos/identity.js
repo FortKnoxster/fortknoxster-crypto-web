@@ -1,5 +1,10 @@
-import { getPublicKey, getPrivateKey } from './serviceKeyStore'
-import { PSK, PVK, SERVICES } from './constants'
+import {
+  getPublicKey,
+  getPrivateKey,
+  setupKeyStore,
+  generateIdentityKeys,
+} from './serviceKeyStore'
+import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants'
 import { RSA } from './algorithms'
 import { ecJwk, rsaJwk } from './utils'
 import { importPublicVerifyKey } from './keys'
@@ -75,5 +80,45 @@ export async function initIdentity(id) {
     return verifyIdentity(certificate)
   } catch (e) {
     return Promise.reject(e)
+  }
+}
+
+const serviceKeys = [
+  { service: SERVICES.mail, rsa: true },
+  { service: SERVICES.storage, rsa: true },
+  { service: SERVICES.protocol, rsa: false },
+]
+
+export async function generateUserKeys(id, plainPassword) {
+  const identityKeyStore = await generateIdentityKeys(plainPassword)
+
+  const certificate = await createIdentity(
+    identityKeyStore.psk.privateKey,
+    id,
+    identityKeyStore.keyContainers.pvk,
+  )
+
+  const serviceKeyStores = await Promise.all(
+    serviceKeys.map(serviceKey =>
+      setupKeyStore(
+        serviceKey.service,
+        plainPassword,
+        identityKeyStore.psk.privateKey,
+        PROTECTOR_TYPES.password,
+        serviceKey.rsa,
+      ),
+    ),
+  )
+  serviceKeyStores.push(identityKeyStore)
+
+  const keyContainers = serviceKeyStores.reduce(
+    (acc, keyStore) =>
+      Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+    {},
+  )
+  return {
+    certificate,
+    keyContainers,
+    serviceKeyStores,
   }
 }

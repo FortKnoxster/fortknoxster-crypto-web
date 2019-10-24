@@ -40,7 +40,7 @@ export { verifyIt } from './kryptos/verifier'
 
 export {
   initIdentity,
-  createIdentity,
+  generateUserKeys,
   verifyContactKeys,
   signData,
   verifyData,
