@@ -1,7 +1,15 @@
 /* eslint-disable max-lines */
+/* eslint-disable no-console */
+/* eslint-disable max-lines */
 import { kryptos } from '../kryptos'
 import { Encrypter } from './kryptos.encrypter'
-import { PROTECTOR_TYPES, EXTRACTABLE, NONEXTRACTABLE } from '../constants'
+import {
+  PROTECTOR_TYPES,
+  EXTRACTABLE,
+  NONEXTRACTABLE,
+  PDK,
+  PSK,
+} from '../constants'
 import * as utils from '../utils'
 import * as algorithms from '../algorithms'
 import * as usage from '../usages'
@@ -124,13 +132,13 @@ export const KeyStore = function KeyStore(
 
   const extractKeyProtector = (keyType, protectorType) => {
     let protectors = null
-    if (keyType === algorithms.PDK) {
+    if (keyType === PDK) {
       if (keyContainerPDK.keyProtectors) {
         protectors = keyContainerPDK.keyProtectors
       } else {
         throw new Error('Missing key protector.')
       }
-    } else if (keyType === algorithms.PSK) {
+    } else if (keyType === PSK) {
       if (keyContainerPSK.keyProtectors) {
         protectors = keyContainerPSK.keyProtectors
       } else {
@@ -351,7 +359,7 @@ export const KeyStore = function KeyStore(
       keyContainerPDK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPDK),
-        keyType: algorithms.getKeyType(mode, algorithms.PDK),
+        keyType: algorithms.getKeyType(mode, PDK),
         protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
@@ -365,7 +373,7 @@ export const KeyStore = function KeyStore(
       keyContainerPSK = {
         encryptedKey: null,
         iv: utils.arrayBufferToBase64(ivPSK),
-        keyType: algorithms.getKeyType(mode, algorithms.PSK),
+        keyType: algorithms.getKeyType(mode, PSK),
         protectType: algorithms.AES_GCM_256,
         keyProtectors: [],
       }
@@ -865,12 +873,7 @@ export const KeyStore = function KeyStore(
         return null
       }
 
-      return unlockPrivateKey(
-        protector,
-        keyContainerPDK,
-        algorithms.PDK,
-        protectorType,
-      )
+      return unlockPrivateKey(protector, keyContainerPDK, PDK, protectorType)
         .then(exportedKey => {
           sessionStorage.setItem(prefixIAKPDK, JSON.stringify(exportedKey))
           resolve()
@@ -888,12 +891,7 @@ export const KeyStore = function KeyStore(
         return null
       }
 
-      return unlockPrivateKey(
-        protector,
-        keyContainerPSK,
-        algorithms.PSK,
-        protectorType,
-      )
+      return unlockPrivateKey(protector, keyContainerPSK, PSK, protectorType)
         .then(exportedKey => {
           sessionStorage.setItem(prefixIAKPSK, JSON.stringify(exportedKey))
           resolve()

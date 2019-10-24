@@ -6,16 +6,20 @@ import {
   RSA_OAEP_ALGO,
 } from './algorithms'
 import { SERVICES, PROTECTOR_TYPES } from './constants'
-import { initIdentity } from './identity'
-import { initStorage } from './storage'
-import { initProtocol } from './protocol'
-import { initChat } from './chat'
 
 const serviceKeyStore = {
   keyStores: null,
 }
 
-export async function initKeyStores(keyStores, type, nodeId, userId) {
+export function getPublicKey(service, type) {
+  return serviceKeyStore.keyStores[service].keyContainers[type]
+}
+
+export function getPrivateKey(service, type) {
+  return serviceKeyStore.keyStores[service][type].privateKey
+}
+
+export async function initKeyStores(keyStores, type) {
   try {
     const serviceKeyStores = await Promise.all(
       keyStores
@@ -26,20 +30,10 @@ export async function initKeyStores(keyStores, type, nodeId, userId) {
         )
         .map(keyStore => init(keyStore.id, keyStore, type)),
     )
-    await initIdentity(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.identity),
-      userId,
-    )
-    initProtocol(
-      serviceKeyStores.find(keyStore => keyStore.id === SERVICES.protocol),
-      nodeId,
-      userId,
-    )
+
     const storageKeyStore = serviceKeyStores.find(
       keyStore => keyStore.id === SERVICES.storage,
     )
-    initStorage(storageKeyStore)
-    initChat(serviceKeyStores.find(keyStore => keyStore.id === SERVICES.mail))
 
     const asymmetricKeyStores = await Promise.all(
       keyStores
@@ -59,9 +53,17 @@ export async function initKeyStores(keyStores, type, nodeId, userId) {
           ),
         ),
     )
-    // Todo: keep company keystore here or in separate file like other service key stores?
-    serviceKeyStore.keyStores = asymmetricKeyStores
-    Object.freeze(serviceKeyStore)
+    if (!Object.isFrozen(serviceKeyStore)) {
+      serviceKeyStore.keyStores = [
+        ...serviceKeyStores,
+        ...asymmetricKeyStores,
+      ].reduce(
+        (acc, keyStore) => Object.assign(acc, { [keyStore.id]: keyStore }),
+        {},
+      )
+      Object.freeze(serviceKeyStore)
+      Object.freeze(serviceKeyStore.keyStores)
+    }
     return true
   } catch (e) {
     return Promise.reject(e)
@@ -71,13 +73,17 @@ export async function initKeyStores(keyStores, type, nodeId, userId) {
 export async function unlockKeyStores(keyStores, password, type) {
   try {
     const serviceKeyStores = await Promise.all(
-      Object.keys(keyStores)
-        .filter(service =>
-          keyStores[service].psk.keyProtectors.find(
-            keyProtector => keyProtector.type === type,
-          ),
+      Object.keys(keyStores).map(service => {
+        const isPasswordProtector = keyStores[service].psk.keyProtectors.find(
+          keyProtector => keyProtector.type === type,
         )
-        .map(service => unlock(service, keyStores[service], password, type)),
+        if (isPasswordProtector)
+          return unlock(service, keyStores[service], password, type)
+        return {
+          id: service,
+          keyContainers: keyStores[service],
+        }
+      }),
     )
     return serviceKeyStores
   } catch (e) {

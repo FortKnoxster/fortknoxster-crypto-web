@@ -258,8 +258,7 @@ export async function unlock(
         const keyProtector = keyContainers[key].keyProtectors.find(
           protector => protector.type === type,
         )
-        const salt = utils.base64ToArrayBuffer(keyProtector.salt)
-        const { iterations } = keyProtector
+        const { salt, iterations } = keyProtector
         const protector = await getProtector(protectorKey, salt, iterations)
         return unlockPrivateKey(
           key,

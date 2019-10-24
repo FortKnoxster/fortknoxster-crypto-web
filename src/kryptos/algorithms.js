@@ -1,4 +1,4 @@
-import { LENGTH_256, LENGTH_2048 } from './constants'
+import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
@@ -16,8 +16,6 @@ export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
 export const ES512 = 'ES512'
 export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
-export const PSK = 'PSK'
-export const PDK = 'PDK'
 
 export const PBKDF2 = {
   name: 'PBKDF2',

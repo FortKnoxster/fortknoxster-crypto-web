@@ -10,11 +10,6 @@ export function addStoragePublicKeys(publicKeys) {
   storage.keyStore.setPublicKeys(publicKeys)
 }
 
-export function initStorage(keyStore) {
-  storage.keyStore = keyStore
-  Object.freeze(storage.keyStore)
-  Object.freeze(storage)
-}
 /*
 async function e() {
   const { keyStore } = storage
