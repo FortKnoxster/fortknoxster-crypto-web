@@ -103,7 +103,7 @@ export function verifyKeyProtector(keys, password, type) {
 }
 
 export function generateIdentityKeys(password) {
-  return setupIdentityKeys('identity', password, ECDSA_ALGO)
+  return setupIdentityKeys(SERVICES.identity, password, ECDSA_ALGO)
 }
 
 export function setupKeyStore(

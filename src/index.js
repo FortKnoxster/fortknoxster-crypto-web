@@ -42,6 +42,7 @@ export {
   initIdentity,
   createIdentity,
   verifyContactKeys,
+  signData,
   verifyData,
 } from './kryptos/identity'
 export { KeyStore } from './kryptos/core/kryptos.keystore'
