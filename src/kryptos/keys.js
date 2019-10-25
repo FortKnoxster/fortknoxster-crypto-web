@@ -116,7 +116,7 @@ export function importPublicEncryptKey(publicKey, usages) {
  * @param {Object} algorithm
  */
 export function generateSessionKey(algorithm) {
-  return kryptos.subtle.generateKey(algorithm, NONEXTRACTABLE, usage.ENCRYPT)
+  return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.ENCRYPT)
 }
 
 export function generateWrapKey() {
@@ -214,6 +214,10 @@ export async function exportPublicKey(publicKey) {
 
 export function exportKey(key) {
   return kryptos.subtle.exportKey(formats.JWK, key)
+}
+
+export function exportRawKey(key) {
+  return kryptos.subtle.exportKey(formats.RAW, key)
 }
 
 export function generateKeyPair(algorithm) {
