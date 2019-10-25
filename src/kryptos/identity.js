@@ -90,35 +90,39 @@ const serviceKeys = [
 ]
 
 export async function generateUserKeys(id, plainPassword) {
-  const identityKeyStore = await generateIdentityKeys(plainPassword)
+  try {
+    const identityKeyStore = await generateIdentityKeys(plainPassword)
 
-  const certificate = await createIdentity(
-    identityKeyStore.psk.privateKey,
-    id,
-    identityKeyStore.keyContainers.pvk,
-  )
+    const certificate = await createIdentity(
+      identityKeyStore.psk.privateKey,
+      id,
+      identityKeyStore.keyContainers.pvk,
+    )
 
-  const serviceKeyStores = await Promise.all(
-    serviceKeys.map(serviceKey =>
-      setupKeyStore(
-        serviceKey.service,
-        plainPassword,
-        identityKeyStore.psk.privateKey,
-        PROTECTOR_TYPES.password,
-        serviceKey.rsa,
+    const serviceKeyStores = await Promise.all(
+      serviceKeys.map(serviceKey =>
+        setupKeyStore(
+          serviceKey.service,
+          plainPassword,
+          identityKeyStore.psk.privateKey,
+          PROTECTOR_TYPES.password,
+          serviceKey.rsa,
+        ),
       ),
-    ),
-  )
-  serviceKeyStores.push(identityKeyStore)
+    )
+    serviceKeyStores.push(identityKeyStore)
 
-  const keyContainers = serviceKeyStores.reduce(
-    (acc, keyStore) =>
-      Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
-    {},
-  )
-  return {
-    certificate,
-    keyContainers,
-    serviceKeyStores,
+    const keyContainers = serviceKeyStores.reduce(
+      (acc, keyStore) =>
+        Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+      {},
+    )
+    return {
+      certificate,
+      keyContainers,
+      serviceKeyStores,
+    }
+  } catch (e) {
+    return Promise.reject(e)
   }
 }
