@@ -53,6 +53,10 @@ export function initProtocol(nodeId, userId, nodePek, nodePvk) {
   // }
 }
 
+export function getProtocol() {
+  return protocol
+}
+
 /**
  * Standard Communication Protocol format.
  *
