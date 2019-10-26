@@ -1,5 +1,8 @@
 import test from 'ava'
-import { encryptNewItemAssignment } from './kryptos/storage'
+import {
+  encryptNewItemAssignment,
+  decryptItemAssignment,
+} from './kryptos/storage'
 import { setupKeys } from './kryptos/keystore'
 import { generateSigningKeyPair } from './kryptos/keys'
 import * as algorithms from './kryptos/algorithms'
@@ -21,7 +24,27 @@ test.before(async () => {
 })
 
 test('Test encrypt new item assignment (encryptNewItemAssignment)', async t => {
-  const itemData = { a: 1, b: 2, c: 3 }
+  const itemData = { d: { a: 1, b: 2, c: 3 } }
   const encryptedItem = await encryptNewItemAssignment(itemData)
   t.assert(encryptedItem)
+})
+
+test('Test decrypt item assignment (decryptItemAssignment)', async t => {
+  const itemData = { d: { a: 1, b: 2, c: 3 } }
+  const item = {
+    item: {
+      // eslint-disable-next-line camelcase
+      meta_data: '',
+    },
+    // eslint-disable-next-line camelcase
+    item_key: '',
+  }
+  const encryptedItem = await encryptNewItemAssignment(itemData)
+  const { s, iv, d, key } = encryptedItem
+  // eslint-disable-next-line camelcase
+  item.item.meta_data = JSON.stringify({ s, so: 'test', iv, v: 1, d })
+  // eslint-disable-next-line camelcase
+  item.item_key = key
+  const decryptedItem = await decryptItemAssignment(item)
+  t.assert(decryptedItem)
 })

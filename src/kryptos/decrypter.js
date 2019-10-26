@@ -25,9 +25,9 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import * as utils from './utils'
-import * as algorithms from './algorithms'
-import { verifyIt } from './verifier'
+import { base64ToArrayBuffer, arrayBufferToObject } from './utils'
+import { AES_GCM } from './algorithms'
+import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
 
 /**
@@ -39,7 +39,7 @@ import { LENGTH_128 } from './constants'
  */
 export function decrypt(arrayBuffer, iv, key) {
   const algorithm = { name: key.algorithm.name, iv }
-  if (algorithm.name === algorithms.AES_GCM.name) {
+  if (algorithm.name === AES_GCM.name) {
     algorithm.tagLength = LENGTH_128
   }
   return kryptos.subtle.decrypt(algorithm, key, arrayBuffer)
@@ -52,11 +52,11 @@ export function decrypt(arrayBuffer, iv, key) {
  * @param {CryptoKey} sessionKey
  * @param {String} base64Iv
  */
-export async function decryptIt(cipherText, sessionKey, base64Iv) {
+export async function decryptIt(cipherText, base64Iv, sessionKey) {
   try {
-    const iv = utils.base64ToArrayBuffer(base64Iv)
+    const iv = base64ToArrayBuffer(base64Iv)
     const plainText = await decrypt(cipherText, iv, sessionKey)
-    return utils.arrayBufferToObject(plainText)
+    return arrayBufferToObject(plainText)
   } catch (error) {
     return Promise.reject(error)
   }
@@ -72,14 +72,16 @@ export async function decryptIt(cipherText, sessionKey, base64Iv) {
  * @param {CryptoKey} publicKey
  */
 export async function verifyDecrypt(
-  cipherText,
+  data,
   sessionKey,
   base64Iv,
   base64Signature,
   publicKey,
 ) {
   try {
-    await verifyIt(publicKey, base64Signature, cipherText)
+    const cipherText = base64ToArrayBuffer(data)
+    const signature = base64ToArrayBuffer(base64Signature)
+    await verify(publicKey, signature, cipherText)
     return decryptIt(cipherText, base64Iv, sessionKey)
   } catch (error) {
     return Promise.reject(error)

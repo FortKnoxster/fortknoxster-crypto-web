@@ -25,9 +25,15 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { generateSessionKey, importPublicEncryptKey } from './keys'
+import {
+  generateSessionKey,
+  importPublicEncryptKey,
+  importPublicVerifyKey,
+  importSessionKey,
+} from './keys'
 import { encryptSign } from './encrypter'
-import { PSK, PEK, SERVICES } from './constants'
+import { verifyDecrypt } from './decrypter'
+import { PSK, PEK, PVK, SERVICES } from './constants'
 import { Encrypter } from './core/kryptos.encrypter'
 import { Decrypter } from './core/kryptos.decrypter'
 import { base64ToArrayBuffer } from './utils'
@@ -37,16 +43,12 @@ const storage = {
   keyStore: null,
 }
 
-export function addStoragePublicKeys(publicKeys) {
-  storage.keyStore.setPublicKeys(publicKeys)
-}
-
 function formatItem(encryptedItem) {
   const { iv, m, s, key, keys } = encryptedItem
   return {
-    message: m,
+    d: m,
     iv,
-    signature: s,
+    s,
     ...(key && { key }),
     ...(keys[0] && {
       // eslint-disable-next-line camelcase
@@ -54,6 +56,56 @@ function formatItem(encryptedItem) {
         type: 'application/octet-stream',
       }),
     }),
+  }
+}
+
+export async function encryptNewItemAssignment(item) {
+  try {
+    const sessionKey = await generateSessionKey(AES_CBC_ALGO)
+
+    const importedPek = await importPublicEncryptKey(
+      getPublicKey(SERVICES.storage, PEK),
+    )
+
+    const result = await encryptSign(
+      item.d,
+      sessionKey,
+      getPrivateKey(SERVICES.storage, PSK),
+      [importedPek],
+    )
+    const encryptedItem = formatItem(result)
+    return encryptedItem
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export async function decryptItemAssignment(data, publicKey) {
+  try {
+    const {
+      item_key,
+      item: { meta_data },
+    } = data
+    const metaData = JSON.parse(meta_data)
+    const importedPvk = await importPublicVerifyKey(
+      publicKey || getPublicKey(SERVICES.storage, PVK),
+    )
+
+    const sessionKey = await importSessionKey(
+      base64ToArrayBuffer(item_key),
+      AES_CBC_ALGO,
+    )
+
+    const result = await verifyDecrypt(
+      metaData.d,
+      sessionKey,
+      metaData.iv,
+      metaData.s,
+      importedPvk,
+    )
+    return result
+  } catch (error) {
+    return Promise.reject(error)
   }
 }
 
@@ -75,32 +127,6 @@ export function encryptFilePart(filePart, partNo, itemId) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, null, null, null)
   return encrypter.encryptFilePart(filePart, itemId, partNo)
-}
-
-export async function encryptNewItemAssignment(itemData) {
-  try {
-    const sessionKey = await generateSessionKey(AES_CBC_ALGO)
-
-    const importedPek = await importPublicEncryptKey(
-      getPublicKey(SERVICES.storage, PEK),
-    )
-
-    const result = await encryptSign(
-      itemData,
-      sessionKey,
-      getPrivateKey(SERVICES.storage, PSK),
-      [importedPek],
-    )
-    const encryptedItem = formatItem(result)
-    return encryptedItem
-  } catch (error) {
-    return Promise.reject(error)
-  }
-  /*
-    const { keyStore } = storage
-    const encrypter = new Encrypter(keyStore, item.d, null)
-    return encrypter.encryptNewItemAssignment()
-    */
 }
 
 export function encryptItemAssignment(item, usernames) {
@@ -132,22 +158,4 @@ export function decryptItem(id, rid, key, metaData, publicKey) {
     publicKey || keyStore.getPvk(true),
   )
   return decrypter.decryptItem(id, rid)
-}
-
-export function decryptItemAssignment(data, publicKey) {
-  const { keyStore } = storage
-  const {
-    item_key,
-    item: { meta_data },
-  } = data
-  const metaData = JSON.parse(meta_data)
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(item_key),
-    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-    base64ToArrayBuffer(metaData.d),
-    base64ToArrayBuffer(metaData.s),
-    publicKey || keyStore.getPvk(true),
-  )
-  return decrypter.decryptItemAssignment()
 }
