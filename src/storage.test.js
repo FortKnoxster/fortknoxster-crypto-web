@@ -2,6 +2,8 @@ import test from 'ava'
 import {
   encryptNewItemAssignment,
   decryptItemAssignment,
+  encryptItem,
+  encryptItems,
 } from './kryptos/storage'
 import { setupKeys } from './kryptos/keystore'
 import { generateSigningKeyPair } from './kryptos/keys'
@@ -24,13 +26,29 @@ test.before(async () => {
 })
 
 test('Test encrypt new item assignment (encryptNewItemAssignment)', async t => {
-  const itemData = { d: { a: 1, b: 2, c: 3 } }
+  const itemData = { d: { a: 1, b: 2, c: 3 }, rid: '123' }
   const encryptedItem = await encryptNewItemAssignment(itemData)
   t.assert(encryptedItem)
 })
 
-test('Test decrypt item assignment (decryptItemAssignment)', async t => {
+test('Test encrypt new item (encryptItem)', async t => {
   const itemData = { d: { a: 1, b: 2, c: 3 } }
+  const encryptedItem = await encryptItem(itemData)
+  t.assert(encryptedItem)
+})
+
+test('Test encrypt new items (encryptItems)', async t => {
+  const newItems = [
+    { d: { a: 1, b: 2, c: 3 }, rid: '123' },
+    { d: { a: 1, b: 2, c: 3 }, rid: '123' },
+    { d: { a: 1, b: 2, c: 3 }, rid: '123' },
+  ]
+  const encryptedItems = await Promise.all(encryptItems(newItems))
+  t.assert(encryptedItems)
+})
+
+test('Test decrypt item assignment (decryptItemAssignment)', async t => {
+  const newItem = { d: { a: 1, b: 2, c: 3 } }
   const item = {
     item: {
       // eslint-disable-next-line camelcase
@@ -39,7 +57,7 @@ test('Test decrypt item assignment (decryptItemAssignment)', async t => {
     // eslint-disable-next-line camelcase
     item_key: '',
   }
-  const encryptedItem = await encryptNewItemAssignment(itemData)
+  const encryptedItem = await encryptNewItemAssignment(newItem)
   const { s, iv, d, key } = encryptedItem
   // eslint-disable-next-line camelcase
   item.item.meta_data = JSON.stringify({ s, so: 'test', iv, v: 1, d })

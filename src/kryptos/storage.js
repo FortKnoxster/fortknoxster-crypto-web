@@ -25,12 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import {
-  generateSessionKey,
-  importPublicEncryptKey,
-  importPublicVerifyKey,
-  importSessionKey,
-} from './keys'
+import { importPublicVerifyKey, getSessionKey } from './keys'
 import { encryptSign } from './encrypter'
 import { verifyDecrypt } from './decrypter'
 import { PSK, PEK, PVK, SERVICES } from './constants'
@@ -43,7 +38,7 @@ const storage = {
   keyStore: null,
 }
 
-function formatItem(encryptedItem) {
+function formatItem(encryptedItem, item) {
   const { iv, m, s, key, keys } = encryptedItem
   return {
     d: m,
@@ -56,28 +51,28 @@ function formatItem(encryptedItem) {
         type: 'application/octet-stream',
       }),
     }),
+    ...(item && { rid: item.rid }),
   }
 }
 
-export async function encryptNewItemAssignment(item) {
+export async function encryptItem(item, key, publicKeys = []) {
   try {
-    const sessionKey = await generateSessionKey(AES_CBC_ALGO)
-
-    const importedPek = await importPublicEncryptKey(
-      getPublicKey(SERVICES.storage, PEK),
-    )
-
+    const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
     const result = await encryptSign(
       item.d,
       sessionKey,
       getPrivateKey(SERVICES.storage, PSK),
-      [importedPek],
+      publicKeys,
     )
-    const encryptedItem = formatItem(result)
-    return encryptedItem
+    return formatItem(result, item)
   } catch (error) {
     return Promise.reject(error)
   }
+}
+
+export async function encryptNewItemAssignment(item) {
+  const publicKey = getPublicKey(SERVICES.storage, PEK)
+  return encryptItem(item, null, [publicKey])
 }
 
 export async function decryptItemAssignment(data, publicKey) {
@@ -91,10 +86,7 @@ export async function decryptItemAssignment(data, publicKey) {
       publicKey || getPublicKey(SERVICES.storage, PVK),
     )
 
-    const sessionKey = await importSessionKey(
-      base64ToArrayBuffer(item_key),
-      AES_CBC_ALGO,
-    )
+    const sessionKey = await getSessionKey(AES_CBC_ALGO, item_key)
 
     const result = await verifyDecrypt(
       metaData.d,
@@ -110,11 +102,7 @@ export async function decryptItemAssignment(data, publicKey) {
 }
 
 export function encryptItems(items) {
-  const { keyStore } = storage
-  return items.map(item => {
-    const encrypter = new Encrypter(keyStore, item.d, null)
-    return encrypter.encryptNewItem(item.rid)
-  })
+  return items.map(item => encryptItem(item))
 }
 
 export function encryptExistingItem(item) {
