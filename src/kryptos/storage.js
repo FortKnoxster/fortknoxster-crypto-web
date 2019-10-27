@@ -47,7 +47,7 @@ function formatItem(encryptedItem, item) {
     ...(key && { key }),
     ...(keys[0] && {
       // eslint-disable-next-line camelcase
-      encrypted_key: new window.Blob([key[0]], {
+      encrypted_key: new window.Blob([keys[0]], {
         type: 'application/octet-stream',
       }),
     }),
@@ -105,10 +105,8 @@ export function encryptItems(items) {
   return items.map(item => encryptItem(item))
 }
 
-export function encryptExistingItem(item) {
-  const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, item.d, null)
-  return encrypter.encryptExistingItem(base64ToArrayBuffer(item.key))
+export function encryptExistingItem(item, key) {
+  return encryptItem(item, key)
 }
 
 export function encryptFilePart(filePart, partNo, itemId) {

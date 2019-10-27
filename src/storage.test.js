@@ -66,3 +66,10 @@ test('Test decrypt item assignment (decryptItemAssignment)', async t => {
   const decryptedItem = await decryptItemAssignment(item)
   t.assert(decryptedItem)
 })
+
+test('Test encrypt existing item with existing key (encryptExistingItem)', async t => {
+  const itemData = { d: { a: 1, b: 2, c: 3 } }
+  const encryptedItem = await encryptItem(itemData)
+  // console.log('encryptedItem', encryptedItem)
+  t.assert(encryptedItem)
+})
