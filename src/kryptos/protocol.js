@@ -176,7 +176,7 @@ export async function decryptProtocol(result, isError, verifyOnly) {
     }
 
     const sessionKey = await getSessionKey(nodePek)
-    return decryptIt(base64ToArrayBuffer(message.data), sessionKey, message.iv)
+    return decryptIt(base64ToArrayBuffer(message.data), message.iv, sessionKey)
   } catch (error) {
     return Promise.reject(error)
   }
