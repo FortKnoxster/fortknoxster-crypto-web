@@ -25,7 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { importPublicVerifyKey, getSessionKey } from './keys'
+import { getSessionKey } from './keys'
 import { encryptSign } from './encrypter'
 import { verifyDecrypt } from './decrypter'
 import { PSK, PEK, PVK, SERVICES } from './constants'
@@ -75,32 +75,6 @@ export async function encryptNewItemAssignment(item) {
   return encryptItem(item, null, [publicKey])
 }
 
-export async function decryptItemAssignment(data, publicKey) {
-  try {
-    const {
-      item_key,
-      item: { meta_data },
-    } = data
-    const metaData = JSON.parse(meta_data)
-    const importedPvk = await importPublicVerifyKey(
-      publicKey || getPublicKey(SERVICES.storage, PVK),
-    )
-
-    const sessionKey = await getSessionKey(AES_CBC_ALGO, item_key)
-
-    const result = await verifyDecrypt(
-      metaData.d,
-      sessionKey,
-      metaData.iv,
-      metaData.s,
-      importedPvk,
-    )
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
-}
-
 export function encryptItems(items) {
   return items.map(item => encryptItem(item))
 }
@@ -115,10 +89,32 @@ export function encryptFilePart(filePart, partNo, itemId) {
   return encrypter.encryptFilePart(filePart, itemId, partNo)
 }
 
-export function encryptItemAssignment(item, usernames) {
-  const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, '', usernames)
-  return encrypter.encryptItemAssignment(base64ToArrayBuffer(item.key))
+export function encryptItemAssignment(item, key, publicKeys) {
+  return encryptItem(item, key, publicKeys)
+}
+
+export async function decryptItemAssignment(data, publicKey) {
+  try {
+    const {
+      item_key,
+      item: { meta_data },
+    } = data
+    const metaData = JSON.parse(meta_data)
+
+    const sessionKey = await getSessionKey(AES_CBC_ALGO, item_key)
+
+    const result = await verifyDecrypt(
+      metaData.d,
+      sessionKey,
+      metaData.iv,
+      metaData.s,
+      publicKey || getPublicKey(SERVICES.storage, PVK),
+    )
+    // Todo: return correct format
+    return result
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 export function decryptFilePart(itemId, partItem, filePart) {
