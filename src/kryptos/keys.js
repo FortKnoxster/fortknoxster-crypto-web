@@ -28,7 +28,7 @@ import { kryptos } from './kryptos'
 import * as algorithms from './algorithms'
 import * as formats from './formats'
 import * as usage from './usages'
-import { objectToArrayBuffer } from './utils'
+import { objectToArrayBuffer, base64ToArrayBuffer } from './utils'
 import { NONEXTRACTABLE, EXTRACTABLE } from './constants'
 
 export function importSessionKey(keyBytes, algorithm) {
@@ -243,4 +243,14 @@ export function fingerprint(key) {
     algorithms.SHA_256.name,
     objectToArrayBuffer(key),
   )
+}
+
+export function getSessionKey(algorithm, key) {
+  if (!key) {
+    return generateSessionKey(algorithm)
+  }
+  if (typeof key === 'string') {
+    return importSessionKey(base64ToArrayBuffer(key), algorithm)
+  }
+  throw new Error('Invalid protector.')
 }

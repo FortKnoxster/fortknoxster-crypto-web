@@ -28,7 +28,7 @@ import { kryptos } from './kryptos'
 import { stringToArrayBuffer, arrayBufferToBase64, nonce } from './utils'
 import { RSA_OAEP_ALGO, AES_GCM } from './algorithms'
 import { sign } from './signer'
-import { exportRawKey } from './keys'
+import { exportRawKey, importPublicEncryptKey } from './keys'
 import { LENGTH_128 } from './constants'
 
 /**
@@ -39,7 +39,12 @@ import { LENGTH_128 } from './constants'
  * @param {CryptoKey} publicKey
  */
 export async function encryptSessionKey(sessionKey, publicKey) {
-  return kryptos.subtle.encrypt(RSA_OAEP_ALGO, publicKey, sessionKey)
+  try {
+    const importedPek = await importPublicEncryptKey(publicKey)
+    return kryptos.subtle.encrypt(RSA_OAEP_ALGO, importedPek, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
