@@ -93,6 +93,19 @@ export function encryptItemAssignment(item, key, publicKeys) {
   return encryptItem(item, key, publicKeys)
 }
 
+export function decryptItem(id, rid, key, metaData, publicKey) {
+  const { keyStore } = storage
+  const decrypter = new Decrypter(
+    keyStore,
+    base64ToArrayBuffer(key),
+    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
+    base64ToArrayBuffer(metaData.d),
+    base64ToArrayBuffer(metaData.s),
+    publicKey || keyStore.getPvk(true),
+  )
+  return decrypter.decryptItem(id, rid)
+}
+
 export async function decryptItemAssignment(data, publicKey) {
   try {
     const {
@@ -127,17 +140,4 @@ export function decryptFilePart(itemId, partItem, filePart) {
     filePart,
   )
   return decrypter.decryptFilePart(itemId, p)
-}
-
-export function decryptItem(id, rid, key, metaData, publicKey) {
-  const { keyStore } = storage
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(key),
-    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-    base64ToArrayBuffer(metaData.d),
-    base64ToArrayBuffer(metaData.s),
-    publicKey || keyStore.getPvk(true),
-  )
-  return decrypter.decryptItem(id, rid)
 }

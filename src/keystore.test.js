@@ -143,7 +143,7 @@ test('Test Elliptic Curve key store unlock', async t => {
 })
 
 test('Test unlock user key stores', async t => {
-  const serviceKeyStores = unlockKeyStores(
+  const serviceKeyStores = await unlockKeyStores(
     keyStoresJson,
     'Test123456',
     PROTECTOR_TYPES.password,
