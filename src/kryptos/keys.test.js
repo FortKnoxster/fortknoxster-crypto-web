@@ -1,7 +1,7 @@
 import test from 'ava'
-import * as kryptos from './index'
-import { generateSigningKeyPair, generateSessionKey } from './kryptos/keys'
-import * as algorithms from './kryptos/algorithms'
+import * as kryptos from '../index'
+import { generateSigningKeyPair, generateSessionKey } from './keys'
+import * as algorithms from './algorithms'
 
 test.before(async t => {
   // eslint-disable-next-line no-param-reassign

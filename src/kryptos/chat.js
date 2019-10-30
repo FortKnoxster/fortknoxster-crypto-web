@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 import { encryptSign } from './encrypter'
 import { generateSessionKey } from './keys'
-import * as algorithms from './algorithms'
+import { AES_CBC_ALGO } from './algorithms'
 
 const chat = {
   keyStore: null,
@@ -14,7 +14,7 @@ export function initChat(keyStore) {
 export async function encryptChatMessage(plainText, publicKeys) {
   const { keyStore } = chat
   try {
-    const sessionKey = await generateSessionKey(algorithms.AES_CBC_ALGO)
+    const sessionKey = await generateSessionKey(AES_CBC_ALGO)
     const privateKey = await keyStore.getPsk()
     return encryptSign(plainText, sessionKey, privateKey, publicKeys)
   } catch (error) {

@@ -25,9 +25,10 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import * as utils from './utils'
-import * as algorithms from './algorithms'
+import { stringToArrayBuffer, arrayBufferToBase64, nonce } from './utils'
+import { RSA_OAEP_ALGO, AES_GCM } from './algorithms'
 import { sign } from './signer'
+import { exportRawKey, importPublicEncryptKey } from './keys'
 import { LENGTH_128 } from './constants'
 
 /**
@@ -37,8 +38,13 @@ import { LENGTH_128 } from './constants'
  * @param {CryptoKey} sessionKey
  * @param {CryptoKey} publicKey
  */
-export function encryptSessionKey(sessionKey, publicKey) {
-  return kryptos.subtle.encrypt(algorithms.RSA_OAEP_ALGO, publicKey, sessionKey)
+export async function encryptSessionKey(sessionKey, publicKey) {
+  try {
+    const importedPek = await importPublicEncryptKey(publicKey)
+    return kryptos.subtle.encrypt(RSA_OAEP_ALGO, importedPek, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -50,7 +56,7 @@ export function encryptSessionKey(sessionKey, publicKey) {
  */
 export function encrypt(arrayBuffer, iv, key) {
   const algorithm = { name: key.algorithm.name, iv }
-  if (algorithm.name === algorithms.AES_GCM.name) {
+  if (algorithm.name === AES_GCM.name) {
     algorithm.tagLength = LENGTH_128
   }
   return kryptos.subtle.encrypt(algorithm, key, arrayBuffer)
@@ -64,8 +70,8 @@ export function encrypt(arrayBuffer, iv, key) {
  */
 export async function encryptIt(plainText, sessionKey) {
   try {
-    const iv = utils.nonce()
-    const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
+    const iv = nonce()
+    const data = stringToArrayBuffer(JSON.stringify(plainText))
     const cipherText = await encrypt(data, iv, sessionKey)
     return {
       iv,
@@ -95,14 +101,16 @@ export async function encryptSign(
   try {
     const { iv, cipherText } = await encryptIt(plainText, sessionKey)
     const signature = await sign(cipherText, privateKey)
+    const exportedSessionKey = await exportRawKey(sessionKey)
     const promises = publicKeys.map(publicKey =>
-      encryptSessionKey(sessionKey, publicKey),
+      encryptSessionKey(exportedSessionKey, publicKey),
     )
     const keys = await Promise.all(promises)
     return {
-      iv: utils.arrayBufferToBase64(iv),
-      m: utils.arrayBufferToBase64(cipherText),
-      s: utils.arrayBufferToBase64(signature),
+      iv: arrayBufferToBase64(iv),
+      m: arrayBufferToBase64(cipherText),
+      s: arrayBufferToBase64(signature),
+      key: arrayBufferToBase64(exportedSessionKey),
       keys,
     }
   } catch (error) {

@@ -1,8 +1,8 @@
 import test from 'ava'
-import { signIt, hmacSignIt } from './kryptos/signer'
-import { generateSigningKeyPair } from './kryptos/keys'
-import * as algorithms from './kryptos/algorithms'
-import { generateId } from './kryptos/utils'
+import { signIt, hmacSignIt } from './signer'
+import { generateSigningKeyPair } from './keys'
+import * as algorithms from './algorithms'
+import { generateId } from './utils'
 
 test('Test create signed Identity', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)

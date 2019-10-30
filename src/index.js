@@ -19,6 +19,7 @@ export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
+  getProtocol,
 } from './kryptos/protocol'
 
 export {

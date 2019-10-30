@@ -1,14 +1,11 @@
 import test from 'ava'
-import { setupIdentityKeys, setupKeys, unlock } from './kryptos/keystore'
-import {
-  generateSigningKeyPair,
-  generateEncryptionKeyPair,
-} from './kryptos/keys'
-import * as algorithms from './kryptos/algorithms'
-import { PROTECTOR_TYPES } from './kryptos/constants'
-import { initKeyStores, unlockKeyStores } from './kryptos/serviceKeyStore'
-import keyStoresJson from './test/json/keyStores'
-import initKeyStoresJson from './test/json/initKeyStores'
+import { setupIdentityKeys, setupKeys, unlock } from './keystore'
+import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
+import * as algorithms from './algorithms'
+import { PROTECTOR_TYPES, SERVICES } from './constants'
+import { initKeyStores, unlockKeyStores } from './serviceKeyStore'
+import keyStoresJson from '../test/json/keyStores'
+import initKeyStoresJson from '../test/json/initKeyStores'
 
 test.before(async t => {
   // eslint-disable-next-line no-param-reassign
@@ -19,7 +16,7 @@ test.before(async t => {
 
 test('Test Identity key store setup.', async t => {
   const keyStore = await setupIdentityKeys(
-    'identity',
+    SERVICES.identity,
     t.context.password,
     algorithms.ECDSA_ALGO,
   )
@@ -29,7 +26,7 @@ test('Test Identity key store setup.', async t => {
 test('Test RSA key store setup with password protector', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
-    'storage',
+    SERVICES.storage,
     t.context.password,
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
@@ -47,7 +44,7 @@ test('Test RSA key store setup with asymmetric protector', async t => {
   const keyPair = await generateEncryptionKeyPair(algorithms.RSA_OAEP_ALGO)
   const signingKeyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
-    'storage',
+    SERVICES.storage,
     keyPair.publicKey,
     signingKeyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
@@ -64,7 +61,7 @@ test('Test RSA key store setup with asymmetric protector', async t => {
 test('Test Elliptic Curve key store setup with password protector', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
-    'storage',
+    SERVICES.storage,
     t.context.password,
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
@@ -78,7 +75,7 @@ test('Test Elliptic Curve key store setup with asymmetric protector', async t =>
   const keyPair = await generateEncryptionKeyPair(algorithms.RSA_OAEP_ALGO)
   const signingKeyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const keyStore = await setupKeys(
-    'storage',
+    SERVICES.storage,
     keyPair.publicKey,
     signingKeyPair.privateKey,
     algorithms.ECDSA_ALGO,
@@ -89,7 +86,7 @@ test('Test Elliptic Curve key store setup with asymmetric protector', async t =>
 })
 
 test('Test Identity key store unlock.', async t => {
-  const service = 'identity'
+  const service = SERVICES.identity
   const keyStore = await setupIdentityKeys(
     service,
     t.context.password,
@@ -106,7 +103,7 @@ test('Test Identity key store unlock.', async t => {
 
 test('Test RSA key store unlock', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
-  const service = 'storage'
+  const service = SERVICES.storage
   const keyStore = await setupKeys(
     service,
     t.context.password,
@@ -125,7 +122,7 @@ test('Test RSA key store unlock', async t => {
 
 test('Test Elliptic Curve key store unlock', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
-  const service = 'protocol'
+  const service = SERVICES.protocol
   const keyStore = await setupKeys(
     service,
     t.context.password,
@@ -143,13 +140,36 @@ test('Test Elliptic Curve key store unlock', async t => {
 })
 
 test('Test unlock user key stores', async t => {
-  const serviceKeyStores = await Promise.all(
-    unlockKeyStores(keyStoresJson, 'Test123456', PROTECTOR_TYPES.password),
+  const serviceKeyStores = await unlockKeyStores(
+    keyStoresJson,
+    'Test123456',
+    PROTECTOR_TYPES.password,
   )
+
   t.assert(serviceKeyStores)
 })
 
 test('Test init unlock user key stores with existing derived password protector', async t => {
   const success = await initKeyStores(initKeyStoresJson)
   t.assert(success)
+})
+
+// Todo implement lock
+test('Test RSA key store lock with asymmetric protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+  )
+  const unlockedKeyStore = await unlock(
+    service,
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+  )
+  t.assert(unlockedKeyStore)
 })

@@ -28,7 +28,7 @@ import { kryptos } from './kryptos'
 import * as algorithms from './algorithms'
 import * as formats from './formats'
 import * as usage from './usages'
-import { objectToArrayBuffer } from './utils'
+import { objectToArrayBuffer, base64ToArrayBuffer } from './utils'
 import { NONEXTRACTABLE, EXTRACTABLE } from './constants'
 
 export function importSessionKey(keyBytes, algorithm) {
@@ -116,7 +116,7 @@ export function importPublicEncryptKey(publicKey, usages) {
  * @param {Object} algorithm
  */
 export function generateSessionKey(algorithm) {
-  return kryptos.subtle.generateKey(algorithm, NONEXTRACTABLE, usage.ENCRYPT)
+  return kryptos.subtle.generateKey(algorithm, EXTRACTABLE, usage.ENCRYPT)
 }
 
 export function generateWrapKey() {
@@ -216,6 +216,10 @@ export function exportKey(key) {
   return kryptos.subtle.exportKey(formats.JWK, key)
 }
 
+export function exportRawKey(key) {
+  return kryptos.subtle.exportKey(formats.RAW, key)
+}
+
 export function generateKeyPair(algorithm) {
   switch (algorithm.name) {
     case algorithms.RSASSA_PKCS1_V1_5_ALGO.name:
@@ -239,4 +243,14 @@ export function fingerprint(key) {
     algorithms.SHA_256.name,
     objectToArrayBuffer(key),
   )
+}
+
+export function getSessionKey(algorithm, key) {
+  if (!key) {
+    return generateSessionKey(algorithm)
+  }
+  if (typeof key === 'string') {
+    return importSessionKey(base64ToArrayBuffer(key), algorithm)
+  }
+  throw new Error('Invalid protector.')
 }

@@ -44,13 +44,17 @@ const protocol = {
 }
 
 export function initProtocol(nodeId, userId, nodePek, nodePvk) {
-  if (!Object.isFrozen(protocol)) {
-    protocol.nodeId = nodeId
-    protocol.userId = userId
-    protocol.nodePek = nodePek
-    protocol.nodePvk = nodePvk
-    Object.freeze(protocol)
-  }
+  // if (!Object.isFrozen(protocol)) {
+  protocol.nodeId = nodeId
+  protocol.userId = userId
+  protocol.nodePek = nodePek
+  protocol.nodePvk = nodePvk
+  // Object.freeze(protocol)
+  // }
+}
+
+export function getProtocol() {
+  return protocol
 }
 
 /**
@@ -172,7 +176,7 @@ export async function decryptProtocol(result, isError, verifyOnly) {
     }
 
     const sessionKey = await getSessionKey(nodePek)
-    return decryptIt(base64ToArrayBuffer(message.data), sessionKey, message.iv)
+    return decryptIt(base64ToArrayBuffer(message.data), message.iv, sessionKey)
   } catch (error) {
     return Promise.reject(error)
   }
