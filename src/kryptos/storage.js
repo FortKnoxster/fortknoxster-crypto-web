@@ -38,6 +38,7 @@ const storage = {
   keyStore: null,
 }
 
+// TODO: Move to React
 function formatItem(encryptedItem, item) {
   const { iv, m, s, key, keys } = encryptedItem
   return {
@@ -55,6 +56,7 @@ function formatItem(encryptedItem, item) {
   }
 }
 
+// TODO: Don't depende on item
 export async function encryptItem(item, key, publicKeys = []) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
@@ -83,6 +85,7 @@ export function encryptExistingItem(item, key) {
   return encryptItem(item, key)
 }
 
+// TODO: Don't depende on item
 export function encryptFilePart(filePart, partNo, itemId) {
   const { keyStore } = storage
   const encrypter = new Encrypter(keyStore, null, null, null)
@@ -93,6 +96,7 @@ export function encryptItemAssignment(item, key, publicKeys) {
   return encryptItem(item, key, publicKeys)
 }
 
+// TODO: Don't depende on item
 export function decryptItem(id, rid, key, metaData, publicKey) {
   const { keyStore } = storage
   const decrypter = new Decrypter(
@@ -106,6 +110,7 @@ export function decryptItem(id, rid, key, metaData, publicKey) {
   return decrypter.decryptItem(id, rid)
 }
 
+// TODO: Don't depende on item
 export async function decryptItemAssignment(data, publicKey) {
   try {
     const {
@@ -130,6 +135,7 @@ export async function decryptItemAssignment(data, publicKey) {
   }
 }
 
+// TODO: Don't depende on item
 export function decryptFilePart(itemId, partItem, filePart) {
   const { keyStore } = storage
   const { iv, k, p } = partItem
