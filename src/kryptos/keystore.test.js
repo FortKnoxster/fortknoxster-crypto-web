@@ -1,7 +1,9 @@
+/* eslint-disable max-lines */
 import test from 'ava'
-import { setupIdentityKeys, setupKeys, unlock } from './keystore'
+import { setupIdentityKeys, setupKeys, unlock, lock } from './keystore'
 import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
 import * as algorithms from './algorithms'
+import { randomString } from './utils'
 import { PROTECTOR_TYPES, SERVICES } from './constants'
 import { initKeyStores, unlockKeyStores } from './serviceKeyStore'
 import keyStoresJson from '../test/json/keyStores'
@@ -154,8 +156,7 @@ test('Test init unlock user key stores with existing derived password protector'
   t.assert(success)
 })
 
-// Todo implement lock
-test('Test RSA key store lock with asymmetric protector', async t => {
+test('Test RSA key store lock with new recovery key protector', async t => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const service = SERVICES.storage
   const keyStore = await setupKeys(
@@ -165,11 +166,154 @@ test('Test RSA key store lock with asymmetric protector', async t => {
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
   )
-  const unlockedKeyStore = await unlock(
-    service,
+  const recoveryKey = randomString()
+  await lock(
     keyStore.keyContainers,
     t.context.password,
     PROTECTOR_TYPES.password,
+    recoveryKey,
+    PROTECTOR_TYPES.recovery,
   )
-  t.assert(unlockedKeyStore)
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasRecoveryProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.recovery,
+  )
+  t.assert(hasPasswordProtector && hasRecoveryProtector)
+})
+
+test('Test RSA key store lock with new password protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+  )
+  const newPassword = randomString()
+  await lock(
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+    newPassword,
+    PROTECTOR_TYPES.password,
+  )
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  // Todo: Also check actual password protector got replaced
+  t.assert(hasPasswordProtector)
+})
+
+test('Test RSA key store lock with new asymmetric protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+  )
+  const newProtectorKeyPair = await generateEncryptionKeyPair(
+    algorithms.RSA_OAEP_ALGO,
+  )
+  await lock(
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+    newProtectorKeyPair.publicKey,
+    PROTECTOR_TYPES.asymmetric,
+  )
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasAsymmetricProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  t.assert(hasPasswordProtector && hasAsymmetricProtector)
+})
+
+test('Test Elliptic Curve key store lock with new recovery key protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.ECDSA_ALGO,
+    algorithms.ECDH_ALGO,
+  )
+  const recoveryKey = randomString()
+  await lock(
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+    recoveryKey,
+    PROTECTOR_TYPES.recovery,
+  )
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasRecoveryProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.recovery,
+  )
+  t.assert(hasPasswordProtector && hasRecoveryProtector)
+})
+
+test('Test Elliptic Curve key store lock with new password protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.ECDSA_ALGO,
+    algorithms.ECDH_ALGO,
+  )
+  const newPassword = randomString()
+  await lock(
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+    newPassword,
+    PROTECTOR_TYPES.password,
+  )
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  // Todo: Also check actual password protector got replaced
+  t.assert(hasPasswordProtector)
+})
+
+test('Test Elliptic Curve key store lock with new asymmetric protector', async t => {
+  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    t.context.password,
+    keyPair.privateKey,
+    algorithms.ECDSA_ALGO,
+    algorithms.ECDH_ALGO,
+  )
+  const newProtectorKeyPair = await generateEncryptionKeyPair(
+    algorithms.RSA_OAEP_ALGO,
+  )
+  await lock(
+    keyStore.keyContainers,
+    t.context.password,
+    PROTECTOR_TYPES.password,
+    newProtectorKeyPair.publicKey,
+    PROTECTOR_TYPES.asymmetric,
+  )
+  const hasPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasAsymmetricProtector = keyStore.keyContainers.psk.keyProtectors.find(
+    protector => protector.type === PROTECTOR_TYPES.password,
+  )
+  t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })

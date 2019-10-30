@@ -26,7 +26,6 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import * as utils from './utils'
-import { deriveKeyFromPassword } from './derive'
 import {
   generateWrapKey,
   wrapKey,
@@ -42,7 +41,7 @@ import * as algorithms from './algorithms'
 import { getUsage } from './usages'
 import { signIt } from './signer'
 import { getProtector, packProtector } from './protector'
-import { PROTECTOR_TYPES, PROTECTOR_ITERATIONS, LENGTH_32 } from './constants'
+import { PROTECTOR_TYPES, EXTRACTABLE } from './constants'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {
@@ -199,6 +198,19 @@ export async function setupKeys(
   }
 }
 
+export function unlockIntermediateKey(
+  encryptedKey,
+  protectorKey,
+  protectAlgorithm,
+) {
+  return unwrapKey(
+    utils.base64ToArrayBuffer(encryptedKey),
+    protectorKey,
+    protectAlgorithm,
+    EXTRACTABLE,
+  )
+}
+
 export async function unlockPrivateKey(
   keyType,
   keyContainer,
@@ -210,8 +222,8 @@ export async function unlockPrivateKey(
     const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
     const encryptedKey = utils.base64ToArrayBuffer(keyContainer.encryptedKey)
     const iv = utils.base64ToArrayBuffer(keyContainer.iv)
-    const intermediateKey = await unwrapKey(
-      utils.base64ToArrayBuffer(protector.encryptedKey),
+    const intermediateKey = await unlockIntermediateKey(
+      protector.encryptedKey,
       protectorKey.key,
       protectAlgorithm,
     )
@@ -313,9 +325,10 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
 }
 
 /**
- * Todo: implement
- * Lock key containers with a new protector. Key containers must unlock the intermediate key
- * with the password protector.
+ * Lock key containers with a new protector. Key containers must first unlock the intermediate key
+ * with current password protector. The new key protecter will replace an existing key protector
+ * of the same time, or be added as a new key protector.
+ * Used for change password, account recovery and reset password operations.
  *
  * @param {Array} keyContainers
  * @param {String} password
@@ -324,17 +337,51 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
  */
 export async function lock(
   keyContainers,
-  password,
-  newProtector,
+  protectorKey,
   type = PROTECTOR_TYPES.password,
+  newProtectorKey,
+  newType = PROTECTOR_TYPES.password,
 ) {
   try {
-    const salt = utils.randomValue(LENGTH_32)
-    const iterations = PROTECTOR_ITERATIONS
-    const PBKDF2 = algorithms.deriveKeyPBKDF2(salt, iterations)
-    const derivedKey = await deriveKeyFromPassword(password, salt, iterations)
+    const promises = Object.keys(keyContainers)
+      .filter(key => ['pdk', 'psk'].includes(key) && keyContainers[key])
+      .map(async key => {
+        const keyProtector = keyContainers[key].keyProtectors.find(
+          protector => protector.type === type,
+        )
+        const { salt, iterations } = keyProtector
+        const protector = await getProtector(protectorKey, salt, iterations)
+        const protectAlgorithm = algorithms.getAlgorithm(
+          keyContainers[key].protectType,
+        )
+        const intermediateKey = await unlockIntermediateKey(
+          keyProtector.encryptedKey,
+          protector.key,
+          protectAlgorithm,
+        )
+        const newProtector = await getProtector(newProtectorKey)
+        const wrappedIntermediateKey = await wrapKey(
+          intermediateKey,
+          newProtector.key,
+        )
+        const replaceProtector = packProtector(
+          wrappedIntermediateKey,
+          protector.algorithm,
+          newType,
+        )
+        const index = keyContainers[key].keyProtectors.findIndex(
+          p => p.type === newType,
+        )
+        if (index !== -1) {
+          // eslint-disable-next-line no-param-reassign
+          keyContainers[key].keyProtectors[index] = replaceProtector
+        } else {
+          keyContainers[key].keyProtectors.push(replaceProtector)
+        }
+        return true
+      })
 
-    return { keyContainers, newProtector, type, PBKDF2, derivedKey }
+    return Promise.all(promises)
   } catch (e) {
     return Promise.reject(e)
   }
