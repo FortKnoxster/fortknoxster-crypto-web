@@ -27,10 +27,17 @@
 import { kryptos } from './kryptos'
 import { importPublicVerifyKey } from './keys'
 import { base64ToArrayBuffer, arrayBufferToObject } from './utils'
-import { AES_GCM } from './algorithms'
+import { AES_GCM, RSA_OAEP } from './algorithms'
 import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
 
+export function decryptSessionKey(encryptedKey, privateKey) {
+  return kryptos.subtle.decrypt(
+    { name: RSA_OAEP.name },
+    privateKey,
+    encryptedKey,
+  )
+}
 /**
  * Decrypt given cipher text with the given symmetric key.
  * Determine decryption algorithm based on the CryptoKey object.

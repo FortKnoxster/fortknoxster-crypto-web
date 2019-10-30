@@ -47,7 +47,9 @@ export async function getSymmetricProtector(
   givenSalt,
   givenIterations,
 ) {
-  const salt = base64ToArrayBuffer(givenSalt) || randomValue(LENGTH_32)
+  const salt = givenSalt
+    ? base64ToArrayBuffer(givenSalt)
+    : randomValue(LENGTH_32)
   const iterations = givenIterations || PROTECTOR_ITERATIONS
   const algorithm = deriveKeyPBKDF2(salt, iterations)
   const key = await deriveKeyFromPassword(password, salt, iterations)

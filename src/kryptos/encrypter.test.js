@@ -4,9 +4,9 @@ import {
   generateSigningKeyPair,
   generateEncryptionKeyPair,
   exportPublicKey,
-} from './kryptos/keys'
-import { encryptSign } from './kryptos/encrypter'
-import * as algorithms from './kryptos/algorithms'
+} from './keys'
+import { encryptSign } from './encrypter'
+import * as algorithms from './algorithms'
 
 test('Test encrypt and sign message', async t => {
   const signKeyPair = await generateSigningKeyPair(

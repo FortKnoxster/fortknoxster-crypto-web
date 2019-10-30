@@ -215,7 +215,6 @@ export async function unlockPrivateKey(
       protectorKey.key,
       protectAlgorithm,
     )
-
     const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
     const usages = getUsage(keyContainer.keyType)
 

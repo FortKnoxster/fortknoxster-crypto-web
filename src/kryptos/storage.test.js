@@ -4,12 +4,12 @@ import {
   decryptItemAssignment,
   encryptItem,
   encryptItems,
-} from './kryptos/storage'
-import { setupKeys } from './kryptos/keystore'
-import { generateSigningKeyPair } from './kryptos/keys'
-import * as algorithms from './kryptos/algorithms'
-import { PROTECTOR_TYPES, SERVICES } from './kryptos/constants'
-import { initKeyStores } from './kryptos/serviceKeyStore'
+} from './storage'
+import { setupKeys } from './keystore'
+import { generateSigningKeyPair } from './keys'
+import * as algorithms from './algorithms'
+import { PROTECTOR_TYPES, SERVICES } from './constants'
+import { initKeyStores } from './serviceKeyStore'
 
 // We need a storage keystore
 test.before(async () => {
@@ -70,6 +70,5 @@ test('Test decrypt item assignment (decryptItemAssignment)', async t => {
 test('Test encrypt existing item with existing key (encryptExistingItem)', async t => {
   const itemData = { d: { a: 1, b: 2, c: 3 } }
   const encryptedItem = await encryptItem(itemData)
-  // console.log('encryptedItem', encryptedItem)
   t.assert(encryptedItem)
 })

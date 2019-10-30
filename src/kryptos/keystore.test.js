@@ -1,14 +1,11 @@
 import test from 'ava'
-import { setupIdentityKeys, setupKeys, unlock } from './kryptos/keystore'
-import {
-  generateSigningKeyPair,
-  generateEncryptionKeyPair,
-} from './kryptos/keys'
-import * as algorithms from './kryptos/algorithms'
-import { PROTECTOR_TYPES, SERVICES } from './kryptos/constants'
-import { initKeyStores, unlockKeyStores } from './kryptos/serviceKeyStore'
-import keyStoresJson from './test/json/keyStores'
-import initKeyStoresJson from './test/json/initKeyStores'
+import { setupIdentityKeys, setupKeys, unlock } from './keystore'
+import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
+import * as algorithms from './algorithms'
+import { PROTECTOR_TYPES, SERVICES } from './constants'
+import { initKeyStores, unlockKeyStores } from './serviceKeyStore'
+import keyStoresJson from '../test/json/keyStores'
+import initKeyStoresJson from '../test/json/initKeyStores'
 
 test.before(async t => {
   // eslint-disable-next-line no-param-reassign
