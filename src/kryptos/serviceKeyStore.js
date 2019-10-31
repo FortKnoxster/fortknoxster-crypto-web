@@ -95,8 +95,17 @@ export async function unlockKeyStores(keyStores, password, type) {
   }
 }
 
-export function lockKeyStores(keys, password, type) {
-  return Object.values(keys).map(k => k.lock(password, type))
+export function lockKeyStores(
+  keyStores,
+  protector,
+  type,
+  newProtector,
+  newType,
+) {
+  const promises = Object.keys(keyStores).map(service =>
+    unlock(keyStores[service], protector, type, newProtector, newType),
+  )
+  return Promise.all(promises)
 }
 
 export function verifyKeyProtector(keys, password, type) {
