@@ -325,6 +325,59 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
 }
 
 /**
+ * Unlock the intermediate key of a key container with given protector, then re-wrap the interrmediate key
+ * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
+ * else the new protector will be added to the list of jey protectors.
+ *
+ * @param {String} keyType
+ * @param {Object} keyContainer
+ * @param {CryptoKey} protector
+ * @param {Object} keyProtector
+ * @param {CryptoKey} newProtectorKey
+ * @param {String} newType
+ */
+async function replaceOrAddProtector(
+  keyType,
+  keyContainer,
+  protector,
+  keyProtector,
+  newProtectorKey,
+  newType,
+) {
+  const clonedKeyContainer = { ...keyContainer }
+  const protectAlgorithm = algorithms.getAlgorithm(
+    clonedKeyContainer.protectType,
+  )
+  const intermediateKey = await unlockIntermediateKey(
+    keyProtector.encryptedKey,
+    protector.key,
+    protectAlgorithm,
+  )
+  const newProtector = await getProtector(newProtectorKey)
+  const wrappedIntermediateKey = await wrapKey(
+    intermediateKey,
+    newProtector.key,
+  )
+  const replaceProtector = packProtector(
+    wrappedIntermediateKey,
+    newProtector.algorithm,
+    newType,
+  )
+  // Clone keyProtectors
+  const clonedKeyProtectors = clonedKeyContainer.keyProtectors.map(kp => ({
+    ...kp,
+  }))
+  const index = clonedKeyProtectors.findIndex(p => p.type === newType)
+  if (index !== -1) {
+    clonedKeyProtectors[index] = replaceProtector
+  } else {
+    clonedKeyProtectors.push(replaceProtector)
+  }
+  clonedKeyContainer.keyProtectors = clonedKeyProtectors
+  return { [keyType]: clonedKeyContainer }
+}
+
+/**
  * Lock key containers with a new protector. Key containers must first unlock the intermediate key
  * with current password protector. The new key protecter will replace an existing key protector
  * of the same time, or be added as a new key protector.
@@ -336,6 +389,7 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
  * @param {String} type
  */
 export async function lock(
+  service,
   keyContainers,
   protectorKey,
   type = PROTECTOR_TYPES.password,
@@ -343,45 +397,37 @@ export async function lock(
   newType = PROTECTOR_TYPES.password,
 ) {
   try {
-    const promises = Object.keys(keyContainers)
-      .filter(key => ['pdk', 'psk'].includes(key) && keyContainers[key])
+    const clonedKeyContainers = { ...keyContainers }
+    const promises = Object.keys(clonedKeyContainers)
+      .filter(key => ['pdk', 'psk'].includes(key) && clonedKeyContainers[key])
       .map(async key => {
-        const keyProtector = keyContainers[key].keyProtectors.find(
+        const keyProtector = clonedKeyContainers[key].keyProtectors.find(
           protector => protector.type === type,
         )
         const { salt, iterations } = keyProtector
         const protector = await getProtector(protectorKey, salt, iterations)
-        const protectAlgorithm = algorithms.getAlgorithm(
-          keyContainers[key].protectType,
-        )
-        const intermediateKey = await unlockIntermediateKey(
-          keyProtector.encryptedKey,
-          protector.key,
-          protectAlgorithm,
-        )
-        const newProtector = await getProtector(newProtectorKey)
-        const wrappedIntermediateKey = await wrapKey(
-          intermediateKey,
-          newProtector.key,
-        )
-        const replaceProtector = packProtector(
-          wrappedIntermediateKey,
-          protector.algorithm,
+
+        return replaceOrAddProtector(
+          key,
+          clonedKeyContainers[key],
+          protector,
+          keyProtector,
+          newProtectorKey,
           newType,
         )
-        const index = keyContainers[key].keyProtectors.findIndex(
-          p => p.type === newType,
-        )
-        if (index !== -1) {
-          // eslint-disable-next-line no-param-reassign
-          keyContainers[key].keyProtectors[index] = replaceProtector
-        } else {
-          keyContainers[key].keyProtectors.push(replaceProtector)
-        }
-        return true
       })
 
-    return Promise.all(promises)
+    const updatedKeyContainers = await Promise.all(promises)
+    return {
+      id: service,
+      keyContainers: {
+        ...clonedKeyContainers,
+        ...updatedKeyContainers.reduce(
+          (acc, container) => Object.assign(acc, container),
+          {},
+        ),
+      },
+    }
   } catch (e) {
     return Promise.reject(e)
   }
