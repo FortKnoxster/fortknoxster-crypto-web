@@ -1,4 +1,4 @@
-import { setupIdentityKeys, setupKeys, unlock, init } from './keystore'
+import { setupIdentityKeys, setupKeys, unlock, init, lock } from './keystore'
 import {
   ECDSA_ALGO,
   ECDH_ALGO,
@@ -95,8 +95,26 @@ export async function unlockKeyStores(keyStores, password, type) {
   }
 }
 
-export function lockKeyStores(keys, password, type) {
-  return Object.values(keys).map(k => k.lock(password, type))
+export async function lockKeyStores(
+  keyStores,
+  protector,
+  type,
+  newProtector,
+  newType,
+) {
+  try {
+    const promises = Object.keys(keyStores).map(service =>
+      lock(service, keyStores[service], protector, type, newProtector, newType),
+    )
+    const serviceKeyStores = await Promise.all(promises)
+    return serviceKeyStores.reduce(
+      (acc, keyStore) =>
+        Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+      {},
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function verifyKeyProtector(keys, password, type) {

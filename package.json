@@ -1,7 +1,7 @@
 {
   "name": "fkx-crypto-web",
-  "version": "1.0.0",
-  "description": "FortKnoxsters encryption algorithms used in the web app.",
+  "version": "2.0.0",
+  "description": "FortKnoxsters encryption algorithms used in the web app. Kryptos is a cryptographic library wrapping and implementing the Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.",
   "main": "./src/index.js",
   "module": "./src/index.js",
   "scripts": {
@@ -31,7 +31,7 @@
     "instrument": false
   },
   "author": "FortKnoxster",
-  "license": "ISC",
+  "license": "Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0",
   "devDependencies": {
     "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.6.2",

@@ -133,14 +133,19 @@ export function wrapKey(key, wrappingKey) {
   })
 }
 
-export function unwrapKey(wrappedKey, unwrappingKey, wrappedKeyAlgorithm) {
+export function unwrapKey(
+  wrappedKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+  extractable = NONEXTRACTABLE,
+) {
   return kryptos.subtle.unwrapKey(
     formats.RAW,
     wrappedKey,
     unwrappingKey,
     unwrappingKey.algorithm.name,
     wrappedKeyAlgorithm,
-    NONEXTRACTABLE,
+    extractable,
     usage.WRAP.concat(usage.ENCRYPT),
   )
 }
