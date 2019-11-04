@@ -364,9 +364,7 @@ async function replaceOrAddProtector(
     newType,
   )
   // Clone keyProtectors
-  const clonedKeyProtectors = clonedKeyContainer.keyProtectors.map(kp => ({
-    ...kp,
-  }))
+  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
   const index = clonedKeyProtectors.findIndex(p => p.type === newType)
   if (index !== -1) {
     clonedKeyProtectors[index] = replaceProtector
