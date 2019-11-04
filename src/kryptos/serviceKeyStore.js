@@ -102,15 +102,19 @@ export async function lockKeyStores(
   newProtector,
   newType,
 ) {
-  const promises = Object.keys(keyStores).map(service =>
-    lock(service, keyStores[service], protector, type, newProtector, newType),
-  )
-  const serviceKeyStores = await Promise.all(promises)
-  return serviceKeyStores.reduce(
-    (acc, keyStore) =>
-      Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
-    {},
-  )
+  try {
+    const promises = Object.keys(keyStores).map(service =>
+      lock(service, keyStores[service], protector, type, newProtector, newType),
+    )
+    const serviceKeyStores = await Promise.all(promises)
+    return serviceKeyStores.reduce(
+      (acc, keyStore) =>
+        Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+      {},
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export function verifyKeyProtector(keys, password, type) {
