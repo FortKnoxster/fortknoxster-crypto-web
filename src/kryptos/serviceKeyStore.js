@@ -123,10 +123,9 @@ export async function lockKeyStore(
   type,
   protectorIdentifier,
 ) {
-  const companyKeyStore = serviceKeyStore.keyStores[SERVICES.company]
   return lock(
     service,
-    companyKeyStore.keyContainers,
+    serviceKeyStore.keyStores[service],
     getPrivateKey(SERVICES.storage, PDK),
     type,
     protector,
