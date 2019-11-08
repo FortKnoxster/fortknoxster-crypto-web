@@ -363,3 +363,32 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async t
   )
   t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })
+
+test('Test RSA key store lock with existing asymmetric protector and new asymmetric protector', async t => {
+  const keyPair = await generateEncryptionKeyPair(algorithms.RSA_OAEP_ALGO)
+  const signingKeyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
+  const service = SERVICES.storage
+  const keyStore = await setupKeys(
+    service,
+    keyPair.publicKey,
+    signingKeyPair.privateKey,
+    algorithms.RSASSA_PKCS1_V1_5_ALGO,
+    algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.asymmetric,
+    'userId1',
+  )
+  const newProtectorKeyPair = await generateEncryptionKeyPair(
+    algorithms.RSA_OAEP_ALGO,
+  )
+  const newKeyContainers = await lock(
+    service,
+    keyStore.keyContainers,
+    keyPair.privateKey,
+    PROTECTOR_TYPES.asymmetric,
+    newProtectorKeyPair.publicKey,
+    PROTECTOR_TYPES.asymmetric,
+    'userId2',
+  )
+  // Todo: pending proper assert
+  t.assert(newKeyContainers)
+})

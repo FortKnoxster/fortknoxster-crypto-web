@@ -7,6 +7,7 @@ export {
   initKeyStores,
   unlockKeyStores,
   lockKeyStores,
+  lockKeyStore,
   verifyKeyProtector,
 } from './kryptos/serviceKeyStore'
 export {

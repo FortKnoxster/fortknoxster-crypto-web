@@ -5,7 +5,7 @@ import {
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
 } from './algorithms'
-import { SERVICES, PROTECTOR_TYPES } from './constants'
+import { SERVICES, PROTECTOR_TYPES, PDK } from './constants'
 
 const serviceKeyStore = {
   keyStores: null,
@@ -115,6 +115,23 @@ export async function lockKeyStores(
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+export async function lockKeyStore(
+  service,
+  protector,
+  type,
+  protectorIdentifier,
+) {
+  return lock(
+    service,
+    serviceKeyStore.keyStores[service],
+    getPrivateKey(SERVICES.storage, PDK),
+    type,
+    protector,
+    type,
+    protectorIdentifier,
+  )
 }
 
 export function verifyKeyProtector(keys, password, type) {
