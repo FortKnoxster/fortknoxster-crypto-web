@@ -125,7 +125,7 @@ export async function lockKeyStore(
 ) {
   return lock(
     service,
-    serviceKeyStore.keyStores[service],
+    serviceKeyStore.keyStores[service].keyContainers,
     getPrivateKey(SERVICES.storage, PDK),
     type,
     protector,
