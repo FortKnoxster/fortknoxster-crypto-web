@@ -343,6 +343,7 @@ async function replaceOrAddProtector(
   keyProtector,
   newProtectorKey,
   newType,
+  protectorIdentifier,
 ) {
   const clonedKeyContainer = { ...keyContainer }
   const protectAlgorithm = algorithms.getAlgorithm(
@@ -362,9 +363,11 @@ async function replaceOrAddProtector(
     wrappedIntermediateKey,
     newProtector.algorithm,
     newType,
+    protectorIdentifier,
   )
   // Clone keyProtectors
   const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+  // Todo: handler (type, identifier) as distinct protectors
   const index = clonedKeyProtectors.findIndex(p => p.type === newType)
   if (index !== -1) {
     clonedKeyProtectors[index] = replaceProtector
@@ -393,6 +396,7 @@ export async function lock(
   type = PROTECTOR_TYPES.password,
   newProtectorKey,
   newType = PROTECTOR_TYPES.password,
+  protectorIdentifier,
 ) {
   try {
     const clonedKeyContainers = { ...keyContainers }
@@ -412,6 +416,7 @@ export async function lock(
           keyProtector,
           newProtectorKey,
           newType,
+          protectorIdentifier,
         )
       })
 
