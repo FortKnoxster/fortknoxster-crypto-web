@@ -257,5 +257,8 @@ export function getSessionKey(algorithm, key) {
   if (typeof key === 'string') {
     return importSessionKey(base64ToArrayBuffer(key), algorithm)
   }
+  if (key instanceof ArrayBuffer) {
+    return importSessionKey(key, algorithm)
+  }
   throw new Error('Invalid protector.')
 }
