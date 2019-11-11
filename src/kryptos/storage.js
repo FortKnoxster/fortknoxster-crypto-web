@@ -27,11 +27,11 @@
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { getSessionKey } from './keys'
 import { encryptSign } from './encrypter'
-import { verifyDecrypt } from './decrypter'
-import { PSK, PEK, PVK, SERVICES } from './constants'
+import { verifyDecrypt, decryptSessionKey } from './decrypter'
+import { PSK, PEK, PVK, PDK, SERVICES } from './constants'
 import { Encrypter } from './core/kryptos.encrypter'
 import { Decrypter } from './core/kryptos.decrypter'
-import { base64ToArrayBuffer } from './utils'
+import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
 import { AES_CBC_ALGO } from './algorithms'
 
 const storage = {
@@ -96,40 +96,33 @@ export function encryptItemAssignment(item, key, publicKeys) {
   return encryptItem(item, key, publicKeys)
 }
 
-// TODO: Don't depende on item
-export function decryptItem(id, rid, key, metaData, publicKey) {
-  const { keyStore } = storage
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(key),
-    new Uint8Array(base64ToArrayBuffer(metaData.iv)),
-    base64ToArrayBuffer(metaData.d),
-    base64ToArrayBuffer(metaData.s),
-    publicKey || keyStore.getPvk(true),
-  )
-  return decrypter.decryptItem(id, rid)
-}
-
-// TODO: Don't depende on item
-export async function decryptItemAssignment(data, publicKey) {
+export async function decryptItem(metaData, key, publicKey) {
   try {
-    const {
-      item_key,
-      item: { meta_data },
-    } = data
-    const metaData = JSON.parse(meta_data)
-
-    const sessionKey = await getSessionKey(AES_CBC_ALGO, item_key)
-
-    const result = await verifyDecrypt(
+    const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
+    const json = await verifyDecrypt(
       metaData.d,
       sessionKey,
       metaData.iv,
       metaData.s,
       publicKey || getPublicKey(SERVICES.storage, PVK),
     )
-    // Todo: return correct format
-    return result
+    return { json }
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export async function decryptItemAssignment(metaData, key, publicKey) {
+  try {
+    const rawKey = await decryptSessionKey(
+      base64ToArrayBuffer(key),
+      getPrivateKey(SERVICES.storage, PDK),
+    )
+    const { json } = await decryptItem(metaData, rawKey, publicKey)
+    return {
+      json,
+      key: arrayBufferToBase64(rawKey),
+    }
   } catch (error) {
     return Promise.reject(error)
   }
