@@ -96,7 +96,6 @@ export async function decryptItemAssignment(metaData, key, publicKey) {
   }
 }
 
-// TODO: Don't depende on item
 export async function decryptFilePart(partItem, filePart) {
   const { iv, k } = partItem
   try {
