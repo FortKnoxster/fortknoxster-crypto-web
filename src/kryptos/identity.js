@@ -15,10 +15,10 @@ export function signData(data, service) {
   return signIt(data, getPrivateKey(service, PSK))
 }
 
-export async function verifyData(data, signature) {
+export async function verifyData(data, signature, publicKey) {
   try {
     const importedPvk = await importPublicVerifyKey(
-      getPublicKey(SERVICES.identity, PVK),
+      publicKey || getPublicKey(SERVICES.identity, PVK),
     )
     return verifyIt(importedPvk, signature, data)
   } catch (e) {
