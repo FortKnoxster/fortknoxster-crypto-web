@@ -191,6 +191,7 @@ export async function setupKeys(
       publicKeys: {
         encrypt: encryptContainer.publicKey,
         verify: signContainer.publicKey,
+        signature,
       },
     }
   } catch (e) {
