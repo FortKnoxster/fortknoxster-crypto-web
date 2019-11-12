@@ -24,10 +24,8 @@ export {
 } from './kryptos/protocol'
 
 export {
-  encryptItemAssignment,
   encryptNewItemAssignment,
-  encryptItems,
-  encryptExistingItem,
+  encryptItem,
   encryptFilePart,
   decryptFilePart,
   decryptItemAssignment,

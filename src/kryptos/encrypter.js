@@ -83,6 +83,27 @@ export async function encryptIt(plainText, sessionKey) {
 }
 
 /**
+ * Encrypt file binary with a given symmetric sessionKey.
+ *
+ * @param {ArrayBuffer} file
+ * @param {CryptoKey} sessionKey
+ */
+export async function encryptFile(file, sessionKey) {
+  try {
+    const iv = nonce()
+    const cipherText = await encrypt(file, iv, sessionKey)
+    const exportedSessionKey = await exportRawKey(sessionKey)
+    return {
+      iv: arrayBufferToBase64(iv),
+      key: arrayBufferToBase64(exportedSessionKey),
+      encrypted: new Uint8Array(cipherText),
+    }
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
  * Encrypt given plain text with given symmetric sessionKey,
  * sign encrypted message with given private key and wrap
  * sessionKey with given publicKeys.

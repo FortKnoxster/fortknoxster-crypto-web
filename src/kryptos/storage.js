@@ -26,47 +26,21 @@
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { getSessionKey } from './keys'
-import { encryptSign } from './encrypter'
-import { verifyDecrypt, decryptSessionKey } from './decrypter'
+import { encryptSign, encryptFile } from './encrypter'
+import { verifyDecrypt, decryptSessionKey, decrypt } from './decrypter'
 import { PSK, PEK, PVK, PDK, SERVICES } from './constants'
-import { Encrypter } from './core/kryptos.encrypter'
-import { Decrypter } from './core/kryptos.decrypter'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
-import { AES_CBC_ALGO } from './algorithms'
+import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
 
-const storage = {
-  keyStore: null,
-}
-
-// TODO: Move to React
-function formatItem(encryptedItem, item) {
-  const { iv, m, s, key, keys } = encryptedItem
-  return {
-    d: m,
-    iv,
-    s,
-    ...(key && { key }),
-    ...(keys[0] && {
-      // eslint-disable-next-line camelcase
-      encrypted_key: new window.Blob([keys[0]], {
-        type: 'application/octet-stream',
-      }),
-    }),
-    ...(item && { rid: item.rid }),
-  }
-}
-
-// TODO: Don't depende on item
-export async function encryptItem(item, key, publicKeys = []) {
+export async function encryptItem(data, key, publicKeys = []) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
-    const result = await encryptSign(
-      item.d,
+    return encryptSign(
+      data,
       sessionKey,
       getPrivateKey(SERVICES.storage, PSK),
       publicKeys,
     )
-    return formatItem(result, item)
   } catch (error) {
     return Promise.reject(error)
   }
@@ -78,22 +52,16 @@ export async function encryptNewItemAssignment(item) {
 }
 
 export function encryptItems(items) {
-  return items.map(item => encryptItem(item))
+  return items.map(item => encryptItem(item.d))
 }
 
-export function encryptExistingItem(item, key) {
-  return encryptItem(item, key)
-}
-
-// TODO: Don't depende on item
-export function encryptFilePart(filePart, partNo, itemId) {
-  const { keyStore } = storage
-  const encrypter = new Encrypter(keyStore, null, null, null)
-  return encrypter.encryptFilePart(filePart, itemId, partNo)
-}
-
-export function encryptItemAssignment(item, key, publicKeys) {
-  return encryptItem(item, key, publicKeys)
+export async function encryptFilePart(filePart) {
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO)
+    return encryptFile(filePart, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 export async function decryptItem(metaData, key, publicKey) {
@@ -129,14 +97,12 @@ export async function decryptItemAssignment(metaData, key, publicKey) {
 }
 
 // TODO: Don't depende on item
-export function decryptFilePart(itemId, partItem, filePart) {
-  const { keyStore } = storage
-  const { iv, k, p } = partItem
-  const decrypter = new Decrypter(
-    keyStore,
-    base64ToArrayBuffer(k),
-    base64ToArrayBuffer(iv),
-    filePart,
-  )
-  return decrypter.decryptFilePart(itemId, p)
+export async function decryptFilePart(partItem, filePart) {
+  const { iv, k } = partItem
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO, base64ToArrayBuffer(k))
+    return decrypt(filePart, base64ToArrayBuffer(iv), sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
