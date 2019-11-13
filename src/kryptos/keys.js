@@ -36,7 +36,7 @@ export function importSessionKey(keyBytes, algorithm) {
     formats.RAW,
     keyBytes,
     algorithm || algorithms.AES_CBC_ALGO,
-    NONEXTRACTABLE,
+    EXTRACTABLE,
     usage.ENCRYPT,
   )
 }
