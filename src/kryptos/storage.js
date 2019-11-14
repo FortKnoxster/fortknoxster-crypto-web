@@ -51,10 +51,6 @@ export async function encryptNewItemAssignment(item) {
   return encryptItem(item, null, [publicKey])
 }
 
-export function encryptItems(items) {
-  return items.map(item => encryptItem(item.d))
-}
-
 export async function encryptFilePart(filePart) {
   try {
     const sessionKey = await getSessionKey(AES_GCM_ALGO)
