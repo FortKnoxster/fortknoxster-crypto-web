@@ -29,10 +29,10 @@ export async function decryptChatMessage(message, key, publicKey) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
     return verifyDecrypt(
-      message.message,
+      message.m,
       sessionKey,
       message.iv,
-      message.signature,
+      message.s,
       publicKey || getPublicKey(SERVICES.mail, PVK),
     )
   } catch (error) {
@@ -42,10 +42,10 @@ export async function decryptChatMessage(message, key, publicKey) {
 
 export function decryptGroupChatMessage(message, sessionKey, publicKey) {
   return verifyDecrypt(
-    message.message,
+    message.decryptChatMessage,
     sessionKey,
     message.iv,
-    message.signature,
+    message.s,
     publicKey || getPublicKey(SERVICES.mail, PVK),
   )
 }
