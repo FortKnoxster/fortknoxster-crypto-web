@@ -36,6 +36,8 @@ export {
   encryptChatMessage,
   encryptGroupChatMessage,
   decryptGroupChatKey,
+  decryptChatMessage,
+  decryptGroupChatMessage,
 } from './kryptos/chat'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
