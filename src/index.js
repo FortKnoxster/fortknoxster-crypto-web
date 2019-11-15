@@ -32,7 +32,11 @@ export {
   decryptItem,
 } from './kryptos/storage'
 
-export { encryptChatMessage } from './kryptos/chat'
+export {
+  encryptChatMessage,
+  encryptGroupChatMessage,
+  decryptGroupChatKey,
+} from './kryptos/chat'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 
