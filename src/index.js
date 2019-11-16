@@ -40,6 +40,8 @@ export {
   decryptGroupChatMessage,
 } from './kryptos/chat'
 
+export { decryptMessage } from './kryptos/inbox'
+
 export { signIt, hmacSignIt } from './kryptos/signer'
 
 export { verifyIt } from './kryptos/verifier'
