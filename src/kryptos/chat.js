@@ -27,7 +27,9 @@ export async function encryptGroupChatMessage(plainText, sessionKey) {
 
 export async function decryptChatMessage(message, key, publicKey) {
   try {
-    const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
+    const rawKey = base64ToArrayBuffer(key)
+    const privateKey = getPrivateKey(SERVICES.mail, PDK)
+    const sessionKey = await unwrapKey(rawKey, privateKey, AES_GCM_ALGO)
     return verifyDecrypt(
       message.m,
       sessionKey,
