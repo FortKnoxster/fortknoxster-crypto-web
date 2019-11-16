@@ -29,7 +29,7 @@ export async function decryptChatMessage(message, key, publicKey) {
   try {
     const rawKey = base64ToArrayBuffer(key)
     const privateKey = getPrivateKey(SERVICES.mail, PDK)
-    const sessionKey = await unwrapKey(rawKey, privateKey, AES_GCM_ALGO)
+    const sessionKey = await unwrapKey(rawKey, privateKey, AES_CBC_ALGO)
     return verifyDecrypt(
       message.m,
       sessionKey,
