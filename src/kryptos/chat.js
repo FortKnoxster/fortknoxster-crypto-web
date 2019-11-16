@@ -44,7 +44,7 @@ export async function decryptChatMessage(message, key, publicKey) {
 
 export function decryptGroupChatMessage(message, sessionKey, publicKey) {
   return verifyDecrypt(
-    message.decryptChatMessage,
+    message.m,
     sessionKey,
     message.iv,
     message.s,
