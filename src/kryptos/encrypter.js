@@ -117,8 +117,8 @@ export async function encryptSign(plainText, sessionKey, privateKey) {
     const { iv, cipherText } = await encryptIt(plainText, sessionKey)
     const signature = await sign(cipherText, privateKey)
     return {
-      iv: arrayBufferToBase64(iv),
       m: arrayBufferToBase64(cipherText),
+      iv: arrayBufferToBase64(iv),
       s: arrayBufferToBase64(signature),
     }
   } catch (error) {
@@ -150,8 +150,8 @@ export async function encryptSignEncrypt(
     )
     const keys = await Promise.all(promises)
     return {
-      iv,
       m,
+      iv,
       s,
       key: arrayBufferToBase64(exportedSessionKey),
       keys,

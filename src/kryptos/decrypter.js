@@ -31,6 +31,12 @@ import { AES_GCM, RSA_OAEP } from './algorithms'
 import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
 
+/**
+ *  Decrypt sessionKey with private key.
+ *
+ * @param {ArrayBuffer} encryptedKey
+ * @param {CryptoKey} privateKey
+ */
 export function decryptSessionKey(encryptedKey, privateKey) {
   return kryptos.subtle.decrypt(
     { name: RSA_OAEP.name },
@@ -43,6 +49,7 @@ export function decryptSessionKey(encryptedKey, privateKey) {
  * Determine decryption algorithm based on the CryptoKey object.
  *
  * @param {ArrayBuffer} arrayBuffer
+ * @param {ArrayBuffer} iv
  * @param {CryptoKey} key
  */
 export function decrypt(arrayBuffer, iv, key) {
@@ -58,7 +65,7 @@ export function decrypt(arrayBuffer, iv, key) {
  *
  * @param {ArrayBuffer} cipherText
  * @param {CryptoKey} sessionKey
- * @param {String} base64Iv
+ * @param {ArrayBuffer} iv
  */
 export async function decryptIt(cipherText, iv, sessionKey) {
   try {
@@ -74,8 +81,8 @@ export async function decryptIt(cipherText, iv, sessionKey) {
  *
  * @param {ArrayBuffer} cipherText
  * @param {CryptoKey} sessionKey
- * @param {String} base64Iv
- * @param {String} base64Signature
+ * @param {ArrayBuffer} iv
+ * @param {ArrayBuffer} signature
  * @param {CryptoKey} publicKey
  */
 export async function verifyDecrypt(
