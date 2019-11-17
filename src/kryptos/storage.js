@@ -26,7 +26,7 @@
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { getSessionKey } from './keys'
-import { encryptSign, encryptFile } from './encrypter'
+import { encryptSignEncrypt, encryptFile } from './encrypter'
 import { verifyDecrypt, decryptSessionKey, decrypt } from './decrypter'
 import { PSK, PEK, PVK, PDK, SERVICES } from './constants'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
@@ -35,7 +35,7 @@ import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
 export async function encryptItem(data, key, publicKeys = []) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
-    return encryptSign(
+    return encryptSignEncrypt(
       data,
       sessionKey,
       getPrivateKey(SERVICES.storage, PSK),

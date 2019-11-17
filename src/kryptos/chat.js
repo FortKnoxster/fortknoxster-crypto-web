@@ -1,5 +1,5 @@
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { encryptSign } from './encrypter'
+import { encryptSign, encryptSignEncrypt } from './encrypter'
 import { decryptSessionKey, verifyDecrypt } from './decrypter'
 import { generateSessionKey, unwrapKey, getSessionKey } from './keys'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
@@ -10,7 +10,7 @@ export async function encryptChatMessage(plainText, publicKeys) {
   try {
     const sessionKey = await generateSessionKey(AES_CBC_ALGO)
     const privateKey = getPrivateKey(SERVICES.mail, PSK)
-    const result = await encryptSign(
+    const result = await encryptSignEncrypt(
       plainText,
       sessionKey,
       privateKey,

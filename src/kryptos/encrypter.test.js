@@ -5,7 +5,7 @@ import {
   generateEncryptionKeyPair,
   exportPublicKey,
 } from './keys'
-import { encryptSign } from './encrypter'
+import { encryptSignEncrypt } from './encrypter'
 import * as algorithms from './algorithms'
 
 test('Test encrypt and sign message', async t => {
@@ -24,7 +24,7 @@ test('Test encrypt and sign message', async t => {
 
   const exportedPublicKey = await exportPublicKey(encryptKeyPair.publicKey)
 
-  const result = await encryptSign(
+  const result = await encryptSignEncrypt(
     plainText,
     sessionKey,
     signKeyPair.privateKey,
