@@ -1,10 +1,10 @@
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { encryptSign } from './encrypter'
-import { decryptSessionKey, verifyDecrypt } from './decrypter'
-import { generateSessionKey, unwrapKey, getSessionKey } from './keys'
+import { verifyDecrypt } from './decrypter'
+import { generateSessionKey, unwrapKey } from './keys'
 import { base64ToArrayBuffer, extractMessage } from './utils'
 import { PSK, PVK, PDK, SERVICES } from './constants'
-import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
+import { AES_CBC_ALGO } from './algorithms'
 
 export async function encryptChatMessage(plainText, publicKeys) {
   try {
@@ -52,27 +52,11 @@ export function decryptGroupChatMessage(message, sessionKey, publicKey) {
   )
 }
 
-export async function encryptGroupChatKey(key, publicKeys) {
-  const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
-  return { sessionKey, publicKeys }
-}
-
-export function decryptGroupChatKey(key, raw) {
-  try {
-    const privateKey = getPrivateKey(SERVICES.mail, PDK)
-    const rawKey = base64ToArrayBuffer(key)
-    if (raw) {
-      return decryptSessionKey(rawKey, privateKey)
-    }
-    return unwrapKey(rawKey, privateKey, AES_GCM_ALGO)
-  } catch (error) {
-    return Promise.reject(error)
-  }
-}
-
 export async function decryptMessage(message, publicKey) {
   try {
-    const { encryptedKey, iv, cipherText, signature } = extractMessage(message)
+    const { encryptedKey, iv, cipherText, signature } = extractMessage(
+      base64ToArrayBuffer(message),
+    )
     const privateKey = getPrivateKey(SERVICES.mail, PDK)
     const sessionKey = await unwrapKey(encryptedKey, privateKey, AES_CBC_ALGO)
     return verifyDecrypt(
@@ -86,55 +70,3 @@ export async function decryptMessage(message, publicKey) {
     return Promise.reject(error)
   }
 }
-
-// Todo: Rewrite, still used in legacy inbox
-/*
-const decrypt2 = (from, uuid) =>
-new Promise(resolve =>
-  keyStore
-    .getPublicKey(from, 'verify')
-    .then(savePublicKey)
-    .then(importPublicVerifyKey)
-    .then(saveImportedPublicVerifyKey)
-    .then(verifyEncryptedMessage)
-    .catch(error => {
-      console.error(error)
-      resolve({
-        uuid,
-        failed: true,
-        plain: { subject: 'Could not verify sender' },
-      })
-    })
-    .then(handleMessageVerification)
-    .then(keyStore.getPdk)
-    .then(decryptKey)
-    .catch(error => {
-      console.error(error)
-      resolve({ uuid, failed: true, plain: { subject: 'Invalid key!' } })
-    })
-    .then(importSessionKey)
-    .then(decryptCipherText)
-    .catch(error => {
-      console.error(error)
-      resolve({
-        uuid,
-        failed: true,
-        plain: { subject: 'Could not decrypt message!!' },
-      })
-    })
-    .then(plainText => {
-      if (plainText) {
-        const plain = utils.arrayBufferToObject(plainText)
-        resolve({ uuid, failed: false, plain })
-      }
-    })
-    .catch(error => {
-      console.error(error)
-      resolve({
-        uuid,
-        failed: true,
-        plain: { subject: 'Something went wrong!!' },
-      })
-    }),
-)
-*/

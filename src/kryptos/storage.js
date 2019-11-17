@@ -64,10 +64,10 @@ export async function decryptItem(metaData, key, publicKey) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
     const json = await verifyDecrypt(
-      metaData.d,
+      base64ToArrayBuffer(metaData.d),
       sessionKey,
-      metaData.iv,
-      metaData.s,
+      base64ToArrayBuffer(metaData.iv),
+      base64ToArrayBuffer(metaData.s),
       publicKey || getPublicKey(SERVICES.storage, PVK),
     )
     return { json }

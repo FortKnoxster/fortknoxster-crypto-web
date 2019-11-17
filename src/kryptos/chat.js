@@ -31,10 +31,10 @@ export async function decryptChatMessage(message, key, publicKey) {
     const privateKey = getPrivateKey(SERVICES.mail, PDK)
     const sessionKey = await unwrapKey(rawKey, privateKey, AES_CBC_ALGO)
     return verifyDecrypt(
-      message.m,
+      base64ToArrayBuffer(message.m),
       sessionKey,
-      message.iv,
-      message.s,
+      base64ToArrayBuffer(message.iv),
+      base64ToArrayBuffer(message.s),
       publicKey || getPublicKey(SERVICES.mail, PVK),
     )
   } catch (error) {
@@ -44,10 +44,10 @@ export async function decryptChatMessage(message, key, publicKey) {
 
 export function decryptGroupChatMessage(message, sessionKey, publicKey) {
   return verifyDecrypt(
-    message.m,
+    base64ToArrayBuffer(message.m),
     sessionKey,
-    message.iv,
-    message.s,
+    base64ToArrayBuffer(message.iv),
+    base64ToArrayBuffer(message.s),
     publicKey || getPublicKey(SERVICES.mail, PVK),
   )
 }

@@ -26,7 +26,7 @@
  */
 import { kryptos } from './kryptos'
 import { importPublicVerifyKey } from './keys'
-import { base64ToArrayBuffer, arrayBufferToObject } from './utils'
+import { arrayBufferToObject } from './utils'
 import { AES_GCM, RSA_OAEP } from './algorithms'
 import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
@@ -60,9 +60,8 @@ export function decrypt(arrayBuffer, iv, key) {
  * @param {CryptoKey} sessionKey
  * @param {String} base64Iv
  */
-export async function decryptIt(cipherText, base64Iv, sessionKey) {
+export async function decryptIt(cipherText, iv, sessionKey) {
   try {
-    const iv = base64ToArrayBuffer(base64Iv)
     const plainText = await decrypt(cipherText, iv, sessionKey)
     return arrayBufferToObject(plainText)
   } catch (error) {
@@ -80,18 +79,16 @@ export async function decryptIt(cipherText, base64Iv, sessionKey) {
  * @param {CryptoKey} publicKey
  */
 export async function verifyDecrypt(
-  data,
+  cipherText,
   sessionKey,
-  base64Iv,
-  base64Signature,
+  iv,
+  signature,
   publicKey,
 ) {
   try {
-    const cipherText = base64ToArrayBuffer(data)
-    const signature = base64ToArrayBuffer(base64Signature)
     const importedPvk = await importPublicVerifyKey(publicKey)
     await verify(importedPvk, signature, cipherText)
-    return decryptIt(cipherText, base64Iv, sessionKey)
+    return decryptIt(cipherText, iv, sessionKey)
   } catch (error) {
     return Promise.reject(error)
   }
