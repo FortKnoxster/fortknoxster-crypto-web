@@ -2,7 +2,7 @@ import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { encryptSign } from './encrypter'
 import { decryptSessionKey, verifyDecrypt } from './decrypter'
 import { generateSessionKey, unwrapKey, getSessionKey } from './keys'
-import { base64ToArrayBuffer } from './utils'
+import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
 import { PSK, PVK, PDK, SERVICES } from './constants'
 import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
 
@@ -10,7 +10,15 @@ export async function encryptChatMessage(plainText, publicKeys) {
   try {
     const sessionKey = await generateSessionKey(AES_CBC_ALGO)
     const privateKey = getPrivateKey(SERVICES.mail, PSK)
-    return encryptSign(plainText, sessionKey, privateKey, publicKeys)
+    const result = await encryptSign(
+      plainText,
+      sessionKey,
+      privateKey,
+      publicKeys,
+    )
+    const { iv, s, m, keys } = result
+    const formattedKeys = keys.map(key => arrayBufferToBase64(key))
+    return { iv, s, m, keys: formattedKeys }
   } catch (error) {
     return Promise.reject(error)
   }
