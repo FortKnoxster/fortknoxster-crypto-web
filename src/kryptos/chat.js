@@ -1,7 +1,12 @@
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { encryptSign, encryptSignEncrypt } from './encrypter'
+import { encryptSign, encryptSignEncrypt, encryptSessionKey } from './encrypter'
 import { decryptSessionKey, verifyDecrypt } from './decrypter'
-import { generateSessionKey, unwrapKey, getSessionKey } from './keys'
+import {
+  generateSessionKey,
+  unwrapKey,
+  getSessionKey,
+  exportRawKey,
+} from './keys'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
 import { PSK, PVK, PDK, SERVICES } from './constants'
 import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
@@ -61,8 +66,13 @@ export function decryptGroupChatMessage(message, sessionKey, publicKey) {
 }
 
 export async function encryptGroupChatKey(key, publicKeys) {
-  const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
-  return { sessionKey, publicKeys }
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
+    const rawKey = await exportRawKey(sessionKey)
+    return publicKeys.map(publicKey => encryptSessionKey(rawKey, publicKey))
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 export function decryptGroupChatKey(key, raw) {
