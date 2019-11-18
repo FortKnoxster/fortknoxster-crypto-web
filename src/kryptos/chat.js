@@ -69,7 +69,11 @@ export async function encryptGroupChatKey(key, publicKeys) {
   try {
     const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
     const rawKey = await exportRawKey(sessionKey)
-    return publicKeys.map(publicKey => encryptSessionKey(rawKey, publicKey))
+    const promises = publicKeys.map(publicKey =>
+      encryptSessionKey(rawKey, publicKey),
+    )
+    const keys = await Promise.all(promises)
+    return keys.map(k => arrayBufferToBase64(k))
   } catch (error) {
     return Promise.reject(error)
   }
