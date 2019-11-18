@@ -260,15 +260,23 @@ export function getSessionKey(algorithm, key) {
   if (key instanceof ArrayBuffer) {
     return importSessionKey(key, algorithm)
   }
-  throw new Error('Invalid protector.')
+  throw new Error('Invalid session key.')
 }
 
-export function importHmacKey(raw) {
+export function importHmacKey(raw, usages) {
   return kryptos.subtle.importKey(
     formats.RAW,
     raw,
     algorithms.HMAC_ALGO,
     NONEXTRACTABLE,
-    usage.SIGN,
+    usages,
   )
+}
+
+export function importHmacSignKey(raw) {
+  return importHmacKey(raw, usage.SIGN)
+}
+
+export function importHmacVerifyKey(raw) {
+  return importHmacKey(raw, usage.VERIFY)
 }
