@@ -262,3 +262,13 @@ export function getSessionKey(algorithm, key) {
   }
   throw new Error('Invalid protector.')
 }
+
+export function importHmacKey(raw) {
+  return kryptos.subtle.importKey(
+    formats.RAW,
+    raw,
+    algorithms.HMAC_ALGO,
+    NONEXTRACTABLE,
+    usage.SIGN,
+  )
+}

@@ -25,15 +25,13 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import * as utils from './utils'
-import * as algorithms from './algorithms'
-import * as formats from './formats'
-import * as usage from './usages'
-import { NONEXTRACTABLE } from './constants'
+import { importHmacKey } from './keys'
+import { stringToArrayBuffer, arrayBufferToBase64 } from './utils'
+import { getSignAlgorithm } from './algorithms'
 
 export function sign(arrayBuffer, signKey) {
   return kryptos.subtle.sign(
-    algorithms.getSignAlgorithm(signKey.algorithm.name),
+    getSignAlgorithm(signKey.algorithm.name),
     signKey,
     new Uint8Array(arrayBuffer),
   )
@@ -41,30 +39,28 @@ export function sign(arrayBuffer, signKey) {
 
 export async function signIt(plainText, privateKey) {
   try {
-    const data = utils.stringToArrayBuffer(JSON.stringify(plainText))
+    const data = stringToArrayBuffer(JSON.stringify(plainText))
     const signature = await sign(data, privateKey)
-    return utils.arrayBufferToBase64(signature)
+    return arrayBufferToBase64(signature)
   } catch (error) {
     return Promise.reject(error)
   }
 }
 
-export function importHmacKey(raw) {
-  return kryptos.subtle.importKey(
-    formats.RAW,
-    raw,
-    algorithms.HMAC_ALGO,
-    NONEXTRACTABLE,
-    usage.SIGN,
-  )
+export async function hmacBinarySignIt(cipherText, rawKey) {
+  try {
+    const signKey = await importHmacKey(stringToArrayBuffer(rawKey))
+    return sign(cipherText, signKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 export async function hmacSignIt(plainText, rawKey) {
   try {
-    const data = utils.stringToArrayBuffer(plainText)
-    const signKey = await importHmacKey(utils.stringToArrayBuffer(rawKey))
-    const signature = await sign(data, signKey)
-    return utils.arrayBufferToBase64(signature)
+    const data = stringToArrayBuffer(plainText)
+    const signature = await hmacBinarySignIt(data, rawKey)
+    return arrayBufferToBase64(signature)
   } catch (error) {
     return Promise.reject(error)
   }

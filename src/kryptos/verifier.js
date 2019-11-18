@@ -25,8 +25,9 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
+import { importHmacKey } from './keys'
 import { base64ToArrayBuffer, stringToArrayBuffer } from './utils'
-import * as algorithms from './algorithms'
+import { getSignAlgorithm } from './algorithms'
 
 /**
  * Verify given signature and verified signature of the given cipher text.
@@ -37,7 +38,7 @@ import * as algorithms from './algorithms'
  */
 export async function verify(publicKey, signature, cipherText) {
   const result = await kryptos.subtle.verify(
-    algorithms.getSignAlgorithm(publicKey.algorithm.name),
+    getSignAlgorithm(publicKey.algorithm.name),
     publicKey,
     signature,
     cipherText,
@@ -60,6 +61,15 @@ export function verifyIt(publicKey, base64Signature, data) {
     const signature = base64ToArrayBuffer(base64Signature)
     const cipherText = stringToArrayBuffer(JSON.stringify(data))
     return verify(publicKey, signature, cipherText)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export async function hmacVerifyIt(rawKey, signature, data) {
+  try {
+    const verifyKey = await importHmacKey(rawKey)
+    return verify(verifyKey, signature, data)
   } catch (error) {
     return Promise.reject(error)
   }

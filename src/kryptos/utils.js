@@ -206,3 +206,9 @@ export function extractMessage(data) {
   const cipherText = new Uint8Array(data, 4 + signatureLength + keyLength + 16)
   return { encryptedKey, iv, cipherText, signature }
 }
+
+export function extractFile(data) {
+  const iv = new Uint8Array(data, 0, 16)
+  const encryptedFile = new Uint8Array(data, 16)
+  return { iv, encryptedFile }
+}
