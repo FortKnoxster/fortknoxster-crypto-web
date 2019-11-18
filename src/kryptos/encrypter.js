@@ -104,6 +104,29 @@ export async function encryptFile(file, sessionKey) {
 }
 
 /**
+ * Encrypt given plain text with given symmetric sessionKey
+ * and sign encrypted message with given private key.
+ *
+ * @param {Object} plainText
+ * @param {CryptoKey} sessionKey
+ * @param {CryptoKey} privateKey
+ * @param {Array} publicKeys
+ */
+export async function encryptSign(plainText, sessionKey, privateKey) {
+  try {
+    const { iv, cipherText } = await encryptIt(plainText, sessionKey)
+    const signature = await sign(cipherText, privateKey)
+    return {
+      m: arrayBufferToBase64(cipherText),
+      iv: arrayBufferToBase64(iv),
+      s: arrayBufferToBase64(signature),
+    }
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
  * Encrypt given plain text with given symmetric sessionKey,
  * sign encrypted message with given private key and wrap
  * sessionKey with given publicKeys.
@@ -113,24 +136,23 @@ export async function encryptFile(file, sessionKey) {
  * @param {CryptoKey} privateKey
  * @param {Array} publicKeys
  */
-export async function encryptSign(
+export async function encryptSignEncrypt(
   plainText,
   sessionKey,
   privateKey,
   publicKeys = [],
 ) {
   try {
-    const { iv, cipherText } = await encryptIt(plainText, sessionKey)
-    const signature = await sign(cipherText, privateKey)
+    const { iv, m, s } = await encryptSign(plainText, sessionKey, privateKey)
     const exportedSessionKey = await exportRawKey(sessionKey)
     const promises = publicKeys.map(publicKey =>
       encryptSessionKey(exportedSessionKey, publicKey),
     )
     const keys = await Promise.all(promises)
     return {
-      iv: arrayBufferToBase64(iv),
-      m: arrayBufferToBase64(cipherText),
-      s: arrayBufferToBase64(signature),
+      m,
+      iv,
+      s,
       key: arrayBufferToBase64(exportedSessionKey),
       keys,
     }

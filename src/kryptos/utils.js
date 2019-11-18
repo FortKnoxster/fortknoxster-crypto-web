@@ -196,3 +196,13 @@ export function toJwk(jwk) {
   }
   return rsaJwk(jwk)
 }
+
+export function extractMessage(data) {
+  const keyLength = new Uint16Array(data, 0, 2)[0] // First 16 bit integer
+  const signatureLength = new Uint16Array(data, 2, 2)[0]
+  const encryptedKey = new Uint8Array(data, 4, keyLength)
+  const signature = new Uint8Array(data, 4 + keyLength, signatureLength)
+  const iv = new Uint8Array(data, 4 + signatureLength + keyLength, 16)
+  const cipherText = new Uint8Array(data, 4 + signatureLength + keyLength + 16)
+  return { encryptedKey, iv, cipherText, signature }
+}
