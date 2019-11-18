@@ -263,20 +263,12 @@ export function getSessionKey(algorithm, key) {
   throw new Error('Invalid session key.')
 }
 
-export function importHmacKey(raw, usages) {
+export function importHmacKey(raw) {
   return kryptos.subtle.importKey(
     formats.RAW,
     raw,
     algorithms.HMAC_ALGO,
     NONEXTRACTABLE,
-    usages,
+    usage.SIGN,
   )
-}
-
-export function importHmacSignKey(raw) {
-  return importHmacKey(raw, usage.SIGN)
-}
-
-export function importHmacVerifyKey(raw) {
-  return importHmacKey(raw, usage.VERIFY)
 }

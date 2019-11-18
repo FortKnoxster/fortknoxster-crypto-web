@@ -32,7 +32,7 @@ export function hexToArrayBuffer(hex) {
   for (let i = 0; i < numBytes; i += 1) {
     byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
   }
-  return byteArray
+  return byteArray.buffer
 }
 
 /**
