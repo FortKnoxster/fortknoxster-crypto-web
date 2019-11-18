@@ -54,7 +54,6 @@ export async function encryptFile(file) {
     const hmac = await hmacBinarySignIt(encrypted, rawKey)
 
     return {
-      iv: arrayBufferToHex(iv),
       key: arrayBufferToHex(key),
       hmac: arrayBufferToHex(hmac),
       encrypted: [iv, encrypted],
