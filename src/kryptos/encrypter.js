@@ -94,8 +94,8 @@ export async function encryptBinary(binary, sessionKey) {
     const cipherText = await encrypt(binary, iv, sessionKey)
     const exportedSessionKey = await exportRawKey(sessionKey)
     return {
-      iv: arrayBufferToBase64(iv),
-      key: arrayBufferToBase64(exportedSessionKey),
+      iv,
+      key: exportedSessionKey,
       encrypted: new Uint8Array(cipherText),
     }
   } catch (error) {
