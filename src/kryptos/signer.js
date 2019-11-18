@@ -49,7 +49,7 @@ export async function signIt(plainText, privateKey) {
 
 export async function hmacBinarySignIt(cipherText, rawKey) {
   try {
-    const signKey = await importHmacKey(stringToArrayBuffer(rawKey))
+    const signKey = await importHmacKey(rawKey)
     return sign(cipherText, signKey)
   } catch (error) {
     return Promise.reject(error)
@@ -59,7 +59,7 @@ export async function hmacBinarySignIt(cipherText, rawKey) {
 export async function hmacSignIt(plainText, rawKey) {
   try {
     const data = stringToArrayBuffer(plainText)
-    const signature = await hmacBinarySignIt(data, rawKey)
+    const signature = await hmacBinarySignIt(data, stringToArrayBuffer(rawKey))
     return arrayBufferToBase64(signature)
   } catch (error) {
     return Promise.reject(error)

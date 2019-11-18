@@ -46,17 +46,21 @@ import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
  * @param {ArrayBuffer} file
  */
 export async function encryptFile(file) {
-  const sessionKey = await getSessionKey(AES_CBC_ALGO)
-  const rawKey = await exportRawKey(sessionKey)
-  const { iv, key, encrypted } = await encryptBinary(file, sessionKey)
+  try {
+    const sessionKey = await getSessionKey(AES_CBC_ALGO)
+    const rawKey = await exportRawKey(sessionKey)
+    const { iv, key, encrypted } = await encryptBinary(file, sessionKey)
 
-  const hmac = await hmacBinarySignIt(encrypted, rawKey)
+    const hmac = await hmacBinarySignIt(encrypted, rawKey)
 
-  return {
-    iv: arrayBufferToHex(iv),
-    key: arrayBufferToHex(key),
-    hmac: arrayBufferToHex(hmac),
-    encrypted: [iv, encrypted],
+    return {
+      iv: arrayBufferToHex(iv),
+      key: arrayBufferToHex(key),
+      hmac: arrayBufferToHex(hmac),
+      encrypted: [iv, encrypted],
+    }
+  } catch (error) {
+    return Promise.reject(error)
   }
 }
 
