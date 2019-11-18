@@ -43,6 +43,7 @@ export {
   decryptGroupChatKey,
   decryptChatMessage,
   decryptGroupChatMessage,
+  encryptGroupChatKey,
 } from './kryptos/chat'
 
 export { decryptMessage } from './kryptos/inbox'
