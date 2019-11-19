@@ -27,7 +27,7 @@
 import { kryptos } from './kryptos'
 import { importPublicVerifyKey } from './keys'
 import { arrayBufferToObject } from './utils'
-import { AES_GCM, RSA_OAEP } from './algorithms'
+import { AES_GCM } from './algorithms'
 import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
 
@@ -39,7 +39,7 @@ import { LENGTH_128 } from './constants'
  */
 export function decryptSessionKey(encryptedKey, privateKey) {
   return kryptos.subtle.decrypt(
-    { name: RSA_OAEP.name },
+    { name: privateKey.algorithm.name },
     privateKey,
     encryptedKey,
   )

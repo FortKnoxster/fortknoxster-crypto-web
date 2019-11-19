@@ -85,17 +85,17 @@ export async function encryptIt(plainText, sessionKey) {
 /**
  * Encrypt file binary with a given symmetric sessionKey.
  *
- * @param {ArrayBuffer} file
+ * @param {ArrayBuffer} binary
  * @param {CryptoKey} sessionKey
  */
-export async function encryptFile(file, sessionKey) {
+export async function encryptBinary(binary, sessionKey) {
   try {
     const iv = nonce()
-    const cipherText = await encrypt(file, iv, sessionKey)
+    const cipherText = await encrypt(binary, iv, sessionKey)
     const exportedSessionKey = await exportRawKey(sessionKey)
     return {
-      iv: arrayBufferToBase64(iv),
-      key: arrayBufferToBase64(exportedSessionKey),
+      iv,
+      key: exportedSessionKey,
       encrypted: new Uint8Array(cipherText),
     }
   } catch (error) {

@@ -26,11 +26,16 @@ export {
 export {
   encryptNewItemAssignment,
   encryptItem,
-  encryptFilePart,
-  decryptFilePart,
   decryptItemAssignment,
   decryptItem,
 } from './kryptos/storage'
+
+export {
+  encryptFile,
+  decryptFile,
+  encryptFilePart,
+  decryptFilePart,
+} from './kryptos/files'
 
 export {
   encryptChatMessage,
@@ -38,6 +43,7 @@ export {
   decryptGroupChatKey,
   decryptChatMessage,
   decryptGroupChatMessage,
+  encryptGroupChatKey,
 } from './kryptos/chat'
 
 export { decryptMessage } from './kryptos/inbox'

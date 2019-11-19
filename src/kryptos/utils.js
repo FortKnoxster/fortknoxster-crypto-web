@@ -32,7 +32,7 @@ export function hexToArrayBuffer(hex) {
   for (let i = 0; i < numBytes; i += 1) {
     byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
   }
-  return byteArray
+  return byteArray.buffer
 }
 
 /**
@@ -205,4 +205,10 @@ export function extractMessage(data) {
   const iv = new Uint8Array(data, 4 + signatureLength + keyLength, 16)
   const cipherText = new Uint8Array(data, 4 + signatureLength + keyLength + 16)
   return { encryptedKey, iv, cipherText, signature }
+}
+
+export function extractFile(data) {
+  const iv = new Uint8Array(data, 0, 16)
+  const encryptedFile = new Uint8Array(data, 16)
+  return { iv, encryptedFile }
 }
