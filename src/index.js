@@ -16,6 +16,9 @@ export {
   dataUrlToBlob,
   randomString,
 } from './kryptos/utils'
+
+export { hashAnything } from './kryptos/digest'
+
 export {
   initProtocol,
   encryptProtocol,
@@ -46,7 +49,7 @@ export {
   encryptGroupChatKey,
 } from './kryptos/chat'
 
-export { decryptMessage } from './kryptos/inbox'
+export { encryptMessage, decryptMessage } from './kryptos/inbox'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 

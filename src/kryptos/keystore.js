@@ -32,7 +32,6 @@ import {
   generateKeyPair,
   wrapPrivateKey,
   exportPublicKey,
-  fingerprint,
   unwrapKey,
   unwrapPrivateKey,
   exportKey,
@@ -40,6 +39,7 @@ import {
 import * as algorithms from './algorithms'
 import { getUsage } from './usages'
 import { signIt } from './signer'
+import { fingerprint } from './digest'
 import { getProtector, packProtector } from './protector'
 import { PROTECTOR_TYPES, EXTRACTABLE } from './constants'
 
