@@ -1,5 +1,6 @@
 import { kryptos } from './kryptos'
 import { EC } from './algorithms'
+import { LENGTH_256 } from './constants'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -211,4 +212,20 @@ export function extractFile(data) {
   const iv = new Uint8Array(data, 0, 16)
   const encryptedFile = new Uint8Array(data, 16)
   return { iv, encryptedFile }
+}
+
+export function packMessage(iv, signature, cipherText) {
+  const signatureLength = new Uint16Array([signature.byteLength])
+  const blob = new Blob(
+    [
+      new Uint16Array([LENGTH_256]), // keyLength, // 2 bytes
+      signatureLength, // 2 bytes
+      new ArrayBuffer(LENGTH_256), // encryptedKey, // 256 bytes
+      signature, // 256 bytes
+      iv,
+      cipherText,
+    ],
+    { type: 'application/octet-stream' },
+  )
+  return blob
 }
