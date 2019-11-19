@@ -25,11 +25,32 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
+import { encryptSignBinary, encryptSessionKeys } from './encrypter'
 import { verifyDecrypt } from './decrypter'
-import { unwrapKey } from './keys'
-import { base64ToArrayBuffer, extractMessage } from './utils'
-import { PVK, PDK, SERVICES } from './constants'
+import { unwrapKey, getSessionKey, exportRawKey } from './keys'
+import { base64ToArrayBuffer, extractMessage, packMessage } from './utils'
+import { PVK, PDK, PSK, SERVICES } from './constants'
 import { AES_CBC_ALGO } from './algorithms'
+
+export async function encryptMessage(plainText, publicKeys) {
+  try {
+    const privateKey = getPrivateKey(SERVICES.mail, PSK)
+    const sessionKey = await getSessionKey(AES_CBC_ALGO)
+    const rawKey = await exportRawKey(sessionKey)
+    const { m, iv, s } = await encryptSignBinary(
+      plainText,
+      sessionKey,
+      privateKey,
+    )
+    const keys = await encryptSessionKeys(rawKey, publicKeys)
+    return {
+      message: packMessage(iv, s, m),
+      keys,
+    }
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
 
 export async function decryptMessage(message, publicKey) {
   try {

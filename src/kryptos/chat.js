@@ -1,5 +1,9 @@
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { encryptSign, encryptSignEncrypt, encryptSessionKey } from './encrypter'
+import {
+  encryptSign,
+  encryptSignEncrypt,
+  encryptSessionKeys,
+} from './encrypter'
 import { decryptSessionKey, verifyDecrypt } from './decrypter'
 import {
   generateSessionKey,
@@ -69,11 +73,7 @@ export async function encryptGroupChatKey(key, publicKeys) {
   try {
     const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
     const rawKey = await exportRawKey(sessionKey)
-    const promises = publicKeys.map(publicKey =>
-      encryptSessionKey(rawKey, publicKey),
-    )
-    const keys = await Promise.all(promises)
-    return keys.map(k => arrayBufferToBase64(k))
+    return encryptSessionKeys(rawKey, publicKeys)
   } catch (error) {
     return Promise.reject(error)
   }

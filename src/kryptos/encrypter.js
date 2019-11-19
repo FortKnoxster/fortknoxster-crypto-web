@@ -47,6 +47,18 @@ export async function encryptSessionKey(sessionKey, publicKey) {
   }
 }
 
+export async function encryptSessionKeys(sessionKey, publicKeys) {
+  try {
+    const promises = publicKeys.map(publicKey =>
+      encryptSessionKey(sessionKey, publicKey),
+    )
+    const keys = await Promise.all(promises)
+    return keys.map(key => arrayBufferToBase64(key))
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
 /**
  * Encrypt binary data with given iv and key.
  *
@@ -112,14 +124,40 @@ export async function encryptBinary(binary, sessionKey) {
  * @param {CryptoKey} privateKey
  * @param {Array} publicKeys
  */
-export async function encryptSign(plainText, sessionKey, privateKey) {
+export async function encryptSignBinary(plainText, sessionKey, privateKey) {
   try {
     const { iv, cipherText } = await encryptIt(plainText, sessionKey)
     const signature = await sign(cipherText, privateKey)
     return {
-      m: arrayBufferToBase64(cipherText),
+      m: cipherText,
+      iv,
+      s: signature,
+    }
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
+ * Encrypt given plain text with given symmetric sessionKey
+ * and sign encrypted message with given private key.
+ *
+ * @param {Object} plainText
+ * @param {CryptoKey} sessionKey
+ * @param {CryptoKey} privateKey
+ * @param {Array} publicKeys
+ */
+export async function encryptSign(plainText, sessionKey, privateKey) {
+  try {
+    const { m, iv, s } = await encryptSignBinary(
+      plainText,
+      sessionKey,
+      privateKey,
+    )
+    return {
+      m: arrayBufferToBase64(m),
       iv: arrayBufferToBase64(iv),
-      s: arrayBufferToBase64(signature),
+      s: arrayBufferToBase64(s),
     }
   } catch (error) {
     return Promise.reject(error)
