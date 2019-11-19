@@ -28,7 +28,7 @@ import { kryptos } from './kryptos'
 import * as algorithms from './algorithms'
 import * as formats from './formats'
 import * as usage from './usages'
-import { objectToArrayBuffer, base64ToArrayBuffer } from './utils'
+import { base64ToArrayBuffer } from './utils'
 import { NONEXTRACTABLE, EXTRACTABLE } from './constants'
 
 export function importSessionKey(keyBytes, algorithm) {
@@ -238,16 +238,6 @@ export function generateKeyPair(algorithm) {
       break
   }
   throw new Error('Invalid key pair algorithm.')
-}
-/**
- *
- * @param {*} key
- */
-export function fingerprint(key) {
-  return kryptos.subtle.digest(
-    algorithms.SHA_256.name,
-    objectToArrayBuffer(key),
-  )
 }
 
 export function getSessionKey(algorithm, key) {
