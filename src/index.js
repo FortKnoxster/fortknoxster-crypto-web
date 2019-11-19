@@ -46,7 +46,7 @@ export {
   encryptGroupChatKey,
 } from './kryptos/chat'
 
-export { decryptMessage } from './kryptos/inbox'
+export { encryptMessage, decryptMessage } from './kryptos/inbox'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 
