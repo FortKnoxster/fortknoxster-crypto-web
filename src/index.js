@@ -16,6 +16,9 @@ export {
   dataUrlToBlob,
   randomString,
 } from './kryptos/utils'
+
+export { hashAnything } from './kryptos/digest'
+
 export {
   initProtocol,
   encryptProtocol,
