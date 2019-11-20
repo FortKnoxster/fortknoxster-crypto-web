@@ -58,7 +58,7 @@ export { verifyIt } from './kryptos/verifier'
 export {
   initIdentity,
   generateUserKeys,
-  verifyContactKeys,
+  verifyPublicKeys,
   signData,
   verifyData,
 } from './kryptos/identity'

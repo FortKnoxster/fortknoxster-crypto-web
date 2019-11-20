@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import {
   getPublicKey,
   getPrivateKey,
@@ -5,8 +6,7 @@ import {
   generateIdentityKeys,
 } from './serviceKeyStore'
 import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants'
-import { RSA } from './algorithms'
-import { ecJwk, rsaJwk } from './utils'
+import { toJwk } from './utils'
 import { importPublicVerifyKey } from './keys'
 import { signIt } from './signer'
 import { verifyIt } from './verifier'
@@ -26,27 +26,39 @@ export async function verifyData(data, signature, publicKey) {
   }
 }
 
-export function verifyContactKeys(contact) {
-  const { keys } = contact
-  return Object.keys(keys)
-    .filter(key => key !== SERVICES.identity)
-    .map(key => {
-      const { encrypt, verify, signature } = keys[key]
-      const keysToVerify = {
-        pek: encrypt.kty === RSA ? rsaJwk(encrypt) : ecJwk(encrypt),
-        pvk: encrypt.kty === RSA ? rsaJwk(verify) : ecJwk(verify),
-      }
-      return verifyIt(keysToVerify, signature, contact)
-    })
+export function signPublicKeys(privateKey, publicEncryptKey, publicVerifyKey) {
+  const publicKeys = {
+    pek: toJwk(publicEncryptKey),
+    pvk: toJwk(publicVerifyKey),
+  }
+  return signIt(publicKeys, privateKey)
+}
+
+export async function verifyPublicKeys(keys, publicKey) {
+  try {
+    const importedPublicKey = await importPublicVerifyKey(publicKey)
+    return Object.keys(keys)
+      .filter(key => key !== SERVICES.identity)
+      .map(key => {
+        const { encrypt, verify, signature } = keys[key]
+        const keysToVerify = {
+          pek: toJwk(encrypt),
+          pvk: toJwk(verify),
+        }
+        return verifyIt(importedPublicKey, signature, keysToVerify)
+      })
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export async function createIdentity(identityPrivateKey, id, pvk) {
-  const certificate = {
-    id,
-    pvk,
-    signature: '',
-  }
   try {
+    const certificate = {
+      id,
+      pvk,
+      signature: '',
+    }
     const signature = await signIt(certificate, identityPrivateKey)
     certificate.signature = signature
     return certificate
