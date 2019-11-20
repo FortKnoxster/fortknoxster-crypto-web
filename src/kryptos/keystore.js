@@ -38,7 +38,8 @@ import {
 } from './keys'
 import * as algorithms from './algorithms'
 import { getUsage } from './usages'
-import { signIt } from './signer'
+// eslint-disable-next-line import/no-cycle
+import { signPublicKeys } from './identity'
 import { fingerprint } from './digest'
 import { getProtector, packProtector } from './protector'
 import { PROTECTOR_TYPES, EXTRACTABLE } from './constants'
@@ -130,14 +131,6 @@ export async function setupIdentityKeys(
   } catch (e) {
     return Promise.reject(e)
   }
-}
-
-export function signPublicKeys(identity, publicEncryptKey, publicVerifyKey) {
-  const publicKeys = {
-    pek: utils.toJwk(publicEncryptKey),
-    pvk: utils.toJwk(publicVerifyKey),
-  }
-  return signIt(publicKeys, identity)
 }
 
 export async function setupKeys(
