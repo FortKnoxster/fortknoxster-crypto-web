@@ -198,6 +198,14 @@ export function toJwk(jwk) {
   return rsaJwk(jwk)
 }
 
+export function formatPublicKeysToVerify(keys) {
+  const { encrypt, verify } = keys
+  return {
+    pek: toJwk(encrypt),
+    pvk: toJwk(verify),
+  }
+}
+
 export function extractMessage(data) {
   const keyLength = new Uint16Array(data, 0, 2)[0] // First 16 bit integer
   const signatureLength = new Uint16Array(data, 2, 2)[0]

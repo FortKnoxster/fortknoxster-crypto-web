@@ -9,6 +9,7 @@ export {
   lockKeyStores,
   lockKeyStore,
   verifyKeyProtector,
+  getKeyStores,
 } from './kryptos/serviceKeyStore'
 export {
   generateId,
@@ -53,12 +54,11 @@ export { encryptMessage, decryptMessage } from './kryptos/inbox'
 
 export { signIt, hmacSignIt } from './kryptos/signer'
 
-export { verifyIt } from './kryptos/verifier'
+export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
 
 export {
   initIdentity,
   generateUserKeys,
-  verifyPublicKeys,
   signData,
   verifyData,
 } from './kryptos/identity'

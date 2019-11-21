@@ -38,8 +38,7 @@ import {
 } from './keys'
 import * as algorithms from './algorithms'
 import { getUsage } from './usages'
-// eslint-disable-next-line import/no-cycle
-import { signPublicKeys } from './identity'
+import { signPublicKeys } from './signer'
 import { fingerprint } from './digest'
 import { getProtector, packProtector } from './protector'
 import { PROTECTOR_TYPES, EXTRACTABLE } from './constants'

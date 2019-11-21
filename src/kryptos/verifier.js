@@ -25,9 +25,14 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { kryptos } from './kryptos'
-import { importHmacKey } from './keys'
-import { base64ToArrayBuffer, stringToArrayBuffer } from './utils'
+import { importHmacKey, importPublicVerifyKey } from './keys'
+import {
+  base64ToArrayBuffer,
+  stringToArrayBuffer,
+  formatPublicKeysToVerify,
+} from './utils'
 import { getSignAlgorithm } from './algorithms'
+import { SERVICES } from './constants'
 
 /**
  * Verify given signature and verified signature of the given cipher text.
@@ -72,5 +77,20 @@ export async function hmacVerifyIt(rawKey, signature, data) {
     return verify(verifyKey, signature, data)
   } catch (error) {
     return Promise.reject(error)
+  }
+}
+
+export async function verifyPublicKeys(keys, publicKey) {
+  try {
+    const importedPublicKey = await importPublicVerifyKey(publicKey)
+    return Object.keys(keys)
+      .filter(key => key !== SERVICES.identity)
+      .map(key => {
+        const { signature } = keys[key]
+        const keysToVerify = formatPublicKeysToVerify(keys[key])
+        return verifyIt(importedPublicKey, signature, keysToVerify)
+      })
+  } catch (e) {
+    return Promise.reject(e)
   }
 }
