@@ -67,6 +67,16 @@ export async function initKeyStores(keyStores) {
   }
 }
 
+export function getKeyStores(services) {
+  return services
+    .map(service => serviceKeyStore.keyStores[service])
+    .reduce(
+      (acc, keyStore) =>
+        Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+      {},
+    )
+}
+
 export function freezeKeyStores() {
   if (!Object.isFrozen(serviceKeyStore)) {
     Object.freeze(serviceKeyStore)

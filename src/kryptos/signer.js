@@ -26,7 +26,7 @@
  */
 import { kryptos } from './kryptos'
 import { importHmacKey } from './keys'
-import { stringToArrayBuffer, arrayBufferToBase64 } from './utils'
+import { stringToArrayBuffer, arrayBufferToBase64, toJwk } from './utils'
 import { getSignAlgorithm } from './algorithms'
 
 export function sign(arrayBuffer, signKey) {
@@ -64,4 +64,12 @@ export async function hmacSignIt(plainText, rawKey) {
   } catch (error) {
     return Promise.reject(error)
   }
+}
+
+export function signPublicKeys(privateKey, publicEncryptKey, publicVerifyKey) {
+  const publicKeys = {
+    pek: toJwk(publicEncryptKey),
+    pvk: toJwk(publicVerifyKey),
+  }
+  return signIt(publicKeys, privateKey)
 }
