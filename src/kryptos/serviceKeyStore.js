@@ -19,16 +19,19 @@ export function getPrivateKey(service, type) {
   return serviceKeyStore.keyStores[service][type].privateKey
 }
 
-export async function initKeyStores(keyStores) {
+export async function initKeyStores(
+  keyStores,
+  type = PROTECTOR_TYPES.password,
+) {
   try {
     const serviceKeyStores = await Promise.all(
       keyStores
         .filter(keyStore =>
           keyStore.keyContainers.psk.keyProtectors.find(
-            keyProtector => keyProtector.type === PROTECTOR_TYPES.password,
+            keyProtector => keyProtector.type === type,
           ),
         )
-        .map(keyStore => init(keyStore.id, keyStore, PROTECTOR_TYPES.password)),
+        .map(keyStore => init(keyStore.id, keyStore, type)),
     )
 
     const storageKeyStore = serviceKeyStores.find(
@@ -41,7 +44,8 @@ export async function initKeyStores(keyStores) {
           keyStore.keyContainers.psk.keyProtectors.find(
             keyProtector =>
               keyProtector.type === PROTECTOR_TYPES.asymmetric &&
-              keyProtector.type !== PROTECTOR_TYPES.password,
+              keyProtector.type !== PROTECTOR_TYPES.password &&
+              keyProtector.type !== PROTECTOR_TYPES.recover,
           ),
         )
         .map(keyStore =>
