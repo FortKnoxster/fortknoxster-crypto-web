@@ -26,7 +26,7 @@
  */
 import { getPrivateKey, getPublicKey } from './serviceKeyStore'
 import { getSessionKey } from './keys'
-import { encryptSignEncrypt } from './encrypter'
+import { encryptSignEncrypt, encryptSessionKeys } from './encrypter'
 import { verifyDecrypt, decryptSessionKey } from './decrypter'
 import { PSK, PEK, PVK, PDK, SERVICES } from './constants'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
@@ -44,6 +44,11 @@ export async function encryptItem(data, key, publicKeys = []) {
   } catch (error) {
     return Promise.reject(error)
   }
+}
+
+export function encryptItemAssignment(key, publicKeys) {
+  const rawKey = base64ToArrayBuffer(key)
+  return encryptSessionKeys(rawKey, publicKeys)
 }
 
 export async function encryptNewItemAssignment(item) {
