@@ -29,6 +29,7 @@ export {
 
 export {
   encryptNewItemAssignment,
+  encryptItemAssignment,
   encryptItem,
   decryptItemAssignment,
   decryptItem,
