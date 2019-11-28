@@ -49,7 +49,7 @@ export async function verify(publicKey, signature, cipherText) {
     cipherText,
   )
   if (!result) {
-    return Promise.reject()
+    return Promise.reject(new Error('Failed verification.'))
   }
   return result
 }
