@@ -29,6 +29,12 @@ import { importHmacKey } from './keys'
 import { stringToArrayBuffer, arrayBufferToBase64, toJwk } from './utils'
 import { getSignAlgorithm } from './algorithms'
 
+/**
+ * Sign binary with a signing key. Returns binary signature.
+ *
+ * @param {ArrayBuffer} arrayBuffer
+ * @param {CryptoKey} signKey
+ */
 export function sign(arrayBuffer, signKey) {
   return kryptos.subtle.sign(
     getSignAlgorithm(signKey.algorithm.name),
@@ -37,6 +43,12 @@ export function sign(arrayBuffer, signKey) {
   )
 }
 
+/**
+ * Sign plain text with a private key. Returns base64 encoded signature.
+ *
+ * @param {String} plainText
+ * @param {CryptoKey} privateKey
+ */
 export async function signIt(plainText, privateKey) {
   try {
     const data = stringToArrayBuffer(JSON.stringify(plainText))
@@ -47,6 +59,12 @@ export async function signIt(plainText, privateKey) {
   }
 }
 
+/**
+ * Sign binary cipher text with given raw key as imported HMAC sign key.
+ *
+ * @param {ArrayBuffer} cipherText
+ * @param {ArrayBuffer} rawKey
+ */
 export async function hmacBinarySignIt(cipherText, rawKey) {
   try {
     const signKey = await importHmacKey(rawKey)
@@ -56,6 +74,12 @@ export async function hmacBinarySignIt(cipherText, rawKey) {
   }
 }
 
+/**
+ * Sign plain text with given raw key as imported HMAC sign key.
+ *
+ * @param {String} plainText
+ * @param {ArrayBuffer} rawKey
+ */
 export async function hmacSignIt(plainText, rawKey) {
   try {
     const data = stringToArrayBuffer(plainText)
@@ -66,6 +90,13 @@ export async function hmacSignIt(plainText, rawKey) {
   }
 }
 
+/**
+ * Sign public keys with exact JWK format.
+ *
+ * @param {CryptoKey} privateKey
+ * @param {JWK} publicEncryptKey
+ * @param {JWK} publicVerifyKey
+ */
 export function signPublicKeys(privateKey, publicEncryptKey, publicVerifyKey) {
   const publicKeys = {
     pek: toJwk(publicEncryptKey),
