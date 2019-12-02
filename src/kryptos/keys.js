@@ -28,7 +28,7 @@ import { kryptos } from './kryptos'
 import * as algorithms from './algorithms'
 import * as formats from './formats'
 import * as usage from './usages'
-import { base64ToArrayBuffer } from './utils'
+import { base64ToArrayBuffer, arrayBufferToObject } from './utils'
 import { NONEXTRACTABLE, EXTRACTABLE } from './constants'
 
 export function importSessionKey(keyBytes, algorithm) {
@@ -157,13 +157,28 @@ export function wrapPrivateKey(privateKey, iv, wrappingKey) {
   })
 }
 
-export function unwrapPrivateKey(
+export async function unwrapPrivateKey(
   wrappedPrivateKey,
   unwrappingKey,
   wrappedKeyAlgorithm,
   unwrappedKeyAlgorithm,
   usages,
 ) {
+  if (algorithms.isEllipticCurve(unwrappedKeyAlgorithm)) {
+    // Use decrypt/import as unwrapKey for EC private keys not supported in Firefox
+    const decryptedKey = await kryptos.subtle.decrypt(
+      wrappedKeyAlgorithm,
+      unwrappingKey,
+      wrappedPrivateKey,
+    )
+    return kryptos.subtle.importKey(
+      formats.JWK,
+      arrayBufferToObject(decryptedKey),
+      unwrappedKeyAlgorithm,
+      NONEXTRACTABLE,
+      usages,
+    )
+  }
   return kryptos.subtle.unwrapKey(
     formats.JWK,
     wrappedPrivateKey,
