@@ -213,3 +213,14 @@ export function keyContainerType(algorithm) {
   }
   throw new Error('Invalid key mode.')
 }
+
+export function isEllipticCurve(algorithm) {
+  const { name } = algorithm
+  switch (name) {
+    case ECDH_ALGO.name:
+    case ECDSA_ALGO.name:
+      return true
+    default:
+      return false
+  }
+}
