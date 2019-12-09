@@ -3,7 +3,6 @@ import {
   encryptNewItemAssignment,
   decryptItemAssignment,
   encryptItem,
-  encryptItems,
 } from './storage'
 import { setupKeys } from './keystore'
 import { generateSigningKeyPair } from './keys'
@@ -43,7 +42,7 @@ test('Test encrypt new items (encryptItems)', async t => {
     { d: { a: 1, b: 2, c: 3 }, rid: '123' },
     { d: { a: 1, b: 2, c: 3 }, rid: '123' },
   ]
-  const encryptedItems = await Promise.all(encryptItems(newItems))
+  const encryptedItems = await Promise.all(newItems.map(i => encryptItem(i)))
   t.assert(encryptedItems)
 })
 
