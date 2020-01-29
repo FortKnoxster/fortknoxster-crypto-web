@@ -7,6 +7,7 @@ import {
 import { setupKeys } from './keystore'
 import { generateSigningKeyPair } from './keys'
 import * as algorithms from './algorithms'
+import * as utils from './utils'
 import { PROTECTOR_TYPES, SERVICES } from './constants'
 import { initKeyStores } from './serviceKeyStore'
 
@@ -47,27 +48,13 @@ test('Test encrypt new items (encryptItems)', async t => {
 })
 
 test('Test decrypt item assignment (decryptItemAssignment)', async t => {
-  const newItem = { d: { a: 1, b: 2, c: 3 } }
-  const item = {
-    item: {
-      // eslint-disable-next-line camelcase
-      meta_data: '',
-    },
-    // eslint-disable-next-line camelcase
-    item_key: '',
-  }
-  const encryptedItem = await encryptNewItemAssignment(newItem)
-  const { s, iv, d, key } = encryptedItem
-  // eslint-disable-next-line camelcase
-  item.item.meta_data = JSON.stringify({ s, so: 'test', iv, v: 1, d })
-  // eslint-disable-next-line camelcase
-  item.item_key = key
-  const decryptedItem = await decryptItemAssignment(item)
-  t.assert(decryptedItem)
-})
-
-test('Test encrypt existing item with existing key (encryptExistingItem)', async t => {
   const itemData = { d: { a: 1, b: 2, c: 3 } }
-  const encryptedItem = await encryptItem(itemData)
-  t.assert(encryptedItem)
+  const encryptedItem = await encryptNewItemAssignment(itemData)
+  const { m, iv, s, keys } = encryptedItem
+  const metaData = { d: m, iv, s }
+  const decryptedItem = await decryptItemAssignment(
+    metaData,
+    utils.arrayBufferToBase64(keys[0]),
+  )
+  t.assert(decryptedItem)
 })

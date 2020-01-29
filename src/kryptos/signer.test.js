@@ -18,22 +18,6 @@ test('Test create signed Identity', async t => {
   t.assert(identity.signature)
 })
 
-test('Test create signed Identity with invalid signing key', async t => {
-  const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
-  const id = generateId(32)
-  const identity = {
-    id,
-    pvk: keyPair.publicKey,
-    signature: '',
-  }
-
-  const error = t.throws(async () => {
-    await signIt(identity, keyPair.publicKey)
-  }, TypeError)
-
-  t.is(error, undefined)
-})
-
 test('Test HMAC signed object', async t => {
   const rawKey = generateId(32)
   const object = {
