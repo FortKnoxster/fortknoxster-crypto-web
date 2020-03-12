@@ -115,10 +115,19 @@ export async function lockKeyStores(
   type,
   newProtector,
   newType,
+  protectorIdentifier,
 ) {
   try {
     const promises = Object.keys(keyStores).map(service =>
-      lock(service, keyStores[service], protector, type, newProtector, newType),
+      lock(
+        service,
+        keyStores[service],
+        protector,
+        type,
+        newProtector,
+        newType,
+        protectorIdentifier,
+      ),
     )
     const serviceKeyStores = await Promise.all(promises)
     return serviceKeyStores.reduce(
