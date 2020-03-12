@@ -109,6 +109,26 @@ export async function unlockKeyStores(keyStores, password, type) {
   }
 }
 
+// Not used yet, but can support asymmetric unlock of keystores without a password protector.
+export async function unlockAsymmetricKeyStores(keyStores, serviceName) {
+  try {
+    const privateKey = getPrivateKey(serviceName, PDK)
+    const serviceKeyStores = await Promise.all(
+      Object.keys(keyStores).map(service =>
+        unlock(
+          service,
+          keyStores[service],
+          privateKey,
+          PROTECTOR_TYPES.asymmetric,
+        ),
+      ),
+    )
+    return serviceKeyStores
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
 export async function lockKeyStores(
   keyStores,
   protector,
@@ -138,6 +158,25 @@ export async function lockKeyStores(
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+// Lock asymmetric protected keystores with a new protector
+export function lockAsymmetricKeyStores(
+  keyStores,
+  serviceName,
+  newProtector,
+  newType,
+  protectorIdentifier,
+) {
+  const privateKey = getPrivateKey(serviceName, PDK)
+  return lockKeyStores(
+    keyStores,
+    privateKey,
+    PROTECTOR_TYPES.asymmetric,
+    newProtector,
+    newType,
+    protectorIdentifier,
+  )
 }
 
 export async function lockKeyStore(
