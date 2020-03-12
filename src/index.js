@@ -6,6 +6,8 @@ export {
   generateIdentityKeys,
   initKeyStores,
   unlockKeyStores,
+  unlockAsymmetricKeyStores,
+  lockAsymmetricKeyStores,
   lockKeyStores,
   lockKeyStore,
   verifyKeyProtector,
