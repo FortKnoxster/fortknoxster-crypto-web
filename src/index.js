@@ -1,5 +1,8 @@
 export { isCryptoSupported } from './kryptos/kryptos'
-export { deriveAccountPassword, deriveKeyFromPassword } from './kryptos/derive'
+export {
+  deriveAccountPassword,
+  deriveSessionKeyFromPassword,
+} from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
   setupKeyStore,
@@ -18,7 +21,6 @@ export {
   blobToDataUrl,
   dataUrlToBlob,
   randomString,
-  stringToArrayBuffer,
 } from './kryptos/utils'
 
 export { hashAnything } from './kryptos/digest'
