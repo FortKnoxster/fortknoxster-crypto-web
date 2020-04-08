@@ -1,5 +1,5 @@
 export { isCryptoSupported } from './kryptos/kryptos'
-export { deriveAccountPassword } from './kryptos/derive'
+export { deriveAccountPassword, deriveKeyFromPassword } from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
   setupKeyStore,
