@@ -1,6 +1,12 @@
 import { kryptos } from './kryptos'
 import { stringToArrayBuffer, arrayBufferToHex } from './utils'
-import { AES_KW_ALGO, PBKDF2, ECDH_ALGO, deriveKeyPBKDF2 } from './algorithms'
+import {
+  AES_KW_ALGO,
+  AES_GCM_ALGO,
+  PBKDF2,
+  ECDH_ALGO,
+  deriveKeyPBKDF2,
+} from './algorithms'
 import { DERIVE, WRAP, ENCRYPT } from './usages'
 import { RAW } from './formats'
 import { EXTRACTABLE, NONEXTRACTABLE } from './constants'
@@ -54,6 +60,31 @@ export async function deriveKeyFromPassword(
       AES_KW_ALGO,
       extractable,
       WRAP,
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function deriveSessionKeyFromPassword(password, salt, iterations) {
+  try {
+    const bufferedPassword = stringToArrayBuffer(password)
+
+    const bufferedSalt = stringToArrayBuffer(salt)
+
+    const key = await kryptos.subtle.importKey(
+      RAW,
+      bufferedPassword,
+      PBKDF2,
+      NONEXTRACTABLE,
+      DERIVE,
+    )
+    return kryptos.subtle.deriveKey(
+      deriveKeyPBKDF2(bufferedSalt, iterations),
+      key,
+      AES_GCM_ALGO,
+      NONEXTRACTABLE,
+      ENCRYPT,
     )
   } catch (e) {
     return Promise.reject(e)
