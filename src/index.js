@@ -18,6 +18,7 @@ export {
   blobToDataUrl,
   dataUrlToBlob,
   randomString,
+  stringToArrayBuffer,
 } from './kryptos/utils'
 
 export { hashAnything } from './kryptos/digest'
