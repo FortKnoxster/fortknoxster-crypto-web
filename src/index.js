@@ -1,51 +1,70 @@
 export { isCryptoSupported } from './kryptos/kryptos'
-export { deriveAccountPassword } from './kryptos/derive'
+export {
+  deriveAccountPassword,
+  deriveSessionKeyFromPassword,
+} from './kryptos/derive'
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
 export {
-  newKeyStore,
-  newKeyStores,
-  setupKeys,
-  generateSignKeys,
+  setupKeyStore,
+  generateIdentityKeys,
+  initKeyStores,
   unlockKeyStores,
+  unlockAsymmetricKeyStores,
+  lockAsymmetricKeyStores,
   lockKeyStores,
+  lockKeyStore,
   verifyKeyProtector,
-} from './kryptos/keyStore'
+  getKeyStores,
+} from './kryptos/serviceKeyStore'
 export {
   generateId,
   blobToDataUrl,
   dataUrlToBlob,
   randomString,
 } from './kryptos/utils'
+
+export { hashAnything } from './kryptos/digest'
+
 export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
-  generalSettingsType,
-  requestEmailChangeType,
-  confirmEmailChangeType,
-  requestPhoneChangeType,
-  confirmPhoneChangeType,
+  getProtocol,
 } from './kryptos/protocol'
 
 export {
-  initStorage,
-  encryptItemAssignment,
   encryptNewItemAssignment,
-  encryptItems,
-  encryptExistingItem,
-  encryptFilePart,
-  decryptFilePart,
+  encryptItemAssignment,
+  encryptItem,
   decryptItemAssignment,
   decryptItem,
 } from './kryptos/storage'
 
-export { initChat, encryptChatMessage } from './kryptos/chat'
+export {
+  encryptFile,
+  decryptFile,
+  encryptFilePart,
+  decryptFilePart,
+} from './kryptos/files'
 
 export {
-  createIdentity,
+  encryptChatMessage,
+  encryptGroupChatMessage,
+  decryptGroupChatKey,
+  decryptChatMessage,
+  decryptGroupChatMessage,
+  encryptGroupChatKey,
+} from './kryptos/chat'
+
+export { encryptMessage, decryptMessage } from './kryptos/inbox'
+
+export { signIt, hmacSignIt } from './kryptos/signer'
+
+export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
+
+export {
   initIdentity,
-  signContact,
-  verifyContactKeys,
-  verifyContact,
+  generateUserKeys,
+  signData,
+  verifyData,
 } from './kryptos/identity'
-export { KeyStore } from './kryptos/core/kryptos.keystore'

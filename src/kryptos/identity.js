@@ -1,83 +1,112 @@
-import { RSA } from './algorithms'
 import {
-  base64ToArrayBuffer,
-  ecJwk,
-  rsaJwk,
-  stringToArrayBuffer,
-} from './utils'
-import { Decrypter } from './core/kryptos.decrypter'
-import { Encrypter } from './core/kryptos.encrypter'
+  getPublicKey,
+  getPrivateKey,
+  setupKeyStore,
+  generateIdentityKeys,
+} from './serviceKeyStore'
+import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants'
+import { importPublicVerifyKey } from './keys'
+import { signIt } from './signer'
+import { verifyIt } from './verifier'
 
-let keyStore
-
-export function initIdentity(kStore) {
-  keyStore = kStore
+export function signData(data, service) {
+  return signIt(data, getPrivateKey(service, PSK))
 }
 
-export function verifyIt(data, signature, contact) {
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(data)),
-    base64ToArrayBuffer(signature),
-  )
-  return decrypter.verifyIt(contact, contact.contactUserId)
-}
-
-export function verifyContact(contactToVerify, contact) {
-  const { signature } = contact
-  const decrypter = new Decrypter(
-    keyStore,
-    null,
-    null,
-    stringToArrayBuffer(JSON.stringify(contactToVerify)),
-    base64ToArrayBuffer(signature),
-  )
-  return decrypter.verifyIt(contact.userId, contact.contactUserId)
-}
-
-export function verifyContactKeys(contact) {
-  const { keys } = contact
-  return Object.keys(keys)
-    .filter(key => key !== 'identity')
-    .map(key => {
-      const { encrypt, verify, signature } = keys[key]
-      const keysToVerify = {
-        pek: encrypt.kty === RSA ? rsaJwk(encrypt) : ecJwk(encrypt),
-        pvk: encrypt.kty === RSA ? rsaJwk(verify) : ecJwk(verify),
-      }
-      return verifyIt(keysToVerify, signature, contact)
-    })
-}
-
-function signContactKeys(keys, hmacKey) {
-  const encrypter = new Encrypter(keyStore)
-  return encrypter.macSignIt(keys, hmacKey)
-}
-
-export async function signContact(contactToSign, hmacKey) {
-  const {
-    contact,
-    contact_keys: { contact_keys },
-  } = contactToSign
+export async function verifyData(data, signature, publicKey) {
   try {
-    const signedKeys = await signContactKeys(contact_keys, hmacKey)
-    // eslint-disable-next-line camelcase
-    contact.contacts_keys_hmac = signedKeys.signature
-    const encrypter = new Encrypter(keyStore)
-    return encrypter.signIt(contact, false)
+    const importedPvk = await importPublicVerifyKey(
+      publicKey || getPublicKey(SERVICES.identity, PVK),
+    )
+    return verifyIt(importedPvk, signature, data)
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
-export function createIdentity(identityKeyStore, id, pvk) {
-  const encrypter = new Encrypter(identityKeyStore)
-  const identity = {
-    id,
-    pvk,
-    signature: '',
+export async function createIdentity(identityPrivateKey, id, pvk) {
+  try {
+    const certificate = {
+      id,
+      pvk,
+      signature: '',
+    }
+    const signature = await signIt(certificate, identityPrivateKey)
+    certificate.signature = signature
+    return certificate
+  } catch (e) {
+    return Promise.reject(e)
   }
-  return encrypter.signIt(identity, true)
+}
+
+export async function verifyIdentity(certificate) {
+  try {
+    const importedPvk = await importPublicVerifyKey(certificate.pvk)
+    const { id, pvk, signature } = certificate
+    const certificateToVerify = {
+      id,
+      pvk,
+      signature: '',
+    }
+    return verifyIt(importedPvk, signature, certificateToVerify)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function initIdentity(id) {
+  try {
+    const certificate = await createIdentity(
+      getPrivateKey(SERVICES.identity, PSK),
+      id,
+      getPublicKey(SERVICES.identity, PVK),
+    )
+    return verifyIdentity(certificate)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+const serviceKeys = [
+  { service: SERVICES.mail, rsa: true },
+  { service: SERVICES.storage, rsa: true },
+  { service: SERVICES.protocol, rsa: false },
+]
+
+export async function generateUserKeys(id, plainPassword) {
+  try {
+    const identityKeyStore = await generateIdentityKeys(plainPassword)
+
+    const certificate = await createIdentity(
+      identityKeyStore.psk.privateKey,
+      id,
+      identityKeyStore.keyContainers.pvk,
+    )
+
+    const serviceKeyStores = await Promise.all(
+      serviceKeys.map(serviceKey =>
+        setupKeyStore(
+          serviceKey.service,
+          plainPassword,
+          identityKeyStore.psk.privateKey,
+          PROTECTOR_TYPES.password,
+          serviceKey.rsa,
+        ),
+      ),
+    )
+    serviceKeyStores.push(identityKeyStore)
+
+    const keyContainers = serviceKeyStores.reduce(
+      (acc, keyStore) =>
+        Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
+      {},
+    )
+    return {
+      certificate,
+      keyContainers,
+      serviceKeyStores,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }

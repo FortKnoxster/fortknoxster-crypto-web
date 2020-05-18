@@ -1,4 +1,4 @@
-import { LENGTH_256, LENGTH_2048 } from './constants'
+import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
@@ -8,6 +8,7 @@ export const AES_GCM_256 = 'AES-GCM-256'
 export const A256GCM = 'A256GCM'
 export const AES_CBC_256 = 'AES-CBC-256'
 export const A256CBC = 'A256CBC'
+export const A256KW = 'A256KW'
 export const RS256 = 'RS256'
 export const RSA2048 = 'RSA2048'
 export const RSA_OAEP_256 = 'RSA-OAEP-256'
@@ -15,8 +16,6 @@ export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
 export const ES512 = 'ES512'
 export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
-export const PSK = 'PSK'
-export const PDK = 'PDK'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
@@ -96,15 +95,17 @@ export const HMAC_ALGO = {
   hash: SHA_256,
 }
 
-export const deriveKeyPBKDF2 = salt => ({
+export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
   ...PBKDF2,
   salt,
-  iterations: 50000,
+  iterations,
   hash: SHA_256.name,
 })
 
 export function getAlgorithm(algo) {
   switch (algo) {
+    case A256KW:
+      return AES_KW_ALGO
     case AES_GCM_256:
     case AES_GCM.name:
     case A256GCM:
@@ -119,6 +120,7 @@ export function getAlgorithm(algo) {
     case RSA2048:
     case RSA_OAEP_256:
     case RSA_OAEP_2048:
+    case RSA_OAEP.name:
       return RSA_OAEP
     case ECDSA_ALGO.name:
     case ES512:
@@ -130,7 +132,7 @@ export function getAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid algorithm')
+  throw new Error(`Invalid algorithm ${algo}.`)
 }
 
 export function getSignAlgorithm(algo) {
@@ -144,7 +146,7 @@ export function getSignAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid sign algorithm')
+  throw new Error('Invalid sign algorithm.')
 }
 
 export function getImportAlgorithm(algo) {
@@ -160,7 +162,7 @@ export function getImportAlgorithm(algo) {
     default:
       break
   }
-  throw new Error('Invalid import algorithm')
+  throw new Error('Invalid import algorithm.')
 }
 
 export function getKeyType(mode, type) {
@@ -194,4 +196,31 @@ export function getKeyMode(keyType) {
       break
   }
   throw new Error('Invalid key type.')
+}
+
+export function keyContainerType(algorithm) {
+  switch (algorithm) {
+    case ECDSA_ALGO:
+      return ECDSA_P521
+    case ECDH_ALGO:
+      return ECDH_P521
+    case RSASSA_PKCS1_V1_5_ALGO:
+      return RSASSA_PKCS1_V1_5_2048
+    case RSA_OAEP_ALGO:
+      return RSA_OAEP_2048
+    default:
+      break
+  }
+  throw new Error('Invalid key mode.')
+}
+
+export function isEllipticCurve(algorithm) {
+  const { name } = algorithm
+  switch (name) {
+    case ECDH_ALGO.name:
+    case ECDSA_ALGO.name:
+      return true
+    default:
+      return false
+  }
 }
