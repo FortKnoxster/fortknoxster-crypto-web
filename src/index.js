@@ -1,9 +1,13 @@
 export { isCryptoSupported } from './kryptos/kryptos'
+
 export {
   deriveAccountPassword,
   deriveSessionKeyFromPassword,
+  deriveSessionKeyFromMasterKey,
 } from './kryptos/derive'
+
 export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
+
 export {
   setupKeyStore,
   generateIdentityKeys,
@@ -16,6 +20,7 @@ export {
   verifyKeyProtector,
   getKeyStores,
 } from './kryptos/serviceKeyStore'
+
 export {
   generateId,
   blobToDataUrl,
