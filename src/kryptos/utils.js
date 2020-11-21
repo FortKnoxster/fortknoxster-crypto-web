@@ -86,12 +86,9 @@ export function arrayBufferToBase64(buffer, base64Url) {
     (previous, current) => previous + String.fromCharCode(current),
     '',
   )
-  const output = btoa(data)
+  const output = window.btoa(data)
   if (base64Url) {
-    return output
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')
+    return output.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   }
   return output
 }
@@ -131,7 +128,7 @@ export function blobToDataUrl(blob) {
       a.abort()
       reject(new DOMException('Problem parsing blobToDataUrl'))
     }
-    a.onload = e => {
+    a.onload = (e) => {
       resolve(e.target.result)
     }
     a.readAsDataURL(blob)

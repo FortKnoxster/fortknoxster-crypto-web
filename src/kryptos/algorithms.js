@@ -21,6 +21,10 @@ export const PBKDF2 = {
   name: 'PBKDF2',
 }
 
+export const HKDF = {
+  name: 'HKDF',
+}
+
 export const SHA_256 = {
   name: 'SHA-256',
 }
@@ -100,6 +104,13 @@ export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
   salt,
   iterations,
   hash: SHA_256.name,
+})
+
+export const deriveKeyHKDF = (salt) => ({
+  ...HKDF,
+  salt,
+  hash: SHA_256.name,
+  info: new ArrayBuffer(0),
 })
 
 export function getAlgorithm(algo) {
