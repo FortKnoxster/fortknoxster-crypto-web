@@ -1,6 +1,12 @@
 import { kryptos } from './kryptos'
 import { EC } from './algorithms'
-import { LENGTH_256 } from './constants'
+import {
+  LENGTH_256,
+  PEM_PUBLIC_HEADER,
+  PEM_PUBLIC_FOOTER,
+  PEM_PRIVATE_HEADER,
+  PEM_PRIVATE_FOOTER,
+} from './constants'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -55,6 +61,10 @@ export function arrayBufferToHex(arrayBuffer) {
     hexString += nextHexByte
   }
   return hexString
+}
+
+export function base64ToBinaryString(base64) {
+  return window.atob(base64)
 }
 
 export function base64ToArrayBuffer(base64, base64Url) {
@@ -233,4 +243,21 @@ export function packMessage(iv, signature, cipherText) {
     { type: 'application/octet-stream' },
   )
   return blob
+}
+
+export function pemToDerArrayBuffer(pem, pemHeader, pemFooter) {
+  const pemContents = pem.substring(
+    pemHeader.length,
+    pem.length - pemFooter.length,
+  )
+  const binaryDerString = base64ToBinaryString(pemContents)
+  return stringToArrayBuffer(binaryDerString)
+}
+
+export function publicPemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PUBLIC_HEADER, PEM_PUBLIC_FOOTER)
+}
+
+export function privatePemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PRIVATE_HEADER, PEM_PRIVATE_FOOTER)
 }

@@ -67,6 +67,8 @@ export { signIt, hmacSignIt } from './kryptos/signer'
 
 export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
 
+export { importPublicKeyPem, importPrivateKeyPem } from './kryptos/keys'
+
 export {
   initIdentity,
   generateUserKeys,

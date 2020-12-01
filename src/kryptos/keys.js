@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Copyright 2020 FortKnoxster Ltd.
  *
@@ -28,7 +29,12 @@ import { kryptos } from './kryptos'
 import * as algorithms from './algorithms'
 import * as formats from './formats'
 import * as usage from './usages'
-import { base64ToArrayBuffer, arrayBufferToObject } from './utils'
+import {
+  base64ToArrayBuffer,
+  arrayBufferToObject,
+  publicPemToDerArrayBuffer,
+  privatePemToDerArrayBuffer,
+} from './utils'
 import { NONEXTRACTABLE, EXTRACTABLE } from './constants'
 
 export function importSessionKey(keyBytes, algorithm) {
@@ -109,6 +115,29 @@ export function importPublicEncryptKey(publicKey, usages) {
   )
 }
 
+export function importPublicKeyPem(publicKey, algorithm = algorithms.RSA_OAEP) {
+  return kryptos.subtle.importKey(
+    formats.SPKI,
+    publicPemToDerArrayBuffer(publicKey),
+    algorithm,
+    NONEXTRACTABLE,
+    usage.ENCRYPT_WRAP,
+  )
+}
+
+export function importPrivateKeyPem(
+  privateKey,
+  algorithm = algorithms.RSA_OAEP,
+) {
+  return kryptos.subtle.importKey(
+    formats.PKSC8,
+    privatePemToDerArrayBuffer(privateKey),
+    algorithm,
+    NONEXTRACTABLE,
+    usage.DECRYPT_UNWRAP,
+  )
+}
+
 /**
  * Generate a new symmetric key.
  * Change: Used to be EXTRACTABLE
@@ -123,7 +152,7 @@ export function generateWrapKey() {
   return kryptos.subtle.generateKey(
     algorithms.AES_GCM_ALGO,
     EXTRACTABLE,
-    usage.WRAP.concat(usage.ENCRYPT),
+    usage.ENCRYPT_WRAP,
   )
 }
 
@@ -146,7 +175,7 @@ export function unwrapKey(
     unwrappingKey.algorithm.name,
     wrappedKeyAlgorithm,
     extractable,
-    usage.WRAP.concat(usage.ENCRYPT),
+    usage.ENCRYPT_WRAP,
   )
 }
 
