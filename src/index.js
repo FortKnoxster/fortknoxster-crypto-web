@@ -26,6 +26,7 @@ export {
   blobToDataUrl,
   dataUrlToBlob,
   randomString,
+  arrayBufferToBase64,
 } from './kryptos/utils'
 
 export { hashAnything } from './kryptos/digest'
@@ -50,6 +51,8 @@ export {
   decryptFile,
   encryptFilePart,
   decryptFilePart,
+  encryptFilePartWithKey,
+  decryptFilePartWithKey,
 } from './kryptos/files'
 
 export {
@@ -67,7 +70,11 @@ export { signIt, hmacSignIt } from './kryptos/signer'
 
 export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
 
-export { importPublicKeyPem, importPrivateKeyPem } from './kryptos/keys'
+export {
+  importPublicKeyPem,
+  importPrivateKeyPem,
+  wrapKey,
+} from './kryptos/keys'
 
 export {
   initIdentity,

@@ -107,7 +107,10 @@ export function deriveSessionKey(algorithm, privateKey, publicKey) {
   )
 }
 
-export async function deriveSessionKeyFromMasterKey(masterKey) {
+export async function deriveSessionKeyFromMasterKey(
+  masterKey,
+  extractable = EXTRACTABLE,
+) {
   try {
     const bufferedKey = stringToArrayBuffer(masterKey)
 
@@ -124,7 +127,7 @@ export async function deriveSessionKeyFromMasterKey(masterKey) {
       deriveKeyHKDF(bufferedSalt),
       key,
       AES_GCM_ALGO,
-      NONEXTRACTABLE,
+      extractable,
       ENCRYPT,
     )
   } catch (e) {
