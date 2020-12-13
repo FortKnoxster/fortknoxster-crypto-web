@@ -19,6 +19,8 @@ export {
   lockKeyStore,
   verifyKeyProtector,
   getKeyStores,
+  unlockPrivateKey,
+  getPrivateKeyFromStore,
 } from './kryptos/serviceKeyStore'
 
 export {

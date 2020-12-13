@@ -1,14 +1,23 @@
 import { setupIdentityKeys, setupKeys, unlock, init, lock } from './keystore'
+import { unwrapPrivateKeyPem } from './keys'
 import {
   ECDSA_ALGO,
   ECDH_ALGO,
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
+  RSA_OAEP,
 } from './algorithms'
-import { SERVICES, PROTECTOR_TYPES, PDK } from './constants'
+import { DECRYPT_UNWRAP } from './usages'
+import { base64ToArrayBuffer } from './utils'
+import { SERVICES, PROTECTOR_TYPES, PDK, PSK } from './constants'
 
 const serviceKeyStore = {
   keyStores: null,
+}
+
+const privateKeys = {
+  decrypt: null,
+  sign: null,
 }
 
 export function getPublicKey(service, type) {
@@ -26,29 +35,29 @@ export async function initKeyStores(
   try {
     const serviceKeyStores = await Promise.all(
       keyStores
-        .filter(keyStore =>
+        .filter((keyStore) =>
           keyStore.keyContainers.psk.keyProtectors.find(
-            keyProtector => keyProtector.type === type,
+            (keyProtector) => keyProtector.type === type,
           ),
         )
-        .map(keyStore => init(keyStore.id, keyStore, type)),
+        .map((keyStore) => init(keyStore.id, keyStore, type)),
     )
 
     const storageKeyStore = serviceKeyStores.find(
-      keyStore => keyStore.id === SERVICES.storage,
+      (keyStore) => keyStore.id === SERVICES.storage,
     )
 
     const asymmetricKeyStores = await Promise.all(
       keyStores
-        .filter(keyStore =>
+        .filter((keyStore) =>
           keyStore.keyContainers.psk.keyProtectors.find(
-            keyProtector =>
+            (keyProtector) =>
               keyProtector.type === PROTECTOR_TYPES.asymmetric &&
               keyProtector.type !== PROTECTOR_TYPES.password &&
               keyProtector.type !== PROTECTOR_TYPES.recover,
           ),
         )
-        .map(keyStore =>
+        .map((keyStore) =>
           unlock(
             keyStore.id,
             keyStore.keyContainers,
@@ -73,7 +82,7 @@ export async function initKeyStores(
 
 export function getKeyStores(services) {
   return services
-    .map(service => serviceKeyStore.keyStores[service])
+    .map((service) => serviceKeyStore.keyStores[service])
     .reduce(
       (acc, keyStore) =>
         Object.assign(acc, { [keyStore.id]: keyStore.keyContainers }),
@@ -91,9 +100,9 @@ export function freezeKeyStores() {
 export async function unlockKeyStores(keyStores, password, type) {
   try {
     const serviceKeyStores = await Promise.all(
-      Object.keys(keyStores).map(service => {
+      Object.keys(keyStores).map((service) => {
         const isPasswordProtector = keyStores[service].psk.keyProtectors.find(
-          keyProtector => keyProtector.type === type,
+          (keyProtector) => keyProtector.type === type,
         )
         if (isPasswordProtector)
           return unlock(service, keyStores[service], password, type)
@@ -114,7 +123,7 @@ export async function unlockAsymmetricKeyStores(keyStores, serviceName) {
   try {
     const privateKey = getPrivateKey(serviceName, PDK)
     const serviceKeyStores = await Promise.all(
-      Object.keys(keyStores).map(service =>
+      Object.keys(keyStores).map((service) =>
         unlock(
           service,
           keyStores[service],
@@ -138,7 +147,7 @@ export async function lockKeyStores(
   protectorIdentifier,
 ) {
   try {
-    const promises = Object.keys(keyStores).map(service =>
+    const promises = Object.keys(keyStores).map((service) =>
       lock(
         service,
         keyStores[service],
@@ -197,7 +206,7 @@ export async function lockKeyStore(
 }
 
 export function verifyKeyProtector(keys, password, type) {
-  const promises = Object.values(keys).map(k =>
+  const promises = Object.values(keys).map((k) =>
     k.verifyProtector(password, type),
   )
   return Promise.all(promises)
@@ -235,4 +244,39 @@ export function setupKeyStore(
     protectorType,
     protectorIdentifier,
   )
+}
+
+export async function unlockPrivateKey(encryptedPrivateKey, sessionKey, rawIv) {
+  try {
+    const iv = base64ToArrayBuffer(rawIv)
+    const encryptedKey = base64ToArrayBuffer(encryptedPrivateKey)
+    const privateKey = await unwrapPrivateKeyPem(
+      encryptedKey,
+      sessionKey,
+      { name: sessionKey.algorithm.name, iv },
+      RSA_OAEP,
+      DECRYPT_UNWRAP,
+    )
+    privateKeys.decrypt = privateKey
+    return privateKey
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export function getPrivateKeyFromStore(type) {
+  switch (type) {
+    case PDK:
+      if (!privateKeys.decrypt) {
+        throw new Error('Missing private decrypt key.')
+      }
+      return privateKeys.decrypt
+    case PSK:
+      if (!privateKeys.sign) {
+        throw new Error('Missing private sign key.')
+      }
+      return privateKeys.sign
+    default:
+      throw new Error('Invalid type.')
+  }
 }

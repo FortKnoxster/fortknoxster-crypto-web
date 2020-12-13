@@ -138,6 +138,24 @@ export function importPrivateKeyPem(
   )
 }
 
+export async function unwrapPrivateKeyPem(
+  wrappedPrivateKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+  unwrappedKeyAlgorithm,
+  usages,
+) {
+  return kryptos.subtle.unwrapKey(
+    formats.PKSC8,
+    wrappedPrivateKey,
+    unwrappingKey,
+    wrappedKeyAlgorithm,
+    unwrappedKeyAlgorithm,
+    NONEXTRACTABLE,
+    usages,
+  )
+}
+
 /**
  * Generate a new symmetric key.
  * Change: Used to be EXTRACTABLE

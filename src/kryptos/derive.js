@@ -9,7 +9,7 @@ import {
   deriveKeyPBKDF2,
   deriveKeyHKDF,
 } from './algorithms'
-import { DERIVE, WRAP, ENCRYPT } from './usages'
+import { DERIVE, WRAP, ENCRYPT, DECRYPT_UNWRAP, ENCRYPT_WRAP } from './usages'
 import { RAW } from './formats'
 import { EXTRACTABLE, NONEXTRACTABLE, LENGTH_32 } from './constants'
 
@@ -128,7 +128,7 @@ export async function deriveSessionKeyFromMasterKey(
       key,
       AES_GCM_ALGO,
       extractable,
-      ENCRYPT,
+      DECRYPT_UNWRAP.concat(ENCRYPT_WRAP),
     )
   } catch (e) {
     return Promise.reject(e)
