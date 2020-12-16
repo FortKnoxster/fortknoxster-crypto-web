@@ -246,9 +246,10 @@ export function packMessage(iv, signature, cipherText) {
 }
 
 export function pemToDerArrayBuffer(pem, pemHeader, pemFooter) {
-  const pemContents = pem.substring(
+  const trimmedPem = pem.replace(/(\r\n|\n|\r)/gm, '')
+  const pemContents = trimmedPem.substring(
     pemHeader.length,
-    pem.length - pemFooter.length,
+    trimmedPem.length - pemFooter.length,
   )
   const binaryDerString = base64ToBinaryString(pemContents)
   return stringToArrayBuffer(binaryDerString)
