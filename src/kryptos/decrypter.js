@@ -26,7 +26,7 @@
  */
 import { kryptos } from './kryptos'
 import { importPublicVerifyKey } from './keys'
-import { arrayBufferToObject } from './utils'
+import { arrayBufferToObject, base64ToArrayBuffer } from './utils'
 import { AES_GCM } from './algorithms'
 import { verify } from './verifier'
 import { LENGTH_128 } from './constants'
@@ -44,6 +44,18 @@ export function decryptSessionKey(encryptedKey, privateKey) {
     encryptedKey,
   )
 }
+
+/**
+ *  Decrypt raw sessionKey with private key.
+ *
+ * @param {String} rawEncryptedKey
+ * @param {CryptoKey} privateKey
+ */
+export function decryptRawSessionKey(rawEncryptedKey, privateKey) {
+  const key = base64ToArrayBuffer(rawEncryptedKey)
+  return decryptSessionKey(key, privateKey)
+}
+
 /**
  * Decrypt given cipher text with the given symmetric key.
  * Determine decryption algorithm based on the CryptoKey object.

@@ -78,6 +78,8 @@ export {
   wrapKey,
 } from './kryptos/keys'
 
+export { decryptRawSessionKey } from './kryptos/decrypter'
+
 export {
   initIdentity,
   generateUserKeys,

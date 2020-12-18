@@ -28,7 +28,7 @@ import { getSessionKey, exportRawKey } from './keys'
 import { encrypt, encryptBinary } from './encrypter'
 import { hmacBinarySignIt } from './signer'
 import { hmacVerifyIt } from './verifier'
-import { decryptSessionKey, decrypt } from './decrypter'
+import { decrypt } from './decrypter'
 import {
   base64ToArrayBuffer,
   arrayBufferToBase64,
@@ -93,11 +93,9 @@ export async function encryptFilePartWithKey(filePart, sessionKey, iv) {
   }
 }
 
-export async function decryptFilePartWithKey(cipherText, key, privateKey) {
+export async function decryptFilePartWithKey(cipherText, key) {
   try {
-    const rawKey = base64ToArrayBuffer(key)
-    const decryptedSessionKey = await decryptSessionKey(rawKey, privateKey)
-    const sessionKey = await getSessionKey(AES_GCM_ALGO, decryptedSessionKey)
+    const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
     const { iv, encryptedFile } = extractFile(cipherText)
     return decrypt(encryptedFile, iv, sessionKey)
   } catch (error) {
