@@ -13,16 +13,13 @@
     "src/**/*.js": "eslint"
   },
   "ava": {
+    "babel": true,
     "require": [
-      "@babel/register",
       "@babel/polyfill",
       "./src/test/helpers/_setup-browser-env.js"
     ]
   },
   "nyc": {
-    "require": [
-      "@babel/register"
-    ],
     "reporter": [
       "lcov",
       "text"
@@ -33,10 +30,12 @@
   "author": "FortKnoxster",
   "license": "Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0",
   "devDependencies": {
+    "@ava/babel": "^1.0.1",
     "@babel/core": "^7.12.7",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.12.7",
     "@babel/register": "^7.12.1",
+    "@istanbuljs/nyc-config-babel": "^3.0.0",
     "ava": "^3.13.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.2.1",

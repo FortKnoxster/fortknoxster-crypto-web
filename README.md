@@ -1,6 +1,8 @@
 # fkx-crypto-web
+FortKnoxsters encryption algorithms used in the web app. Kryptos is a cryptographic library wrapping and implementing the Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
 
-FortKnoxsters crypto implementation used in the web app.
+## Documentation
+TODO
 
 ## Getting Started
 
@@ -14,7 +16,12 @@ In importing project run below commands:
 npm link fkx-crypto-web 
 ```
 
+## Development
+TODO
+
+### Troubleshooting
 If error similar to this:
+```
 mickey@minux-x1:~/Dev/fkx-web-app$ (cd ../fkx-crypto-web; npm link) && npm link fkx-crypto-web
 npm ERR! path /home/mickey/Dev/fkx-crypto-web
 npm ERR! code EACCES
@@ -39,6 +46,7 @@ npm ERR! the command again as root/Administrator (though this is not recommended
 npm ERR! A complete log of this run can be found in:
 npm ERR!     /home/mickey/.npm/_logs/2018-09-28T11_48_04_023Z-debug.log
 mickey@minux-x1:~/Dev/fkx-web-app$ 
+```
 
 Then try below steps to remove any global installs (with -g):
 
@@ -54,3 +62,8 @@ nvm install stable
 For linux use instead of above link commands:
 
 (cd ../fkx-crypto-web; npm link) && npm link fkx-crypto-web 
+
+## License
+
+[APACHE](LICENSE)
+
