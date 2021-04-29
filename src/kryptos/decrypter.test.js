@@ -10,7 +10,7 @@ import { verifyDecrypt } from './decrypter'
 import * as algorithms from './algorithms'
 import * as utils from './utils'
 
-test('Test verify and decrypt message', async t => {
+test.only('Test verify and decrypt message', async (t) => {
   const signKeyPair = await generateSigningKeyPair(
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
   )
