@@ -1,4 +1,12 @@
 import { kryptos } from './kryptos'
+import { EC } from './algorithms'
+import {
+  LENGTH_256,
+  PEM_PUBLIC_HEADER,
+  PEM_PUBLIC_FOOTER,
+  PEM_PRIVATE_HEADER,
+  PEM_PRIVATE_FOOTER,
+} from './constants'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -31,7 +39,7 @@ export function hexToArrayBuffer(hex) {
   for (let i = 0; i < numBytes; i += 1) {
     byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
   }
-  return byteArray
+  return byteArray.buffer
 }
 
 /**
@@ -53,6 +61,10 @@ export function arrayBufferToHex(arrayBuffer) {
     hexString += nextHexByte
   }
   return hexString
+}
+
+export function base64ToBinaryString(base64) {
+  return window.atob(base64)
 }
 
 export function base64ToArrayBuffer(base64, base64Url) {
@@ -84,12 +96,9 @@ export function arrayBufferToBase64(buffer, base64Url) {
     (previous, current) => previous + String.fromCharCode(current),
     '',
   )
-  const output = btoa(data)
+  const output = window.btoa(data)
   if (base64Url) {
-    return output
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')
+    return output.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   }
   return output
 }
@@ -129,7 +138,7 @@ export function blobToDataUrl(blob) {
       a.abort()
       reject(new DOMException('Problem parsing blobToDataUrl'))
     }
-    a.onload = e => {
+    a.onload = (e) => {
       resolve(e.target.result)
     }
     a.readAsDataURL(blob)
@@ -157,6 +166,11 @@ export function arrayBufferToObject(arrayBuffer) {
   return JSON.parse(arrayBufferToString(arrayBuffer))
 }
 
+/**
+ * Ensure explicit object keys order for RSA JWK.
+ *
+ * @param {Object} jwk
+ */
 export function rsaJwk(jwk) {
   return {
     alg: jwk.alg,
@@ -168,6 +182,11 @@ export function rsaJwk(jwk) {
   }
 }
 
+/**
+ * Ensure explicit object keys order for EC JWK.
+ *
+ * @param {Object} jwk
+ */
 export function ecJwk(jwk) {
   return {
     crv: jwk.crv,
@@ -177,4 +196,69 @@ export function ecJwk(jwk) {
     x: jwk.x,
     y: jwk.y,
   }
+}
+
+export function toJwk(jwk) {
+  if (jwk.kty === EC) {
+    return ecJwk(jwk)
+  }
+  return rsaJwk(jwk)
+}
+
+export function formatPublicKeysToVerify(keys) {
+  const { encrypt, verify } = keys
+  return {
+    pek: toJwk(encrypt),
+    pvk: toJwk(verify),
+  }
+}
+
+export function extractMessage(data) {
+  const keyLength = new Uint16Array(data, 0, 2)[0] // First 16 bit integer
+  const signatureLength = new Uint16Array(data, 2, 2)[0]
+  const encryptedKey = new Uint8Array(data, 4, keyLength)
+  const signature = new Uint8Array(data, 4 + keyLength, signatureLength)
+  const iv = new Uint8Array(data, 4 + signatureLength + keyLength, 16)
+  const cipherText = new Uint8Array(data, 4 + signatureLength + keyLength + 16)
+  return { encryptedKey, iv, cipherText, signature }
+}
+
+export function extractFile(data) {
+  const iv = new Uint8Array(data, 0, 16)
+  const encryptedFile = new Uint8Array(data, 16)
+  return { iv, encryptedFile }
+}
+
+export function packMessage(iv, signature, cipherText) {
+  const signatureLength = new Uint16Array([signature.byteLength])
+  const blob = new Blob(
+    [
+      new Uint16Array([LENGTH_256]), // keyLength, // 2 bytes
+      signatureLength, // 2 bytes
+      new ArrayBuffer(LENGTH_256), // encryptedKey, // 256 bytes
+      signature, // 256 bytes
+      iv,
+      cipherText,
+    ],
+    { type: 'application/octet-stream' },
+  )
+  return blob
+}
+
+export function pemToDerArrayBuffer(pem, pemHeader, pemFooter) {
+  const trimmedPem = pem.replace(/(\r\n|\n|\r)/gm, '')
+  const pemContents = trimmedPem.substring(
+    pemHeader.length,
+    trimmedPem.length - pemFooter.length,
+  )
+  const binaryDerString = base64ToBinaryString(pemContents)
+  return stringToArrayBuffer(binaryDerString)
+}
+
+export function publicPemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PUBLIC_HEADER, PEM_PUBLIC_FOOTER)
+}
+
+export function privatePemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PRIVATE_HEADER, PEM_PRIVATE_FOOTER)
 }

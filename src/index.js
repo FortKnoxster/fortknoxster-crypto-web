@@ -1,51 +1,88 @@
 export { isCryptoSupported } from './kryptos/kryptos'
-export { deriveAccountPassword } from './kryptos/derive'
-export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
+
 export {
-  newKeyStore,
-  newKeyStores,
-  setupKeys,
-  generateSignKeys,
+  deriveAccountPassword,
+  deriveSessionKeyFromPassword,
+  deriveSessionKeyFromMasterKey,
+} from './kryptos/derive'
+
+export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
+
+export {
+  setupKeyStore,
+  generateIdentityKeys,
+  initKeyStores,
   unlockKeyStores,
+  unlockAsymmetricKeyStores,
+  lockAsymmetricKeyStores,
   lockKeyStores,
+  lockKeyStore,
   verifyKeyProtector,
-} from './kryptos/keyStore'
+  getKeyStores,
+  unlockPrivateKey,
+  getPrivateKeyFromStore,
+} from './kryptos/serviceKeyStore'
+
 export {
   generateId,
   blobToDataUrl,
   dataUrlToBlob,
   randomString,
+  arrayBufferToBase64,
 } from './kryptos/utils'
+
+export { hashAnything } from './kryptos/digest'
+
 export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
-  generalSettingsType,
-  requestEmailChangeType,
-  confirmEmailChangeType,
-  requestPhoneChangeType,
-  confirmPhoneChangeType,
+  getProtocol,
 } from './kryptos/protocol'
 
 export {
-  initStorage,
-  encryptItemAssignment,
   encryptNewItemAssignment,
-  encryptItems,
-  encryptExistingItem,
-  encryptFilePart,
-  decryptFilePart,
+  encryptItemAssignment,
+  encryptItem,
   decryptItemAssignment,
   decryptItem,
 } from './kryptos/storage'
 
-export { initChat, encryptChatMessage } from './kryptos/chat'
+export {
+  encryptFile,
+  decryptFile,
+  encryptFilePart,
+  decryptFilePart,
+  encryptFilePartWithKey,
+  decryptFilePartWithKey,
+} from './kryptos/files'
 
 export {
-  createIdentity,
+  encryptChatMessage,
+  encryptGroupChatMessage,
+  decryptGroupChatKey,
+  decryptChatMessage,
+  decryptGroupChatMessage,
+  encryptGroupChatKey,
+} from './kryptos/chat'
+
+export { encryptMessage, decryptMessage } from './kryptos/inbox'
+
+export { signIt, hmacSignIt } from './kryptos/signer'
+
+export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
+
+export {
+  importPublicKeyPem,
+  importPrivateKeyPem,
+  wrapKey,
+} from './kryptos/keys'
+
+export { decryptRawSessionKey } from './kryptos/decrypter'
+
+export {
   initIdentity,
-  signContact,
-  verifyContactKeys,
-  verifyContact,
+  generateUserKeys,
+  signData,
+  verifyData,
 } from './kryptos/identity'
-export { KeyStore } from './kryptos/core/kryptos.keystore'
