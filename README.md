@@ -1,4 +1,4 @@
-# fkx-crypto-web
+# FortKnoxster Crypto Web
 FortKnoxster Crypto Web is an open source, cross-browser cryptographic library implementing the Web Cryptography API. FortKnoxster Crypto Web supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
 It is the core end-to-end encryption library used in FortKnoxster Web Apps.
 
