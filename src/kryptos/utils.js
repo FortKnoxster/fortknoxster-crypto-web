@@ -1,6 +1,12 @@
 import { kryptos } from './kryptos'
 import { EC } from './algorithms'
-import { LENGTH_256 } from './constants'
+import {
+  LENGTH_256,
+  PEM_PUBLIC_HEADER,
+  PEM_PUBLIC_FOOTER,
+  PEM_PRIVATE_HEADER,
+  PEM_PRIVATE_FOOTER,
+} from './constants'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.
@@ -57,6 +63,10 @@ export function arrayBufferToHex(arrayBuffer) {
   return hexString
 }
 
+export function base64ToBinaryString(base64) {
+  return window.atob(base64)
+}
+
 export function base64ToArrayBuffer(base64, base64Url) {
   let base64String = base64
   if (base64Url) {
@@ -86,12 +96,9 @@ export function arrayBufferToBase64(buffer, base64Url) {
     (previous, current) => previous + String.fromCharCode(current),
     '',
   )
-  const output = btoa(data)
+  const output = window.btoa(data)
   if (base64Url) {
-    return output
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')
+    return output.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   }
   return output
 }
@@ -131,7 +138,7 @@ export function blobToDataUrl(blob) {
       a.abort()
       reject(new DOMException('Problem parsing blobToDataUrl'))
     }
-    a.onload = e => {
+    a.onload = (e) => {
       resolve(e.target.result)
     }
     a.readAsDataURL(blob)
@@ -236,4 +243,22 @@ export function packMessage(iv, signature, cipherText) {
     { type: 'application/octet-stream' },
   )
   return blob
+}
+
+export function pemToDerArrayBuffer(pem, pemHeader, pemFooter) {
+  const trimmedPem = pem.replace(/(\r\n|\n|\r)/gm, '')
+  const pemContents = trimmedPem.substring(
+    pemHeader.length,
+    trimmedPem.length - pemFooter.length,
+  )
+  const binaryDerString = base64ToBinaryString(pemContents)
+  return stringToArrayBuffer(binaryDerString)
+}
+
+export function publicPemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PUBLIC_HEADER, PEM_PUBLIC_FOOTER)
+}
+
+export function privatePemToDerArrayBuffer(pem) {
+  return pemToDerArrayBuffer(pem, PEM_PRIVATE_HEADER, PEM_PRIVATE_FOOTER)
 }

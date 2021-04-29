@@ -4,7 +4,7 @@ import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
 import * as algorithms from './algorithms'
 import { generateId } from './utils'
 
-test('Test create signed Identity', async t => {
+test('Test create signed Identity', async (t) => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const id = generateId(32)
   const identity = {
@@ -18,7 +18,7 @@ test('Test create signed Identity', async t => {
   t.assert(identity.signature)
 })
 
-test('Test HMAC signed object', async t => {
+test('Test HMAC signed object', async (t) => {
   const rawKey = generateId(32)
   const object = {
     a: 'a',
@@ -31,7 +31,7 @@ test('Test HMAC signed object', async t => {
   t.assert(object.signature)
 })
 
-test('Test sign public keys (signPublicKeys)', async t => {
+test('Test sign public keys (signPublicKeys)', async (t) => {
   const encryptionKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,
   )

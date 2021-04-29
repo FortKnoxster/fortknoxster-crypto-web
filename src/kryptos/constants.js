@@ -25,3 +25,7 @@ export const PSK = 'psk' // Private Sign Key
 export const PDK = 'pdk' // Private Decrypt Key
 export const PVK = 'pvk' // Publick Verify Key
 export const PEK = 'pek' // Public Encrypt Key
+export const PEM_PUBLIC_HEADER = '-----BEGIN PUBLIC KEY-----'
+export const PEM_PUBLIC_FOOTER = '-----END PUBLIC KEY-----'
+export const PEM_PRIVATE_HEADER = '-----BEGIN PRIVATE KEY-----'
+export const PEM_PRIVATE_FOOTER = '-----END PRIVATE KEY-----'

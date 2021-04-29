@@ -25,7 +25,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import { getSessionKey, exportRawKey } from './keys'
-import { encryptBinary } from './encrypter'
+import { encrypt, encryptBinary } from './encrypter'
 import { hmacBinarySignIt } from './signer'
 import { hmacVerifyIt } from './verifier'
 import { decrypt } from './decrypter'
@@ -77,6 +77,26 @@ export async function decryptFile(cipherText, key, hmac) {
     const signature = hexToArrayBuffer(hmac)
     await hmacVerifyIt(rawKey, signature, encryptedFile)
     const sessionKey = await getSessionKey(AES_CBC_ALGO, rawKey)
+    return decrypt(encryptedFile, iv, sessionKey)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export async function encryptFilePartWithKey(filePart, sessionKey, iv) {
+  try {
+    const rawIv = hexToArrayBuffer(iv)
+    const cipherText = await encrypt(filePart, rawIv, sessionKey)
+    return [rawIv, new Uint8Array(cipherText)]
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export async function decryptFilePartWithKey(cipherText, key) {
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO, key)
+    const { iv, encryptedFile } = extractFile(cipherText)
     return decrypt(encryptedFile, iv, sessionKey)
   } catch (error) {
     return Promise.reject(error)

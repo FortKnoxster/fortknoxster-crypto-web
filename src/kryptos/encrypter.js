@@ -49,11 +49,11 @@ export async function encryptSessionKey(sessionKey, publicKey) {
 
 export async function encryptSessionKeys(sessionKey, publicKeys) {
   try {
-    const promises = publicKeys.map(publicKey =>
+    const promises = publicKeys.map((publicKey) =>
       encryptSessionKey(sessionKey, publicKey),
     )
     const keys = await Promise.all(promises)
-    return keys.map(key => arrayBufferToBase64(key))
+    return keys.map((key) => arrayBufferToBase64(key))
   } catch (error) {
     return Promise.reject(error)
   }
@@ -183,7 +183,7 @@ export async function encryptSignEncrypt(
   try {
     const { iv, m, s } = await encryptSign(plainText, sessionKey, privateKey)
     const exportedSessionKey = await exportRawKey(sessionKey)
-    const promises = publicKeys.map(publicKey =>
+    const promises = publicKeys.map((publicKey) =>
       encryptSessionKey(exportedSessionKey, publicKey),
     )
     const keys = await Promise.all(promises)
