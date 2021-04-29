@@ -13,6 +13,9 @@
     "src/**/*.js": "eslint"
   },
   "ava": {
+    "files": [
+      "**/**.test.js"
+    ],
     "babel": true,
     "require": [
       "@babel/polyfill",
