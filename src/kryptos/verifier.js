@@ -24,15 +24,15 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { kryptos } from './kryptos'
-import { importHmacKey, importPublicVerifyKey } from './keys'
+import { kryptos } from './kryptos.js'
+import { importHmacKey, importPublicVerifyKey } from './keys.js'
 import {
   base64ToArrayBuffer,
   stringToArrayBuffer,
   formatPublicKeysToVerify,
-} from './utils'
-import { getSignAlgorithm } from './algorithms'
-import { SERVICES } from './constants'
+} from './utils.js'
+import { getSignAlgorithm } from './algorithms.js'
+import { SERVICES } from './constants.js'
 
 /**
  * Verify given signature and verified signature of the given cipher text.
@@ -84,8 +84,8 @@ export async function verifyPublicKeys(keys, publicKey) {
   try {
     const importedPublicKey = await importPublicVerifyKey(publicKey)
     return Object.keys(keys)
-      .filter(key => key !== SERVICES.identity)
-      .map(key => {
+      .filter((key) => key !== SERVICES.identity)
+      .map((key) => {
         const { signature } = keys[key]
         const keysToVerify = formatPublicKeysToVerify(keys[key])
         return verifyIt(importedPublicKey, signature, keysToVerify)

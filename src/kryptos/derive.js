@@ -1,5 +1,5 @@
-import { kryptos } from './kryptos'
-import { stringToArrayBuffer, arrayBufferToHex, randomValue } from './utils'
+import { kryptos } from './kryptos.js'
+import { stringToArrayBuffer, arrayBufferToHex, randomValue } from './utils.js'
 import {
   AES_KW_ALGO,
   AES_GCM_ALGO,
@@ -8,10 +8,16 @@ import {
   ECDH_ALGO,
   deriveKeyPBKDF2,
   deriveKeyHKDF,
-} from './algorithms'
-import { DERIVE, WRAP, ENCRYPT, DECRYPT_UNWRAP, ENCRYPT_WRAP } from './usages'
-import { RAW } from './formats'
-import { EXTRACTABLE, NONEXTRACTABLE, LENGTH_32 } from './constants'
+} from './algorithms.js'
+import {
+  DERIVE,
+  WRAP,
+  ENCRYPT,
+  DECRYPT_UNWRAP,
+  ENCRYPT_WRAP,
+} from './usages.js'
+import { RAW } from './formats.js'
+import { EXTRACTABLE, NONEXTRACTABLE, LENGTH_32 } from './constants.js'
 
 export async function deriveAccountPassword(username, password, domain) {
   try {

@@ -24,19 +24,19 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { getSessionKey, exportRawKey } from './keys'
-import { encrypt, encryptBinary } from './encrypter'
-import { hmacBinarySignIt } from './signer'
-import { hmacVerifyIt } from './verifier'
-import { decrypt } from './decrypter'
+import { getSessionKey, exportRawKey } from './keys.js'
+import { encrypt, encryptBinary } from './encrypter.js'
+import { hmacBinarySignIt } from './signer.js'
+import { hmacVerifyIt } from './verifier.js'
+import { decrypt } from './decrypter.js'
 import {
   base64ToArrayBuffer,
   arrayBufferToBase64,
   arrayBufferToHex,
   hexToArrayBuffer,
   extractFile,
-} from './utils'
-import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
+} from './utils.js'
+import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms.js'
 
 /**
  * Encrypts a file with a random AES encryption key. The encrypted file is then

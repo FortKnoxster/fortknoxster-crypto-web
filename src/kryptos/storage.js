@@ -24,13 +24,13 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { getPrivateKey, getPublicKey } from './serviceKeyStore'
-import { getSessionKey } from './keys'
-import { encryptSignEncrypt, encryptSessionKeys } from './encrypter'
-import { verifyDecrypt, decryptSessionKey } from './decrypter'
-import { PSK, PEK, PVK, PDK, SERVICES } from './constants'
-import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
-import { AES_CBC_ALGO } from './algorithms'
+import { getPrivateKey, getPublicKey } from './serviceKeyStore.js'
+import { getSessionKey } from './keys.js'
+import { encryptSignEncrypt, encryptSessionKeys } from './encrypter.js'
+import { verifyDecrypt, decryptSessionKey } from './decrypter.js'
+import { PSK, PEK, PVK, PDK, SERVICES } from './constants.js'
+import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils.js'
+import { AES_CBC_ALGO } from './algorithms.js'
 
 export async function encryptItem(data, key, publicKeys = []) {
   try {

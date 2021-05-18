@@ -3,11 +3,11 @@ import {
   getPrivateKey,
   setupKeyStore,
   generateIdentityKeys,
-} from './serviceKeyStore'
-import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants'
-import { importPublicVerifyKey } from './keys'
-import { signIt } from './signer'
-import { verifyIt } from './verifier'
+} from './serviceKeyStore.js'
+import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants.js'
+import { importPublicVerifyKey } from './keys.js'
+import { signIt } from './signer.js'
+import { verifyIt } from './verifier.js'
 
 export function signData(data, service) {
   return signIt(data, getPrivateKey(service, PSK))
@@ -84,7 +84,7 @@ export async function generateUserKeys(id, plainPassword) {
     )
 
     const serviceKeyStores = await Promise.all(
-      serviceKeys.map(serviceKey =>
+      serviceKeys.map((serviceKey) =>
         setupKeyStore(
           serviceKey.service,
           plainPassword,

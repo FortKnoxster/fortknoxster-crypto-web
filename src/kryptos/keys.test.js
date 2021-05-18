@@ -1,11 +1,11 @@
 import test from 'ava'
-import * as kryptos from '../index'
+import * as kryptos from '../index.js'
 import {
   generateSigningKeyPair,
   generateEncryptionKeyPair,
   generateSessionKey,
-} from './keys'
-import * as algorithms from './algorithms'
+} from './keys.js'
+import * as algorithms from './algorithms.js'
 // import { publicKeyPem } from '../test/pem/publicKey.pem'
 
 const publicKeyPem =

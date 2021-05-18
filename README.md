@@ -19,6 +19,10 @@ npm link fkx-crypto-web
 ## Development
 TODO
 
+## Testing
+[Debug](https://github.com/avajs/ava/blob/main/docs/recipes/debugging-with-chrome-devtools.md)
+
+
 ### Troubleshooting
 If error similar to this:
 ```

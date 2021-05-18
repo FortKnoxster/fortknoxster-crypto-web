@@ -24,10 +24,10 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { kryptos } from './kryptos'
-import { importHmacKey } from './keys'
-import { stringToArrayBuffer, arrayBufferToBase64, toJwk } from './utils'
-import { getSignAlgorithm } from './algorithms'
+import { kryptos } from './kryptos.js'
+import { importHmacKey } from './keys.js'
+import { stringToArrayBuffer, arrayBufferToBase64, toJwk } from './utils.js'
+import { getSignAlgorithm } from './algorithms.js'
 
 /**
  * Sign binary with a signing key. Returns binary signature.
