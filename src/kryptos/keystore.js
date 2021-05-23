@@ -257,10 +257,10 @@ export async function unlock(
 ) {
   try {
     const promises = Object.keys(keyContainers)
-      .filter(key => ['pdk', 'psk'].includes(key) && keyContainers[key])
-      .map(async key => {
+      .filter((key) => ['pdk', 'psk'].includes(key) && keyContainers[key])
+      .map(async (key) => {
         const keyProtector = keyContainers[key].keyProtectors.find(
-          protector => protector.type === type,
+          (protector) => protector.type === type,
         )
         const { salt, iterations } = keyProtector
         const protector = await getProtector(protectorKey, salt, iterations)
@@ -289,11 +289,11 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
   try {
     const promises = Object.keys(keyStore.keyContainers)
       .filter(
-        key => ['pdk', 'psk'].includes(key) && keyStore.keyContainers[key],
+        (key) => ['pdk', 'psk'].includes(key) && keyStore.keyContainers[key],
       )
-      .map(async key => {
+      .map(async (key) => {
         const keyProtector = keyStore.keyContainers[key].keyProtectors.find(
-          protector => protector.type === type,
+          (protector) => protector.type === type,
         )
         const protector = await getProtector(keyStore[key].protector)
         return unlockPrivateKey(
@@ -361,7 +361,7 @@ async function replaceOrAddProtector(
   // Clone keyProtectors
   const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
   // Todo: handler (type, identifier) as distinct protectors
-  const index = clonedKeyProtectors.findIndex(p => p.type === newType)
+  const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
   if (index !== -1) {
     clonedKeyProtectors[index] = replaceProtector
   } else {
@@ -394,10 +394,10 @@ export async function lock(
   try {
     const clonedKeyContainers = { ...keyContainers }
     const promises = Object.keys(clonedKeyContainers)
-      .filter(key => ['pdk', 'psk'].includes(key) && clonedKeyContainers[key])
-      .map(async key => {
+      .filter((key) => ['pdk', 'psk'].includes(key) && clonedKeyContainers[key])
+      .map(async (key) => {
         const keyProtector = clonedKeyContainers[key].keyProtectors.find(
-          protector => protector.type === type,
+          (protector) => protector.type === type,
         )
         const { salt, iterations } = keyProtector
         const protector = await getProtector(protectorKey, salt, iterations)
