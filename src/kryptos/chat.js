@@ -1,19 +1,19 @@
-import { getPrivateKey, getPublicKey } from './serviceKeyStore'
+import { getPrivateKey, getPublicKey } from './serviceKeyStore.js'
 import {
   encryptSign,
   encryptSignEncrypt,
   encryptSessionKeys,
-} from './encrypter'
-import { decryptSessionKey, verifyDecrypt } from './decrypter'
+} from './encrypter.js'
+import { decryptSessionKey, verifyDecrypt } from './decrypter.js'
 import {
   generateSessionKey,
   unwrapKey,
   getSessionKey,
   exportRawKey,
-} from './keys'
-import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils'
-import { PSK, PVK, PDK, SERVICES } from './constants'
-import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms'
+} from './keys.js'
+import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils.js'
+import { PSK, PVK, PDK, SERVICES } from './constants.js'
+import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms.js'
 
 export async function encryptChatMessage(plainText, publicKeys) {
   try {
@@ -26,7 +26,7 @@ export async function encryptChatMessage(plainText, publicKeys) {
       publicKeys,
     )
     const { iv, s, m, keys } = result
-    const formattedKeys = keys.map(key => arrayBufferToBase64(key))
+    const formattedKeys = keys.map((key) => arrayBufferToBase64(key))
     return { iv, s, m, keys: formattedKeys }
   } catch (error) {
     return Promise.reject(error)

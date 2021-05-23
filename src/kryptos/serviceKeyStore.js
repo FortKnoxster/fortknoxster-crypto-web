@@ -1,15 +1,15 @@
-import { setupIdentityKeys, setupKeys, unlock, init, lock } from './keystore'
-import { unwrapPrivateKeyPem } from './keys'
+import { setupIdentityKeys, setupKeys, unlock, init, lock } from './keystore.js'
+import { unwrapPrivateKeyPem } from './keys.js'
 import {
   ECDSA_ALGO,
   ECDH_ALGO,
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
   RSA_OAEP,
-} from './algorithms'
-import { DECRYPT_UNWRAP } from './usages'
-import { base64ToArrayBuffer } from './utils'
-import { SERVICES, PROTECTOR_TYPES, PDK, PSK } from './constants'
+} from './algorithms.js'
+import { DECRYPT_UNWRAP } from './usages.js'
+import { base64ToArrayBuffer } from './utils.js'
+import { SERVICES, PROTECTOR_TYPES, PDK, PSK } from './constants.js'
 
 const serviceKeyStore = {
   keyStores: null,

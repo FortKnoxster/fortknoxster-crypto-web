@@ -1,13 +1,12 @@
 /* eslint-disable max-lines */
 import test from 'ava'
-import { setupIdentityKeys, setupKeys, unlock, lock } from './keystore'
-import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
-import * as algorithms from './algorithms'
-import { randomString } from './utils'
-import { PROTECTOR_TYPES, SERVICES } from './constants'
-import { initKeyStores, unlockKeyStores } from './serviceKeyStore'
-import keyStoresJson from '../test/json/keyStores.json'
-import initKeyStoresJson from '../test/json/initKeyStores.json'
+import { setupIdentityKeys, setupKeys, unlock, lock } from './keystore.js'
+import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys.js'
+import * as algorithms from './algorithms.js'
+import { randomString } from './utils.js'
+import { PROTECTOR_TYPES, SERVICES } from './constants.js'
+import { initKeyStores, unlockKeyStores } from './serviceKeyStore.js'
+import { keyStoresJson, initKeyStoresJson } from '../test/json/index.js'
 
 test.before(async (t) => {
   // eslint-disable-next-line no-param-reassign
@@ -87,7 +86,7 @@ test('Test Elliptic Curve key store setup with asymmetric protector', async (t) 
   t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
 
-test('Test Identity key store unlock.', async (t) => {
+test.only('Test Identity key store unlock.', async (t) => {
   const service = SERVICES.identity
   const keyStore = await setupIdentityKeys(
     service,

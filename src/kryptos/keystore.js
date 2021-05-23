@@ -25,7 +25,7 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import * as utils from './utils'
+import * as utils from './utils.js'
 import {
   generateWrapKey,
   wrapKey,
@@ -35,13 +35,13 @@ import {
   unwrapKey,
   unwrapPrivateKey,
   exportKey,
-} from './keys'
-import * as algorithms from './algorithms'
-import { getUsage } from './usages'
-import { signPublicKeys } from './signer'
-import { fingerprint } from './digest'
-import { getProtector, packProtector } from './protector'
-import { PROTECTOR_TYPES, EXTRACTABLE } from './constants'
+} from './keys.js'
+import * as algorithms from './algorithms.js'
+import { getUsage } from './usages.js'
+import { signPublicKeys } from './signer.js'
+import { fingerprint } from './digest.js'
+import { getProtector, packProtector } from './protector.js'
+import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {

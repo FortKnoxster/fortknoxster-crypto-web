@@ -4,11 +4,11 @@ import {
   generateSigningKeyPair,
   generateEncryptionKeyPair,
   exportPublicKey,
-} from './keys'
-import { encryptSignEncrypt } from './encrypter'
-import * as algorithms from './algorithms'
+} from './keys.js'
+import { encryptSignEncrypt } from './encrypter.js'
+import * as algorithms from './algorithms.js'
 
-test('Test encrypt and sign message', async t => {
+test('Test encrypt and sign message', async (t) => {
   const signKeyPair = await generateSigningKeyPair(
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
   )

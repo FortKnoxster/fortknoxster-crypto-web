@@ -1,10 +1,10 @@
-import { kryptos } from './kryptos'
+import { kryptos } from './kryptos.js'
 import {
   objectToArrayBuffer,
   arrayBufferToHex,
   stringToArrayBuffer,
-} from './utils'
-import { SHA_256 } from './algorithms'
+} from './utils.js'
+import { SHA_256 } from './algorithms.js'
 
 export function fingerprint(key) {
   return kryptos.subtle.digest(SHA_256.name, objectToArrayBuffer(key))

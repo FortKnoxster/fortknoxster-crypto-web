@@ -4,11 +4,11 @@ import {
   generateSigningKeyPair,
   generateEncryptionKeyPair,
   exportPublicKey,
-} from './keys'
-import { encryptSignEncrypt } from './encrypter'
-import { verifyDecrypt } from './decrypter'
-import * as algorithms from './algorithms'
-import * as utils from './utils'
+} from './keys.js'
+import { encryptSignEncrypt } from './encrypter.js'
+import { verifyDecrypt } from './decrypter.js'
+import * as algorithms from './algorithms.js'
+import * as utils from './utils.js'
 
 test.only('Test verify and decrypt message', async (t) => {
   const signKeyPair = await generateSigningKeyPair(
