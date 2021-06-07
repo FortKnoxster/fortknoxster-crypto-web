@@ -1,12 +1,16 @@
-export { isCryptoSupported } from './kryptos/kryptos'
+export { isCryptoSupported } from './kryptos/kryptos.js'
 
 export {
   deriveAccountPassword,
   deriveSessionKeyFromPassword,
   deriveSessionKeyFromMasterKey,
-} from './kryptos/derive'
+} from './kryptos/derive.js'
 
-export { PROTECTOR_TYPES, SERVICES, SERVICE_MODES } from './kryptos/constants'
+export {
+  PROTECTOR_TYPES,
+  SERVICES,
+  SERVICE_MODES,
+} from './kryptos/constants.js'
 
 export {
   setupKeyStore,
@@ -21,7 +25,7 @@ export {
   getKeyStores,
   unlockPrivateKey,
   getPrivateKeyFromStore,
-} from './kryptos/serviceKeyStore'
+} from './kryptos/serviceKeyStore.js'
 
 export {
   generateId,
@@ -29,16 +33,16 @@ export {
   dataUrlToBlob,
   randomString,
   arrayBufferToBase64,
-} from './kryptos/utils'
+} from './kryptos/utils.js'
 
-export { hashAnything } from './kryptos/digest'
+export { hashAnything } from './kryptos/digest.js'
 
 export {
   initProtocol,
   encryptProtocol,
   decryptProtocol,
   getProtocol,
-} from './kryptos/protocol'
+} from './kryptos/protocol.js'
 
 export {
   encryptNewItemAssignment,
@@ -46,7 +50,7 @@ export {
   encryptItem,
   decryptItemAssignment,
   decryptItem,
-} from './kryptos/storage'
+} from './kryptos/storage.js'
 
 export {
   encryptFile,
@@ -55,7 +59,7 @@ export {
   decryptFilePart,
   encryptFilePartWithKey,
   decryptFilePartWithKey,
-} from './kryptos/files'
+} from './kryptos/files.js'
 
 export {
   encryptChatMessage,
@@ -64,25 +68,25 @@ export {
   decryptChatMessage,
   decryptGroupChatMessage,
   encryptGroupChatKey,
-} from './kryptos/chat'
+} from './kryptos/chat.js'
 
-export { encryptMessage, decryptMessage } from './kryptos/inbox'
+export { encryptMessage, decryptMessage } from './kryptos/inbox.js'
 
-export { signIt, hmacSignIt } from './kryptos/signer'
+export { signIt, hmacSignIt } from './kryptos/signer.js'
 
-export { verifyIt, verifyPublicKeys } from './kryptos/verifier'
+export { verifyIt, verifyPublicKeys } from './kryptos/verifier.js'
 
 export {
   importPublicKeyPem,
   importPrivateKeyPem,
   wrapKey,
-} from './kryptos/keys'
+} from './kryptos/keys.js'
 
-export { decryptRawSessionKey } from './kryptos/decrypter'
+export { decryptRawSessionKey } from './kryptos/decrypter.js'
 
 export {
   initIdentity,
   generateUserKeys,
   signData,
   verifyData,
-} from './kryptos/identity'
+} from './kryptos/identity.js'
