@@ -1,3 +1,6 @@
+![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
+![Join Telegram](https://img.shields.io/badge/Join-Telegram-blue?logo=telegram&link=https://t.me/FortKnoxster)
+
 # FortKnoxster Crypto Web
 FortKnoxster Crypto Web is an open source, cross-browser cryptographic library implementing the Web Cryptography API. FortKnoxster Crypto Web supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
 It is the core end-to-end encryption library used in FortKnoxster Web Apps.
