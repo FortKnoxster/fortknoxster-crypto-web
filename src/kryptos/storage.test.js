@@ -3,13 +3,13 @@ import {
   encryptNewItemAssignment,
   decryptItemAssignment,
   encryptItem,
-} from './storage'
-import { setupKeys } from './keystore'
-import { generateSigningKeyPair } from './keys'
-import * as algorithms from './algorithms'
-import * as utils from './utils'
-import { PROTECTOR_TYPES, SERVICES } from './constants'
-import { initKeyStores } from './serviceKeyStore'
+} from './storage.js'
+import { setupKeys } from './keystore.js'
+import { generateSigningKeyPair } from './keys.js'
+import * as algorithms from './algorithms.js'
+import * as utils from './utils.js'
+import { PROTECTOR_TYPES, SERVICES } from './constants.js'
+import { initKeyStores } from './serviceKeyStore.js'
 
 // We need a storage keystore
 test.before(async () => {
@@ -25,29 +25,29 @@ test.before(async () => {
   await initKeyStores([keyStore])
 })
 
-test('Test encrypt new item assignment (encryptNewItemAssignment)', async t => {
+test('Test encrypt new item assignment (encryptNewItemAssignment)', async (t) => {
   const itemData = { d: { a: 1, b: 2, c: 3 }, rid: '123' }
   const encryptedItem = await encryptNewItemAssignment(itemData)
   t.assert(encryptedItem)
 })
 
-test('Test encrypt new item (encryptItem)', async t => {
+test('Test encrypt new item (encryptItem)', async (t) => {
   const itemData = { d: { a: 1, b: 2, c: 3 } }
   const encryptedItem = await encryptItem(itemData)
   t.assert(encryptedItem)
 })
 
-test('Test encrypt new items (encryptItems)', async t => {
+test('Test encrypt new items (encryptItems)', async (t) => {
   const newItems = [
     { d: { a: 1, b: 2, c: 3 }, rid: '123' },
     { d: { a: 1, b: 2, c: 3 }, rid: '123' },
     { d: { a: 1, b: 2, c: 3 }, rid: '123' },
   ]
-  const encryptedItems = await Promise.all(newItems.map(i => encryptItem(i)))
+  const encryptedItems = await Promise.all(newItems.map((i) => encryptItem(i)))
   t.assert(encryptedItems)
 })
 
-test('Test decrypt item assignment (decryptItemAssignment)', async t => {
+test('Test decrypt item assignment (decryptItemAssignment)', async (t) => {
   const itemData = { d: { a: 1, b: 2, c: 3 } }
   const encryptedItem = await encryptNewItemAssignment(itemData)
   const { m, iv, s, keys } = encryptedItem

@@ -3,7 +3,7 @@ import {
   ECDSA_P521,
   RSA_OAEP_2048,
   ECDH_P521,
-} from './algorithms'
+} from './algorithms.js'
 
 export const DERIVE = ['deriveBits', 'deriveKey']
 export const WRAP = ['wrapKey', 'unwrapKey']

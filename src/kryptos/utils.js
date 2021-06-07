@@ -1,12 +1,12 @@
-import { kryptos } from './kryptos'
-import { EC } from './algorithms'
+import { kryptos } from './kryptos.js'
+import { EC } from './algorithms.js'
 import {
   LENGTH_256,
   PEM_PUBLIC_HEADER,
   PEM_PUBLIC_FOOTER,
   PEM_PRIVATE_HEADER,
   PEM_PRIVATE_FOOTER,
-} from './constants'
+} from './constants.js'
 /**
  * TODO consider TextEncoder.encode() Returns a Uint8Array containing utf-8 encoded text.
  * Converts a String to an ArrayBuffer.

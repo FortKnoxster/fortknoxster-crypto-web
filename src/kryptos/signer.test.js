@@ -1,8 +1,8 @@
 import test from 'ava'
-import { signIt, hmacSignIt, signPublicKeys } from './signer'
-import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys'
-import * as algorithms from './algorithms'
-import { generateId } from './utils'
+import { signIt, hmacSignIt, signPublicKeys } from './signer.js'
+import { generateSigningKeyPair, generateEncryptionKeyPair } from './keys.js'
+import * as algorithms from './algorithms.js'
+import { generateId } from './utils.js'
 
 test('Test create signed Identity', async (t) => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)

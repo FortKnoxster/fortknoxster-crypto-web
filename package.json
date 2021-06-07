@@ -4,10 +4,12 @@
   "description": "FortKnoxsters encryption algorithms used in the web app. Kryptos is a cryptographic library wrapping and implementing the Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.",
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint src/**/*.js",
     "test": "nyc ava --verbose --timeout=20s",
-    "test:watch": "nyc ava --verbose --watch --timeout=20s"
+    "test:watch": "nyc ava --verbose --watch --timeout=20s",
+    "eslint": "eslint src/**/*.js"
   },
   "lint-staged": {
     "src/**/*.js": "eslint"
@@ -54,13 +56,14 @@
     "babel-plugin-istanbul": "^6.0.0",
     "babel-register": "^6.26.0",
     "browser-env": "^3.3.0",
-    "eslint": "^7.14.0",
+    "eslint": "^7.26.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-config-prettier": "^6.15.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-ava": "^12.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.3.0",
-    "jsdoc": "^3.6.6",
+    "jsdoc": "^3.6.7",
     "lint-staged": "^10.5.1",
     "node-webcrypto-ossl": "^2.1.2",
     "nyc": "^15.1.0",

@@ -1,4 +1,4 @@
-import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants'
+import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants.js'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'

@@ -1,5 +1,5 @@
 import test from 'ava'
-import { hashAnything } from './digest'
+import { hashAnything } from './digest.js'
 
 test('Test hash anything - mix of variables, objects, arrays, strings etc.', async (t) => {
   const a = 'test'

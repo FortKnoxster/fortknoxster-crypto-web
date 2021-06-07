@@ -1,6 +1,6 @@
 import test from 'ava'
 // import { deriveSessionKeyFromMasterKey } from './derive'
-import { randomString } from './utils'
+import { randomString } from './utils.js'
 
 test('Test derive key from master key', async (t) => {
   const masterKey = randomString()
