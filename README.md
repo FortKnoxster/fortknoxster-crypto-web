@@ -1,3 +1,5 @@
+[![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)](https://github.com/Naereen/badges/)
+
 # fkx-crypto-web
 FortKnoxsters encryption algorithms used in the web app. Kryptos is a cryptographic library wrapping and implementing the Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
 
