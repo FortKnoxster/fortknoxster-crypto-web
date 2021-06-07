@@ -170,7 +170,7 @@ export function generateWrapKey() {
   return kryptos.subtle.generateKey(
     algorithms.AES_GCM_ALGO,
     EXTRACTABLE,
-    usage.ENCRYPT_WRAP,
+    usage.WRAP.concat(usage.ENCRYPT),
   )
 }
 
@@ -193,7 +193,7 @@ export function unwrapKey(
     unwrappingKey.algorithm.name,
     wrappedKeyAlgorithm,
     extractable,
-    usage.ENCRYPT_WRAP,
+    usage.WRAP.concat(usage.ENCRYPT),
   )
 }
 
