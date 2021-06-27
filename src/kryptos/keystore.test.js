@@ -174,14 +174,12 @@ test('Test RSA key store lock with new recovery key protector', async (t) => {
     recoveryKey,
     PROTECTOR_TYPES.recovery,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
-  const hasRecoveryProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.recovery,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasRecoveryProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.recovery,
+  )
   t.assert(hasPasswordProtector && hasRecoveryProtector)
 })
 
@@ -207,10 +205,9 @@ test('Test RSA key store lock with new password protector', async (t) => {
   const oldPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
     (protector) => protector.type === PROTECTOR_TYPES.password,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
   t.assert(
     hasPasswordProtector &&
       hasPasswordProtector.encryptedKey !== oldPasswordProtector.encryptedKey,
@@ -238,14 +235,12 @@ test('Test RSA key store lock with new asymmetric protector', async (t) => {
     newProtectorKeyPair.publicKey,
     PROTECTOR_TYPES.asymmetric,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
-  const hasAsymmetricProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasAsymmetricProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
   t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })
 
@@ -298,14 +293,12 @@ test('Test Elliptic Curve key store lock with new recovery key protector', async
     recoveryKey,
     PROTECTOR_TYPES.recovery,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
-  const hasRecoveryProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.recovery,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasRecoveryProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.recovery,
+  )
   t.assert(hasPasswordProtector && hasRecoveryProtector)
 })
 
@@ -331,10 +324,9 @@ test('Test Elliptic Curve key store lock with new password protector', async (t)
   const oldPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
     (protector) => protector.type === PROTECTOR_TYPES.password,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
   t.assert(
     hasPasswordProtector &&
       hasPasswordProtector.encryptedKey !== oldPasswordProtector.encryptedKey,
@@ -362,14 +354,12 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async (
     newProtectorKeyPair.publicKey,
     PROTECTOR_TYPES.asymmetric,
   )
-  const hasPasswordProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.password,
-    )
-  const hasAsymmetricProtector =
-    newKeyContainers.keyContainers.psk.keyProtectors.find(
-      (protector) => protector.type === PROTECTOR_TYPES.asymmetric,
-    )
+  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.password,
+  )
+  const hasAsymmetricProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
+    (protector) => protector.type === PROTECTOR_TYPES.asymmetric,
+  )
   t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })
 
