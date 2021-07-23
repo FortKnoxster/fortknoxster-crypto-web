@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  * @name Kryptos
- * @file enrypter.js
+ * @file keystore.js
  * @copyright Copyright © FortKnoxster Ltd. 2020.
  * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
  * @author Mickey Johnnysson <mj@fortknoxster.com>
@@ -27,10 +27,10 @@
  */
 import * as utils from './utils.js'
 import {
-  generateWrapKey,
+  // generateWrapKey,
   wrapKey,
   generateKeyPair,
-  wrapPrivateKey,
+  // wrapPrivateKey,
   exportPublicKey,
   unwrapKey,
   unwrapPrivateKey,
@@ -40,9 +40,10 @@ import * as algorithms from './algorithms.js'
 import { getUsage } from './usages.js'
 import { signPublicKeys } from './signer.js'
 import { fingerprint } from './digest.js'
+import { setupKeyContainer } from './keyContainer.js'
 import { getProtector, packProtector } from './protector.js'
 import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
-
+/*
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {
     encryptedKey: utils.arrayBufferToBase64(wrappedKey),
@@ -52,6 +53,7 @@ function newKeyContainer(wrappedKey, iv, keyType) {
     keyProtectors: [],
   }
 }
+*/
 
 export async function setupKeyPair(
   derivedKey,
@@ -61,16 +63,29 @@ export async function setupKeyPair(
   protectorIdentifier,
 ) {
   try {
-    const intermediateKey = await generateWrapKey()
-    const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
+    // const intermediateKey = await generateWrapKey()
+    // const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
     const keyPair = await generateKeyPair(algorithm)
+
+    const keyContainer = setupKeyContainer(
+      derivedKey,
+      algorithms.keyContainerType(algorithm),
+      keyPair,
+      protectorAlgorithm,
+      protectorType,
+      protectorIdentifier,
+    )
+
+    /*
     const iv = utils.nonce()
     const wrappedPrivateKey = await wrapPrivateKey(
       keyPair.privateKey,
       iv,
       intermediateKey,
     )
+    */
     const exportedPublicKey = await exportPublicKey(keyPair.publicKey)
+    /*
     const keyContainer = newKeyContainer(
       wrappedPrivateKey,
       iv,
@@ -83,6 +98,8 @@ export async function setupKeyPair(
       protectorIdentifier,
     )
     keyContainer.keyProtectors.push(passwordProtector)
+    */
+
     return {
       keyContainer,
       publicKey: exportedPublicKey,
