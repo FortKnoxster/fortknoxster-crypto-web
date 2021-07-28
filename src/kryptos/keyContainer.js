@@ -24,11 +24,26 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { arrayBufferToBase64, objectToArrayBuffer, nonce } from './utils.js'
-import { generateWrapKey, wrapKey, wrapPrivateKey } from './keys.js'
+import { kryptos } from './kryptos.js'
+import {
+  arrayBufferToBase64,
+  base64ToArrayBuffer,
+  objectToArrayBuffer,
+  arrayBufferToObject,
+  nonce,
+} from './utils.js'
+import {
+  generateWrapKey,
+  wrapKey,
+  unwrapKey,
+  wrapPrivateKey,
+  unwrapPrivateKey,
+} from './keys.js'
 import { encrypt } from './encrypter.js'
 import * as algorithms from './algorithms.js'
+import { getUsage } from './usages.js'
 import { getProtector, packProtector } from './protector.js'
+import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {
@@ -46,6 +61,43 @@ function wrapKeyContainerKey(keyToEncrypt, iv, intermediateKey) {
   }
   const arrayBuffer = objectToArrayBuffer(keyToEncrypt)
   return encrypt(arrayBuffer, iv, intermediateKey)
+}
+
+export function unlockIntermediateKey(
+  encryptedKey,
+  protectorKey,
+  protectAlgorithm,
+) {
+  return unwrapKey(
+    base64ToArrayBuffer(encryptedKey),
+    protectorKey,
+    protectAlgorithm,
+    EXTRACTABLE,
+  )
+}
+
+async function unwrapKeyContainerKey(
+  wrappedPrivateKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+  unwrappedKeyAlgorithm,
+  usages,
+) {
+  if (!usages) {
+    const privatekeyBuffer = await kryptos.subtle.decrypt(
+      wrappedKeyAlgorithm,
+      unwrappingKey,
+      wrappedPrivateKey,
+    )
+    return arrayBufferToObject(privatekeyBuffer)
+  }
+  return unwrapPrivateKey(
+    wrappedPrivateKey,
+    unwrappingKey,
+    wrappedKeyAlgorithm,
+    unwrappedKeyAlgorithm,
+    usages,
+  )
 }
 
 export async function setupKeyContainer(
@@ -96,6 +148,44 @@ export async function lockKeyContainer(
       protectorType,
       protectorIdentifier,
     )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function unlockKeyContainer(
+  keyContainer,
+  protectorKey,
+  type = PROTECTOR_TYPES.password,
+  includeProtector,
+) {
+  try {
+    const keyProtector = keyContainer.keyProtectors.find(
+      (protector) => protector.type === type,
+    )
+    const { salt, iterations } = keyProtector
+    const protector = await getProtector(protectorKey, salt, iterations)
+    const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
+    const encryptedKey = base64ToArrayBuffer(keyContainer.encryptedKey)
+    const iv = base64ToArrayBuffer(keyContainer.iv)
+    const intermediateKey = await unlockIntermediateKey(
+      keyProtector.encryptedKey,
+      protector.key,
+      protectAlgorithm,
+    )
+    const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
+    const usages = getUsage(keyContainer.keyType)
+    const privateKey = await unwrapKeyContainerKey(
+      encryptedKey,
+      intermediateKey,
+      { name: protectAlgorithm.name, iv },
+      unwrappedKeyAlgorithm,
+      usages,
+    )
+    if (includeProtector) {
+      return { privateKey, protectorKey: protector.key }
+    }
+    return { privateKey }
   } catch (e) {
     return Promise.reject(e)
   }

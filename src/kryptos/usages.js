@@ -25,6 +25,8 @@ export function getUsage(algorithm) {
       return DECRYPT_UNWRAP
     case ECDH_P521:
       return DERIVE
+    case 'BIP39':
+      return null
     default:
       break
   }

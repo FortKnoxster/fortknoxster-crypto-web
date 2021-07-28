@@ -26,6 +26,7 @@ export {
   unlockPrivateKey,
   getPrivateKeyFromStore,
   getPublicKey,
+  getPrivateKey,
 } from './kryptos/serviceKeyStore.js'
 
 export {
@@ -92,4 +93,4 @@ export {
   verifyData,
 } from './kryptos/identity.js'
 
-export { lockKeyContainer } from './kryptos/keyContainer.js'
+export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
