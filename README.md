@@ -1,6 +1,4 @@
 ![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
-![Check](https://github.com/trustwallet/assets/workflows/Check/badge.svg)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/trustwallet/wallet-core)
 
 # FortKnoxster Crypto Web
 
