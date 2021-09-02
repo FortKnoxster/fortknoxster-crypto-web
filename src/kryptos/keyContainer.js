@@ -83,14 +83,6 @@ async function unwrapKeyContainerKey(
   unwrappedKeyAlgorithm,
   usages,
 ) {
-  if (!usages) {
-    const privatekeyBuffer = await kryptos.subtle.decrypt(
-      wrappedKeyAlgorithm,
-      unwrappingKey,
-      wrappedPrivateKey,
-    )
-    return arrayBufferToObject(privatekeyBuffer)
-  }
   return unwrapPrivateKey(
     wrappedPrivateKey,
     unwrappingKey,
@@ -98,6 +90,23 @@ async function unwrapKeyContainerKey(
     unwrappedKeyAlgorithm,
     usages,
   )
+}
+
+async function unwrapKeyContainerKeyAsObject(
+  wrappedPrivateKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+) {
+  try {
+    const privatekeyBuffer = await kryptos.subtle.decrypt(
+      wrappedKeyAlgorithm,
+      unwrappingKey,
+      wrappedPrivateKey,
+    )
+    return arrayBufferToObject(privatekeyBuffer)
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
 
 export async function setupKeyContainer(
@@ -175,13 +184,22 @@ export async function unlockKeyContainer(
     )
     const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
     const usages = getUsage(keyContainer.keyType)
-    const privateKey = await unwrapKeyContainerKey(
-      encryptedKey,
-      intermediateKey,
-      { name: protectAlgorithm.name, iv },
-      unwrappedKeyAlgorithm,
-      usages,
-    )
+    let privateKey
+    if (usages) {
+      privateKey = await unwrapKeyContainerKey(
+        encryptedKey,
+        intermediateKey,
+        { name: protectAlgorithm.name, iv },
+        unwrappedKeyAlgorithm,
+        usages,
+      )
+    } else {
+      privateKey = await unwrapKeyContainerKeyAsObject(
+        encryptedKey,
+        intermediateKey,
+        { name: protectAlgorithm.name, iv },
+      )
+    }
     if (includeProtector) {
       return { privateKey, protectorKey: protector.key }
     }
