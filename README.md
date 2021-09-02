@@ -1,5 +1,6 @@
 ![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
-![Join Telegram](https://img.shields.io/badge/Join-Telegram-blue?logo=telegram&link=https://t.me/FortKnoxster)
+![Check](https://github.com/trustwallet/assets/workflows/Check/badge.svg)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/trustwallet/wallet-core)
 
 # FortKnoxster Crypto Web
 
@@ -22,6 +23,10 @@ or
 ## Testing
 
 [Debug](https://github.com/avajs/ava/blob/main/docs/recipes/debugging-with-chrome-devtools.md)
+
+```
+npm test
+```
 
 ## License
 
