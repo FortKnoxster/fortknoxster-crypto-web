@@ -17,7 +17,12 @@ import {
   ENCRYPT_WRAP,
 } from './usages.js'
 import { RAW } from './formats.js'
-import { EXTRACTABLE, NONEXTRACTABLE, LENGTH_32 } from './constants.js'
+import {
+  EXTRACTABLE,
+  NONEXTRACTABLE,
+  PROTECTOR_ITERATIONS,
+  LENGTH_32,
+} from './constants.js'
 
 export async function deriveAccountPassword(username, password, domain) {
   try {
@@ -46,6 +51,7 @@ export async function deriveAccountPassword(username, password, domain) {
   }
 }
 
+// For password protector
 export async function deriveKeyFromPassword(
   password,
   salt,
@@ -113,15 +119,12 @@ export function deriveSessionKey(algorithm, privateKey, publicKey) {
   )
 }
 
-export async function deriveSessionKeyFromMasterKey(
-  masterKey,
+export async function deriveFromBufferedKey(
+  bufferedKey,
+  bufferedSalt,
   extractable = EXTRACTABLE,
 ) {
   try {
-    const bufferedKey = stringToArrayBuffer(masterKey)
-
-    const bufferedSalt = randomValue(LENGTH_32)
-
     const key = await kryptos.subtle.importKey(
       RAW,
       bufferedKey,
@@ -136,6 +139,42 @@ export async function deriveSessionKeyFromMasterKey(
       extractable,
       DECRYPT_UNWRAP.concat(ENCRYPT_WRAP),
     )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export function deriveSessionKeyFromMasterKey(
+  masterKey,
+  extractable = EXTRACTABLE,
+) {
+  const bufferedKey = stringToArrayBuffer(masterKey)
+
+  const bufferedSalt = randomValue(LENGTH_32)
+
+  return deriveFromBufferedKey(bufferedKey, bufferedSalt, extractable)
+}
+
+export async function deriveSessionKeyWithInput(
+  masterKey,
+  input,
+  extractable = EXTRACTABLE,
+) {
+  try {
+    const bufferedKey = stringToArrayBuffer(masterKey)
+
+    const bufferedSalt = randomValue(LENGTH_32)
+
+    const iterations = PROTECTOR_ITERATIONS
+    const derivedKey = await deriveKeyFromPassword(
+      input,
+      bufferedSalt,
+      iterations,
+    )
+
+    const exportedKey = await kryptos.subtle.exportKey(RAW, derivedKey)
+
+    return deriveFromBufferedKey(bufferedKey, exportedKey, extractable)
   } catch (e) {
     return Promise.reject(e)
   }

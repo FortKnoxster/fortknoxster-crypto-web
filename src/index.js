@@ -29,15 +29,9 @@ export {
   getPrivateKey,
 } from './kryptos/serviceKeyStore.js'
 
-export {
-  generateId,
-  blobToDataUrl,
-  dataUrlToBlob,
-  randomString,
-  arrayBufferToBase64,
-} from './kryptos/utils.js'
+export * from './kryptos/utils.js'
 
-export { hashAnything } from './kryptos/digest.js'
+export { hashAnything, fingerprint } from './kryptos/digest.js'
 
 export {
   initProtocol,
