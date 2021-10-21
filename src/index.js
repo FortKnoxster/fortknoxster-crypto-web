@@ -85,6 +85,8 @@ export {
   generateUserKeys,
   signData,
   verifyData,
+  signWithIdentity,
+  verifyWithIdentity,
 } from './kryptos/identity.js'
 
 export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
