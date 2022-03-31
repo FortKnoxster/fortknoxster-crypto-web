@@ -1,4 +1,4 @@
-import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants.js'
+import { LENGTH_256, LENGTH_2048, LENGTH_8192, PSK, PDK } from './constants.js'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
@@ -16,6 +16,8 @@ export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
 export const ES512 = 'ES512'
 export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
+export const RSA_OAEP_512 = 'RSA-OAEP-512'
+export const PS512 = 'PS512'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
@@ -29,9 +31,23 @@ export const SHA_256 = {
   name: 'SHA-256',
 }
 
+export const SHA_512 = {
+  name: 'SHA-512',
+}
+
 export const RSA_OAEP = {
   name: 'RSA-OAEP',
   hash: SHA_256,
+}
+
+export const RSA_OAEP_8K = {
+  name: 'RSA-OAEP',
+  hash: SHA_512,
+}
+
+export const RSA_PSS_8K = {
+  name: 'RSA-PSS',
+  hash: SHA_512,
 }
 
 export const AES_CBC = {
@@ -67,6 +83,20 @@ export const RSA_OAEP_ALGO = {
   modulusLength: LENGTH_2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: SHA_256,
+}
+
+export const RSA_OAEP_ALGO_8K = {
+  name: 'RSA-OAEP',
+  modulusLength: LENGTH_8192,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
+export const RSA_PSS_ALGO_8K = {
+  name: 'RSA-PSS',
+  modulusLength: LENGTH_8192,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
 }
 
 export const ECDH_ALGO = {
