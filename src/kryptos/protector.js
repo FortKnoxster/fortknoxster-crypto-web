@@ -73,6 +73,9 @@ export async function importProtector(protector) {
 }
 
 export function getProtector(protector, salt, iterations) {
+  if (protector.key) {
+    return protector
+  }
   if (typeof protector === 'string') {
     return getSymmetricProtector(protector, salt, iterations)
   }

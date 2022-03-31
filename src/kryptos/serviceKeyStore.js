@@ -169,7 +169,6 @@ export async function lockKeyStores(
   }
 }
 
-// Lock asymmetric protected keystores with a new protector
 export function lockAsymmetricKeyStores(
   keyStores,
   serviceName,

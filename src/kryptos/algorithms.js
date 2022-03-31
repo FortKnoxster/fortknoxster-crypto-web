@@ -116,6 +116,7 @@ export const deriveKeyHKDF = (salt) => ({
 export function getAlgorithm(algo) {
   switch (algo) {
     case A256KW:
+    case 'AES-KW':
       return AES_KW_ALGO
     case AES_GCM_256:
     case AES_GCM.name:
@@ -140,6 +141,8 @@ export function getAlgorithm(algo) {
     case ECDH_ALGO.name:
     case ECDH_P521:
       return ECDH_ALGO
+    case 'BIP39':
+      return null
     default:
       break
   }

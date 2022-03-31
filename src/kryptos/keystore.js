@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  * @name Kryptos
- * @file enrypter.js
+ * @file keystore.js
  * @copyright Copyright © FortKnoxster Ltd. 2020.
  * @license Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
  * @author Mickey Johnnysson <mj@fortknoxster.com>
@@ -27,31 +27,18 @@
  */
 import * as utils from './utils.js'
 import {
-  generateWrapKey,
   wrapKey,
   generateKeyPair,
-  wrapPrivateKey,
   exportPublicKey,
   unwrapKey,
-  unwrapPrivateKey,
   exportKey,
 } from './keys.js'
 import * as algorithms from './algorithms.js'
-import { getUsage } from './usages.js'
 import { signPublicKeys } from './signer.js'
 import { fingerprint } from './digest.js'
+import { setupKeyContainer, unlockKeyContainer } from './keyContainer.js'
 import { getProtector, packProtector } from './protector.js'
 import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
-
-function newKeyContainer(wrappedKey, iv, keyType) {
-  return {
-    encryptedKey: utils.arrayBufferToBase64(wrappedKey),
-    iv: utils.arrayBufferToBase64(iv),
-    keyType,
-    protectType: algorithms.AES_GCM_256,
-    keyProtectors: [],
-  }
-}
 
 export async function setupKeyPair(
   derivedKey,
@@ -61,28 +48,19 @@ export async function setupKeyPair(
   protectorIdentifier,
 ) {
   try {
-    const intermediateKey = await generateWrapKey()
-    const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
     const keyPair = await generateKeyPair(algorithm)
-    const iv = utils.nonce()
-    const wrappedPrivateKey = await wrapPrivateKey(
-      keyPair.privateKey,
-      iv,
-      intermediateKey,
-    )
-    const exportedPublicKey = await exportPublicKey(keyPair.publicKey)
-    const keyContainer = newKeyContainer(
-      wrappedPrivateKey,
-      iv,
+
+    const keyContainer = await setupKeyContainer(
+      derivedKey,
       algorithms.keyContainerType(algorithm),
-    )
-    const passwordProtector = packProtector(
-      wrappedIntermediateKey,
+      keyPair,
       protectorAlgorithm,
       protectorType,
       protectorIdentifier,
     )
-    keyContainer.keyProtectors.push(passwordProtector)
+
+    const exportedPublicKey = await exportPublicKey(keyPair.publicKey)
+
     return {
       keyContainer,
       publicKey: exportedPublicKey,
@@ -207,41 +185,32 @@ export function unlockIntermediateKey(
 export async function unlockPrivateKey(
   keyType,
   keyContainer,
-  protector,
   protectorKey,
+  type,
   includeProtector = false,
 ) {
   try {
-    const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
-    const encryptedKey = utils.base64ToArrayBuffer(keyContainer.encryptedKey)
-    const iv = utils.base64ToArrayBuffer(keyContainer.iv)
-    const intermediateKey = await unlockIntermediateKey(
-      protector.encryptedKey,
-      protectorKey.key,
-      protectAlgorithm,
+    const unlockedKeyContainer = await unlockKeyContainer(
+      keyContainer,
+      protectorKey,
+      type,
+      includeProtector,
     )
-    const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
-    const usages = getUsage(keyContainer.keyType)
 
-    const privateKey = await unwrapPrivateKey(
-      encryptedKey,
-      intermediateKey,
-      { name: protectAlgorithm.name, iv },
-      unwrappedKeyAlgorithm,
-      usages,
-    )
     if (includeProtector) {
-      const exportedDerivedKey = await exportKey(protectorKey.key)
+      const exportedDerivedKey = await exportKey(
+        unlockedKeyContainer.protectorKey,
+      )
       return {
         [keyType]: {
-          privateKey,
+          privateKey: unlockedKeyContainer.privateKey,
           protector: exportedDerivedKey,
         },
       }
     }
     return {
       [keyType]: {
-        privateKey,
+        privateKey: unlockedKeyContainer.privateKey,
       },
     }
   } catch (e) {
@@ -259,16 +228,11 @@ export async function unlock(
     const promises = Object.keys(keyContainers)
       .filter((key) => ['pdk', 'psk'].includes(key) && keyContainers[key])
       .map(async (key) => {
-        const keyProtector = keyContainers[key].keyProtectors.find(
-          (protector) => protector.type === type,
-        )
-        const { salt, iterations } = keyProtector
-        const protector = await getProtector(protectorKey, salt, iterations)
         return unlockPrivateKey(
           key,
           keyContainers[key],
-          keyProtector,
-          protector,
+          protectorKey,
+          type,
           type !== PROTECTOR_TYPES.asymmetric,
         )
       })
@@ -292,15 +256,12 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
         (key) => ['pdk', 'psk'].includes(key) && keyStore.keyContainers[key],
       )
       .map(async (key) => {
-        const keyProtector = keyStore.keyContainers[key].keyProtectors.find(
-          (protector) => protector.type === type,
-        )
         const protector = await getProtector(keyStore[key].protector)
         return unlockPrivateKey(
           key,
           keyStore.keyContainers[key],
-          keyProtector,
           protector,
+          type,
           false,
         )
       })

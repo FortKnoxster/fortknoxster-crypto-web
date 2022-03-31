@@ -6,8 +6,23 @@ import {
 } from './serviceKeyStore.js'
 import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants.js'
 import { importPublicVerifyKey } from './keys.js'
-import { signIt } from './signer.js'
-import { verifyIt } from './verifier.js'
+import { signIt, sign } from './signer.js'
+import { verifyIt, verify } from './verifier.js'
+
+export function signWithIdentity(data) {
+  return sign(data, getPrivateKey(SERVICES.identity, PSK))
+}
+
+export async function verifyWithIdentity(data, signature) {
+  try {
+    const importedPvk = await importPublicVerifyKey(
+      getPublicKey(SERVICES.identity, PVK),
+    )
+    return verify(importedPvk, signature, data)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
 
 export function signData(data, service) {
   return signIt(data, getPrivateKey(service, PSK))

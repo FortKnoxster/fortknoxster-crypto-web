@@ -25,17 +25,13 @@ export {
   getKeyStores,
   unlockPrivateKey,
   getPrivateKeyFromStore,
+  getPublicKey,
+  getPrivateKey,
 } from './kryptos/serviceKeyStore.js'
 
-export {
-  generateId,
-  blobToDataUrl,
-  dataUrlToBlob,
-  randomString,
-  arrayBufferToBase64,
-} from './kryptos/utils.js'
+export * from './kryptos/utils.js'
 
-export { hashAnything } from './kryptos/digest.js'
+export { hashAnything, fingerprint } from './kryptos/digest.js'
 
 export {
   initProtocol,
@@ -89,4 +85,8 @@ export {
   generateUserKeys,
   signData,
   verifyData,
+  signWithIdentity,
+  verifyWithIdentity,
 } from './kryptos/identity.js'
+
+export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
