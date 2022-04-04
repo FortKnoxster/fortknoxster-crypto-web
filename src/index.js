@@ -83,6 +83,8 @@ export { decryptRawSessionKey } from './kryptos/decrypter.js'
 export {
   initIdentity,
   generateUserKeys,
+  generateServiceKeys,
+  generateUserKeysV2,
   signData,
   verifyData,
   signWithIdentity,
