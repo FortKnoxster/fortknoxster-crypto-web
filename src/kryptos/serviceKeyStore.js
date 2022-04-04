@@ -214,9 +214,10 @@ export function setupKeyStore(
   protector,
   identityKeyStore,
   protectorType,
-  protectorIdentifier,
+
   signAlgorithm,
   encryptAlgorithm,
+  protectorIdentifier,
 ) {
   return setupKeys(
     service,

@@ -107,7 +107,6 @@ export async function generateServiceKeys(id, plainPassword, serviceKeys) {
           plainPassword,
           identityKeyStore.psk.privateKey,
           PROTECTOR_TYPES.password,
-          null,
           serviceKey.signAlgorithm,
           serviceKey.encryptAlgorithm,
         ),
