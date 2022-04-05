@@ -214,7 +214,6 @@ export function setupKeyStore(
   protector,
   identityKeyStore,
   protectorType,
-
   signAlgorithm,
   encryptAlgorithm,
   protectorIdentifier,

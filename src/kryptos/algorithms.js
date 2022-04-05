@@ -18,6 +18,10 @@ export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
 export const RSA_OAEP_512 = 'RSA-OAEP-512'
 export const PS512 = 'PS512'
+export const RSA_OAEP_4096 = 'RSA-OAEP-4096'
+export const RSA_PSS_4096 = 'RSA-PSS-4096'
+export const RSA_OAEP_8192 = 'RSA-OAEP-8192'
+export const RSA_PSS_8192 = 'RSA-PSS-8192'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
@@ -164,6 +168,10 @@ export function getAlgorithm(algo) {
     case RSA_OAEP_2048:
     case RSA_OAEP.name:
       return RSA_OAEP
+    case RSA_OAEP_512:
+      return RSA_OAEP_8K
+    case PS512:
+      return RSA_PSS_8K
     case ECDSA_ALGO.name:
     case ES512:
     case ECDSA_P521:
@@ -183,6 +191,8 @@ export function getSignAlgorithm(algo) {
   switch (algo) {
     case RSASSA_PKCS1_V1_5.name:
       return RSASSA_PKCS1_V1_5
+    case RSA_PSS_8K.name:
+      return RSA_PSS_8K
     case ECDSA_ALGO.name:
       return { name: ECDSA_ALGO.name, hash: SHA_256 }
     case HMAC_ALGO.name:
@@ -235,6 +245,10 @@ export function getKeyMode(keyType) {
       return EC
     case RSA_OAEP_2048:
     case RSASSA_PKCS1_V1_5_2048:
+    case RSA_OAEP_4096:
+    case RSA_PSS_4096:
+    case RSA_OAEP_8192:
+    case RSA_PSS_8192:
       return RSA
     default:
       break
@@ -252,6 +266,10 @@ export function keyContainerType(algorithm) {
       return RSASSA_PKCS1_V1_5_2048
     case RSA_OAEP_ALGO:
       return RSA_OAEP_2048
+    case RSA_OAEP_ALGO_8K:
+      return RSA_OAEP_8192
+    case RSA_PSS_ALGO_8K:
+      return RSA_PSS_8192
     default:
       break
   }

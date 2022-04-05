@@ -136,7 +136,7 @@ export async function setupKeys(
       protectorIdentifier,
     )
     const signature = await signPublicKeys(
-      identityKey === null ? signContainer.privateKey : identityKey, // Self-sign if no identity key provided
+      identityKey, // === null ? signContainer.privateKey : identityKey, // Self-sign if no identity key provided
       encryptContainer.publicKey,
       signContainer.publicKey,
     )
