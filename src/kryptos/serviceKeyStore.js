@@ -205,8 +205,16 @@ export function verifyKeyProtector(keys, password, type) {
   return Promise.all(promises)
 }
 
-export function generateIdentityKeys(password) {
-  return setupIdentityKeys(SERVICES.identity, password, ECDSA_ALGO)
+export function generateIdentityKeys(
+  password,
+  protectorType = PROTECTOR_TYPES.password,
+) {
+  return setupIdentityKeys(
+    SERVICES.identity,
+    password,
+    ECDSA_ALGO,
+    protectorType,
+  )
 }
 
 export function setupKeyStore(

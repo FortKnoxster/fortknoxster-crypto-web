@@ -20,6 +20,7 @@ test('Test Identity key store setup.', async (t) => {
     SERVICES.identity,
     t.context.password,
     algorithms.ECDSA_ALGO,
+    PROTECTOR_TYPES.password,
   )
   t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
@@ -92,6 +93,7 @@ test.skip('Test Identity key store unlock.', async (t) => {
     service,
     t.context.password,
     algorithms.ECDSA_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -111,6 +113,7 @@ test('Test RSA key store unlock', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -130,6 +133,7 @@ test.skip('Test Elliptic Curve key store unlock', async (t) => {
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -164,6 +168,7 @@ test('Test RSA key store lock with new recovery key protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const recoveryKey = randomString()
   const newKeyContainers = await lock(
@@ -194,6 +199,7 @@ test('Test RSA key store lock with new password protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -226,6 +232,7 @@ test('Test RSA key store lock with new asymmetric protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newProtectorKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,
@@ -258,6 +265,7 @@ test('Test RSA key store lock and unlock with new password protector', async (t)
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -288,6 +296,7 @@ test('Test Elliptic Curve key store lock with new recovery key protector', async
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const recoveryKey = randomString()
   const newKeyContainers = await lock(
@@ -318,6 +327,7 @@ test('Test Elliptic Curve key store lock with new password protector', async (t)
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -350,6 +360,7 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async (
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password
   )
   const newProtectorKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,

@@ -43,7 +43,7 @@ import { encrypt } from './encrypter.js'
 import * as algorithms from './algorithms.js'
 import { getUsage } from './usages.js'
 import { getProtector, packProtector } from './protector.js'
-import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
+import { EXTRACTABLE } from './constants.js'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {
@@ -165,7 +165,7 @@ export async function lockKeyContainer(
 export async function unlockKeyContainer(
   keyContainer,
   protectorKey,
-  type = PROTECTOR_TYPES.password,
+  type,
   includeProtector,
 ) {
   try {

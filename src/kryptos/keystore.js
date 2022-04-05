@@ -75,7 +75,7 @@ export async function setupIdentityKeys(
   id,
   protectorKey,
   algorithm,
-  protectorType = PROTECTOR_TYPES.password,
+  protectorType,
   protectorIdentifier,
 ) {
   try {
@@ -116,7 +116,7 @@ export async function setupKeys(
   identityKey,
   signAlgorithm,
   encryptAlgorithm,
-  protectorType = PROTECTOR_TYPES.password,
+  protectorType,
   protectorIdentifier,
 ) {
   try {
@@ -347,9 +347,9 @@ export async function lock(
   service,
   keyContainers,
   protectorKey,
-  type = PROTECTOR_TYPES.password,
+  type,
   newProtectorKey,
-  newType = PROTECTOR_TYPES.password,
+  newType,
   protectorIdentifier,
 ) {
   try {
