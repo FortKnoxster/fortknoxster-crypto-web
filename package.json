@@ -18,9 +18,9 @@
     "files": [
       "**/**.test.js"
     ],
-    "babel": true,
+    "verbose": true,
     "require": [
-      "@babel/polyfill",
+      "@babel/register",
       "./src/test/helpers/_setup-browser-env.js"
     ]
   },
@@ -44,13 +44,12 @@
     "end-to-end encryption"
   ],
   "devDependencies": {
-    "@ava/babel": "^1.0.1",
     "@babel/core": "^7.14.0",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.14.0",
     "@babel/register": "^7.12.1",
     "@istanbuljs/nyc-config-babel": "^3.0.0",
-    "ava": "^3.13.0",
+    "ava": "^4.1.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.2.1",
     "babel-plugin-istanbul": "^6.0.0",
@@ -59,7 +58,7 @@
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-ava": "^12.0.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
