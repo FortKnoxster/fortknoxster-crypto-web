@@ -18,6 +18,7 @@ export const SERVICES = {
   storage: 'storage',
   protocol: 'protocol',
   company: 'company',
+  wallet: 'wallet',
 }
 export const SERVICE_MODES = {
   rsa: 'RSA',

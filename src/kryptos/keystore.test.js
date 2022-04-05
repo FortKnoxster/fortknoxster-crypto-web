@@ -20,6 +20,7 @@ test('Test Identity key store setup.', async (t) => {
     SERVICES.identity,
     t.context.password,
     algorithms.ECDSA_ALGO,
+    PROTECTOR_TYPES.password,
   )
   t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
@@ -92,6 +93,7 @@ test.skip('Test Identity key store unlock.', async (t) => {
     service,
     t.context.password,
     algorithms.ECDSA_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -111,6 +113,7 @@ test('Test RSA key store unlock', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -130,6 +133,7 @@ test.skip('Test Elliptic Curve key store unlock', async (t) => {
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const unlockedKeyStore = await unlock(
     service,
@@ -164,6 +168,7 @@ test('Test RSA key store lock with new recovery key protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const recoveryKey = randomString()
   const newKeyContainers = await lock(
@@ -174,12 +179,14 @@ test('Test RSA key store lock with new recovery key protector', async (t) => {
     recoveryKey,
     PROTECTOR_TYPES.recovery,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
-  const hasRecoveryProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.recovery,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
+  const hasRecoveryProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.recovery,
+    )
   t.assert(hasPasswordProtector && hasRecoveryProtector)
 })
 
@@ -192,6 +199,7 @@ test('Test RSA key store lock with new password protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -205,9 +213,10 @@ test('Test RSA key store lock with new password protector', async (t) => {
   const oldPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
     (protector) => protector.type === PROTECTOR_TYPES.password,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
   t.assert(
     hasPasswordProtector &&
       hasPasswordProtector.encryptedKey !== oldPasswordProtector.encryptedKey,
@@ -223,6 +232,7 @@ test('Test RSA key store lock with new asymmetric protector', async (t) => {
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newProtectorKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,
@@ -235,12 +245,14 @@ test('Test RSA key store lock with new asymmetric protector', async (t) => {
     newProtectorKeyPair.publicKey,
     PROTECTOR_TYPES.asymmetric,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
-  const hasAsymmetricProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
+  const hasAsymmetricProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
   t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })
 
@@ -253,6 +265,7 @@ test('Test RSA key store lock and unlock with new password protector', async (t)
     keyPair.privateKey,
     algorithms.RSASSA_PKCS1_V1_5_ALGO,
     algorithms.RSA_OAEP_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -283,6 +296,7 @@ test('Test Elliptic Curve key store lock with new recovery key protector', async
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const recoveryKey = randomString()
   const newKeyContainers = await lock(
@@ -293,12 +307,14 @@ test('Test Elliptic Curve key store lock with new recovery key protector', async
     recoveryKey,
     PROTECTOR_TYPES.recovery,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
-  const hasRecoveryProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.recovery,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
+  const hasRecoveryProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.recovery,
+    )
   t.assert(hasPasswordProtector && hasRecoveryProtector)
 })
 
@@ -311,6 +327,7 @@ test('Test Elliptic Curve key store lock with new password protector', async (t)
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password,
   )
   const newPassword = randomString()
   const newKeyContainers = await lock(
@@ -324,9 +341,10 @@ test('Test Elliptic Curve key store lock with new password protector', async (t)
   const oldPasswordProtector = keyStore.keyContainers.psk.keyProtectors.find(
     (protector) => protector.type === PROTECTOR_TYPES.password,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
   t.assert(
     hasPasswordProtector &&
       hasPasswordProtector.encryptedKey !== oldPasswordProtector.encryptedKey,
@@ -342,6 +360,7 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async (
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
+    PROTECTOR_TYPES.password
   )
   const newProtectorKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,
@@ -354,12 +373,14 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async (
     newProtectorKeyPair.publicKey,
     PROTECTOR_TYPES.asymmetric,
   )
-  const hasPasswordProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.password,
-  )
-  const hasAsymmetricProtector = newKeyContainers.keyContainers.psk.keyProtectors.find(
-    (protector) => protector.type === PROTECTOR_TYPES.asymmetric,
-  )
+  const hasPasswordProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.password,
+    )
+  const hasAsymmetricProtector =
+    newKeyContainers.keyContainers.psk.keyProtectors.find(
+      (protector) => protector.type === PROTECTOR_TYPES.asymmetric,
+    )
   t.assert(hasPasswordProtector && hasAsymmetricProtector)
 })
 
