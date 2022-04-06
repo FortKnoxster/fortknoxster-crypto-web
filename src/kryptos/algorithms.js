@@ -133,11 +133,15 @@ export const HMAC_ALGO = {
   hash: SHA_256,
 }
 
-export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
+export const deriveKeyPBKDF2 = (
+  salt,
+  iterations = 50000,
+  hash = SHA_256.name,
+) => ({
   ...PBKDF2,
   salt,
   iterations,
-  hash: SHA_256.name,
+  hash,
 })
 
 export const deriveKeyHKDF = (salt) => ({

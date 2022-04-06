@@ -3,6 +3,7 @@ import { stringToArrayBuffer, arrayBufferToHex, randomValue } from './utils.js'
 import {
   AES_KW_ALGO,
   AES_GCM_ALGO,
+  SHA_256,
   PBKDF2,
   HKDF,
   ECDH_ALGO,
@@ -24,7 +25,13 @@ import {
   LENGTH_32,
 } from './constants.js'
 
-export async function deriveAccountPassword(username, password, domain) {
+export async function deriveAccountPassword(
+  username,
+  password,
+  domain,
+  iterations = 50000,
+  hash = SHA_256.name,
+) {
   try {
     const salt = stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
     const bufferedPassword = stringToArrayBuffer(password)
@@ -37,7 +44,7 @@ export async function deriveAccountPassword(username, password, domain) {
       DERIVE,
     )
     const derivedKey = await kryptos.subtle.deriveKey(
-      deriveKeyPBKDF2(salt),
+      deriveKeyPBKDF2(salt, iterations, hash),
       key,
       AES_KW_ALGO,
       EXTRACTABLE,
