@@ -4,6 +4,7 @@ import {
   AES_KW_ALGO,
   AES_GCM_ALGO,
   SHA_256,
+  SHA_512,
   PBKDF2,
   HKDF,
   ECDH_ALGO,
@@ -43,16 +44,18 @@ export async function deriveAccountPassword(
       NONEXTRACTABLE,
       DERIVE,
     )
-    const derivedKey = await kryptos.subtle.deriveKey(
+
+    let length = 256
+    if (hash === SHA_512.name) {
+      length = 512
+    }
+    const derivedKey = await kryptos.subtle.deriveBits(
       deriveKeyPBKDF2(salt, iterations, hash),
       key,
-      AES_KW_ALGO,
-      EXTRACTABLE,
-      WRAP,
+      length,
     )
-    const exportedKey = await kryptos.subtle.exportKey(RAW, derivedKey)
 
-    return arrayBufferToHex(exportedKey)
+    return arrayBufferToHex(derivedKey)
   } catch (e) {
     return Promise.reject(e)
   }
