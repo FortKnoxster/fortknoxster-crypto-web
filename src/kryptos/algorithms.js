@@ -173,8 +173,10 @@ export function getAlgorithm(algo) {
     case RSA_OAEP.name:
       return RSA_OAEP
     case RSA_OAEP_512:
+    case RSA_OAEP_8192:
       return RSA_OAEP_8K
     case PS512:
+    case RSA_PSS_8192:
       return RSA_PSS_8K
     case ECDSA_ALGO.name:
     case ES512:
