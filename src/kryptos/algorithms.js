@@ -1,4 +1,12 @@
-import { LENGTH_256, LENGTH_2048, LENGTH_8192, PSK, PDK } from './constants.js'
+/* eslint-disable max-lines */
+import {
+  LENGTH_256,
+  LENGTH_2048,
+  LENGTH_4096,
+  LENGTH_8192,
+  PSK,
+  PDK,
+} from './constants.js'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
@@ -44,6 +52,16 @@ export const RSA_OAEP = {
   hash: SHA_256,
 }
 
+export const RSA_OAEP_4K = {
+  name: 'RSA-OAEP',
+  hash: SHA_512,
+}
+
+export const RSA_PSS_4K = {
+  name: 'RSA-PSS',
+  hash: SHA_512,
+}
+
 export const RSA_OAEP_8K = {
   name: 'RSA-OAEP',
   hash: SHA_512,
@@ -87,6 +105,20 @@ export const RSA_OAEP_ALGO = {
   modulusLength: LENGTH_2048,
   publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
   hash: SHA_256,
+}
+
+export const RSA_OAEP_ALGO_4K = {
+  name: 'RSA-OAEP',
+  modulusLength: LENGTH_4096,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
+export const RSA_PSS_ALGO_4K = {
+  name: 'RSA-PSS',
+  modulusLength: LENGTH_4096,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
 }
 
 export const RSA_OAEP_ALGO_8K = {
@@ -175,6 +207,10 @@ export function getAlgorithm(algo) {
     case RSA_OAEP_512:
     case RSA_OAEP_8192:
       return RSA_OAEP_8K
+    case RSA_OAEP_4096:
+      return RSA_OAEP_4K
+    case RSA_PSS_4096:
+      return RSA_PSS_4K
     case PS512:
     case RSA_PSS_8192:
       return RSA_PSS_8K
