@@ -1,5 +1,7 @@
 /* eslint-disable max-lines */
 import {
+  LENGTH_32,
+  LENGTH_64,
   LENGTH_256,
   LENGTH_2048,
   LENGTH_4096,
@@ -60,6 +62,7 @@ export const RSA_OAEP_4K = {
 export const RSA_PSS_4K = {
   name: 'RSA-PSS',
   hash: SHA_512,
+  saltLength: LENGTH_32,
 }
 
 export const RSA_OAEP_8K = {
@@ -70,7 +73,7 @@ export const RSA_OAEP_8K = {
 export const RSA_PSS_8K = {
   name: 'RSA-PSS',
   hash: SHA_512,
-  saltLength: 64,
+  saltLength: LENGTH_64,
 }
 
 export const AES_CBC = {

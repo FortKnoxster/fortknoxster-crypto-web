@@ -5,6 +5,7 @@ export const LENGTH_4096 = 4096
 export const LENGTH_8192 = 8192
 export const LENGTH_256 = 256
 export const LENGTH_128 = 128
+export const LENGTH_64 = 64
 export const LENGTH_32 = 32
 export const PROTECTOR_ITERATIONS = 20000
 export const PROTECTOR_TYPES = {
