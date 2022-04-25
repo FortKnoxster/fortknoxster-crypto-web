@@ -70,6 +70,7 @@ export const RSA_OAEP_8K = {
 export const RSA_PSS_8K = {
   name: 'RSA-PSS',
   hash: SHA_512,
+  saltLength: 64,
 }
 
 export const AES_CBC = {
