@@ -34,6 +34,7 @@ export function getUsage(algorithm) {
     case ECDH_P521:
       return DERIVE
     case 'BIP39':
+    case 'wallet':
       return null
     default:
       break
