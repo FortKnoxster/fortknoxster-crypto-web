@@ -227,6 +227,7 @@ export function getAlgorithm(algo) {
       return ECDH_ALGO
     case 'BIP39':
     case 'wallet':
+    case 'beneficiary':
       return null
     default:
       break

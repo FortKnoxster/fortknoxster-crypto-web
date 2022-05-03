@@ -35,6 +35,7 @@ export function getUsage(algorithm) {
       return DERIVE
     case 'BIP39':
     case 'wallet':
+    case 'beneficiary':
       return null
     default:
       break

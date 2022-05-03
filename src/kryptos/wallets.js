@@ -32,7 +32,7 @@ import {
 } from './keys.js'
 import { PVK, PEK, PDK, PSK } from './constants.js'
 import { AES_GCM_ALGO } from './algorithms.js'
-import { arrayBufferToBase64 } from './utils.js'
+import { arrayBufferToHex } from './utils.js'
 import { lockKeyContainer, unlockKeyContainer } from './keyContainer.js'
 import { signIt } from './signer.js'
 import { verifyIt } from './verifier.js'
@@ -86,7 +86,7 @@ export async function encryptBeneficiary(beneficiary, service, type) {
     const exportedSessionKey = await exportRawKey(sessionKey)
     const clonedBeneficiary = { ...beneficiary }
     clonedBeneficiary.algorithm = AES_GCM_ALGO
-    clonedBeneficiary.key = arrayBufferToBase64(exportedSessionKey)
+    clonedBeneficiary.key = arrayBufferToHex(exportedSessionKey)
     const encryptedData = await encryptDetails(
       clonedBeneficiary,
       service,
