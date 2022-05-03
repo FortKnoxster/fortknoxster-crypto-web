@@ -289,6 +289,7 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
  * @param {Object} keyProtector
  * @param {CryptoKey} newProtectorKey
  * @param {String} newType
+ * @param {String} protectorIdentifier
  */
 async function replaceOrAddProtector(
   keyType,
