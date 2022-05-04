@@ -93,4 +93,8 @@ export {
 
 export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
 
-export { encryptWallet, decryptWallet } from './kryptos/wallets.js'
+export {
+  encryptWallet,
+  decryptWallet,
+  encryptBeneficiary,
+} from './kryptos/wallets.js'

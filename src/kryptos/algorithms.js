@@ -180,11 +180,11 @@ export const deriveKeyPBKDF2 = (
   hash,
 })
 
-export const deriveKeyHKDF = (salt) => ({
+export const deriveKeyHKDF = (salt, hash = SHA_256.name, info = 0) => ({
   ...HKDF,
   salt,
-  hash: SHA_256.name,
-  info: new ArrayBuffer(0),
+  hash,
+  info: new ArrayBuffer(info),
 })
 
 export function getAlgorithm(algo) {
@@ -227,6 +227,7 @@ export function getAlgorithm(algo) {
       return ECDH_ALGO
     case 'BIP39':
     case 'wallet':
+    case 'beneficiary':
       return null
     default:
       break
