@@ -24,13 +24,13 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { getAlgorithm, deriveKeyPBKDF2 } from './algorithms.js'
+import { getAlgorithm, deriveKeyPBKDF2, deriveKeyHKDF } from './algorithms.js'
 import {
   randomValue,
   arrayBufferToBase64,
   base64ToArrayBuffer,
 } from './utils.js'
-import { deriveKeyFromPassword } from './derive.js'
+import { deriveKeyFromPassword, deriveKeyFromSymmetric } from './derive.js'
 import { importWrapKey } from './keys.js'
 import { PROTECTOR_ITERATIONS, LENGTH_32 } from './constants.js'
 
@@ -46,7 +46,7 @@ export function packProtector(wrappedKey, algorithm, type, identifier) {
   }
 }
 
-export async function getSymmetricProtector(
+export async function getPasswordProtector(
   password,
   givenSalt,
   givenIterations,
@@ -57,6 +57,18 @@ export async function getSymmetricProtector(
   const iterations = givenIterations || PROTECTOR_ITERATIONS
   const algorithm = deriveKeyPBKDF2(salt, iterations)
   const key = await deriveKeyFromPassword(password, salt, iterations)
+  return {
+    algorithm,
+    key,
+  }
+}
+
+export async function getSymmetricProtector(bufferedKey, givenSalt) {
+  const salt = givenSalt
+    ? base64ToArrayBuffer(givenSalt)
+    : randomValue(LENGTH_32)
+  const algorithm = deriveKeyHKDF(salt)
+  const key = await deriveKeyFromSymmetric(bufferedKey, salt)
   return {
     algorithm,
     key,
@@ -77,7 +89,7 @@ export function getProtector(protector, salt, iterations) {
     return protector
   }
   if (typeof protector === 'string') {
-    return getSymmetricProtector(protector, salt, iterations)
+    return getPasswordProtector(protector, salt, iterations)
   }
   if (typeof protector === 'object' && protector.algorithm) {
     return {

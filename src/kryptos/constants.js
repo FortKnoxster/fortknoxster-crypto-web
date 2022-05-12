@@ -12,6 +12,7 @@ export const PROTECTOR_TYPES = {
   password: 'password',
   recovery: 'recovery_key',
   asymmetric: 'asymmetric',
+  symmetric: 'symmetric',
 }
 export const SERVICES = {
   identity: 'identity',
