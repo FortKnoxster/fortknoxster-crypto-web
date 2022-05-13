@@ -57,16 +57,6 @@ export function importEncryptionKey(keyBytes, algorithm) {
   )
 }
 
-export function importEncryptionWrapKey(keyBytes, algorithm) {
-  return kryptos.subtle.importKey(
-    formats.RAW,
-    keyBytes,
-    algorithm,
-    NONEXTRACTABLE,
-    usage.ENCRYPT_WRAP,
-  )
-}
-
 export function importWrapKey(key) {
   const algorithm = algorithms.getAlgorithm(key.alg)
   return kryptos.subtle.importKey(
