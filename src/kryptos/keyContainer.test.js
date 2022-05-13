@@ -157,7 +157,7 @@ test('Test wallet lock key container with asymmetric RSA 8K protector and new sy
   const bufferedKey = base64ToArrayBuffer(t.context.key)
   const newProtector = await getSymmetricProtector(bufferedKey)
 
-  const newKeyContainer = await replaceOrAddProtector(
+  const result = await replaceOrAddProtector(
     t.context.type,
     keyContainer,
     protector,
@@ -165,6 +165,8 @@ test('Test wallet lock key container with asymmetric RSA 8K protector and new sy
     newProtector,
     PROTECTOR_TYPES.symmetric,
   )
+
+  const newKeyContainer = result.wallet
 
   t.assert(
     newKeyContainer.encryptedKey &&
