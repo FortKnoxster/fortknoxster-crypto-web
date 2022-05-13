@@ -239,35 +239,39 @@ export async function replaceOrAddProtector(
   newType,
   protectorIdentifier,
 ) {
-  const clonedKeyContainer = { ...keyContainer }
-  const protectAlgorithm = algorithms.getAlgorithm(
-    clonedKeyContainer.protectType,
-  )
-  const intermediateKey = await unlockIntermediateKey(
-    keyProtector.encryptedKey,
-    protector.key,
-    protectAlgorithm,
-  )
-  const newProtector = await getProtector(newProtectorKey)
-  const wrappedIntermediateKey = await wrapKey(
-    intermediateKey,
-    newProtector.key,
-  )
-  const replaceProtector = packProtector(
-    wrappedIntermediateKey,
-    newProtector.algorithm,
-    newType,
-    protectorIdentifier,
-  )
-  // Clone keyProtectors
-  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
-  // Todo: handler (type, identifier) as distinct protectors
-  const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
-  if (index !== -1) {
-    clonedKeyProtectors[index] = replaceProtector
-  } else {
-    clonedKeyProtectors.push(replaceProtector)
+  try {
+    const clonedKeyContainer = { ...keyContainer }
+    const protectAlgorithm = algorithms.getAlgorithm(
+      clonedKeyContainer.protectType,
+    )
+    const intermediateKey = await unlockIntermediateKey(
+      keyProtector.encryptedKey,
+      protector.key,
+      protectAlgorithm,
+    )
+    const newProtector = await getProtector(newProtectorKey)
+    const wrappedIntermediateKey = await wrapKey(
+      intermediateKey,
+      newProtector.key,
+    )
+    const replaceProtector = packProtector(
+      wrappedIntermediateKey,
+      newProtector.algorithm,
+      newType,
+      protectorIdentifier,
+    )
+    // Clone keyProtectors
+    const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+    // Todo: handler (type, identifier) as distinct protectors
+    const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
+    if (index !== -1) {
+      clonedKeyProtectors[index] = replaceProtector
+    } else {
+      clonedKeyProtectors.push(replaceProtector)
+    }
+    clonedKeyContainer.keyProtectors = clonedKeyProtectors
+    return { [keyType]: clonedKeyContainer }
+  } catch (e) {
+    return Promise.reject(e)
   }
-  clonedKeyContainer.keyProtectors = clonedKeyProtectors
-  return { [keyType]: clonedKeyContainer }
 }
