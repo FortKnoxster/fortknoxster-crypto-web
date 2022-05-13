@@ -41,6 +41,7 @@ export {
 } from './kryptos/protocol.js'
 
 export {
+  initStorage,
   encryptNewItemAssignment,
   encryptItemAssignment,
   encryptItem,
@@ -97,4 +98,6 @@ export {
   encryptWallet,
   decryptWallet,
   encryptBeneficiary,
+  reEncryptBeneficiary,
+  encryptItemKeyToBeneficiary,
 } from './kryptos/wallets.js'

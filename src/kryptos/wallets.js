@@ -29,13 +29,15 @@ import {
   importPublicVerifyKey,
   generateSessionKey,
   exportRawKey,
+  getSessionKey,
 } from './keys.js'
-import { PVK, PEK, PDK, PSK } from './constants.js'
-import { AES_GCM_ALGO } from './algorithms.js'
-import { arrayBufferToHex } from './utils.js'
+import { PVK, PEK, PDK, PSK, PROTECTOR_TYPES } from './constants.js'
+import { AES_GCM_ALGO, keyContainerType, getAlgorithm } from './algorithms.js'
+import { arrayBufferToHex, hexToArrayBuffer } from './utils.js'
 import { lockKeyContainer, unlockKeyContainer } from './keyContainer.js'
 import { signIt } from './signer.js'
 import { verifyIt } from './verifier.js'
+import { getSymmetricProtector } from './protector.js'
 
 export async function encryptDetails(wallet, service, protectType, dataType) {
   try {
@@ -94,6 +96,104 @@ export async function encryptBeneficiary(beneficiary, service, type) {
       'beneficiary',
     )
     return encryptedData
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function getBeneficiaryProtectorKey(
+  encryptionBeneficiaryData,
+  service,
+  type,
+) {
+  try {
+    const decryptedData = await decryptWallet(
+      encryptionBeneficiaryData,
+      service,
+      type,
+    )
+    const { key, algorithm } = decryptedData
+    const rawKey = hexToArrayBuffer(key)
+    const protectorKey = await getSymmetricProtector(rawKey)
+    return {
+      protectorKey,
+      algorithm,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function reEncryptBeneficiary(
+  beneficiary,
+  encryptionBeneficiaryData,
+  service,
+  type,
+) {
+  try {
+    const decryptedData = await decryptWallet(
+      encryptionBeneficiaryData,
+      service,
+      type,
+    )
+    const { key, algorithm } = decryptedData
+    const clonedBeneficiary = { ...beneficiary }
+    clonedBeneficiary.algorithm = algorithm
+    clonedBeneficiary.key = key
+    const encryptedData = await encryptDetails(
+      clonedBeneficiary,
+      service,
+      type,
+      'beneficiary',
+    )
+    return encryptedData
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+// Todo: complete
+export async function encryptWalletToBeneficiary(
+  encryptedWallet,
+  encryptionBeneficiaryData,
+  service,
+  type,
+) {
+  try {
+    const { protectorKey, algorithm } = await getBeneficiaryProtectorKey(
+      encryptionBeneficiaryData,
+      service,
+      type,
+    )
+
+    return { protectorKey, algorithm }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function encryptItemKeyToBeneficiary(
+  encryptionBeneficiaryData,
+  service,
+  type,
+  itemKey,
+) {
+  try {
+    const { protectorKey, algorithm } = await getBeneficiaryProtectorKey(
+      encryptionBeneficiaryData,
+      service,
+      type,
+    )
+    const sessionKey = await getSessionKey(AES_GCM_ALGO, itemKey)
+
+    const keyContainer = await lockKeyContainer(
+      protectorKey,
+      keyContainerType(getAlgorithm(algorithm.name)),
+      sessionKey,
+      PROTECTOR_TYPES.symmetric,
+    )
+
+    return keyContainer
   } catch (e) {
     return Promise.reject(e)
   }
