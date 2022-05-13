@@ -9,7 +9,8 @@
     "lint": "eslint src/**/*.js",
     "test": "nyc ava --verbose --timeout=20s",
     "test:watch": "nyc ava --verbose --watch --timeout=20s",
-    "eslint": "eslint src/**/*.js"
+    "eslint": "eslint src/**/*.js",
+    "coverage": "c8 --reporter=html --reporter=text ava --verbose --timeout=20s"
   },
   "lint-staged": {
     "src/**/*.js": "eslint"
@@ -56,6 +57,7 @@
     "babel-plugin-istanbul": "^6.0.0",
     "babel-register": "^6.26.0",
     "browser-env": "^3.3.0",
+    "c8": "^7.11.2",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",

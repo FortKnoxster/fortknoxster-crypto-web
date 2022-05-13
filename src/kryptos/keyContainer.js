@@ -221,14 +221,14 @@ export async function unlockKeyContainer(
  * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
  * else the new protector will be added to the list of jey protectors.
  *
- * @param {String} keyType
- * @param {Object} keyContainer
- * @param {CryptoKey} protector
- * @param {Object} keyProtector
- * @param {CryptoKey} newProtectorKey
- * @param {String} newType
- * @param {String} protectorIdentifier
- * @return {Object}
+ * @param {String} keyType key type of unlocking protector
+ * @param {Object} keyContainer given key container
+ * @param {CryptoKey} protector protector to unlock with key protector
+ * @param {Object} keyProtector key protector to unlock protector
+ * @param {CryptoKey} newProtectorKey new key protector to lock key container
+ * @param {String} newType new key protector type
+ * @param {String} protectorIdentifier optional identifier of key protector
+ * @return {Object} return new key container
  */
 export async function replaceOrAddProtector(
   keyType,
