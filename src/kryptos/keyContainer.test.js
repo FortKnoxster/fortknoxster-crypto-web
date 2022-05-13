@@ -3,8 +3,12 @@ import test from 'ava'
 import { generateEncryptionKeyPair, getSessionKey } from './keys.js'
 import * as algorithms from './algorithms.js'
 import { PROTECTOR_TYPES } from './constants.js'
-import { lockKeyContainer, unlockKeyContainer } from './keyContainer.js'
-import { getSymmetricProtector } from './protector.js'
+import {
+  lockKeyContainer,
+  unlockKeyContainer,
+  replaceOrAddProtector,
+} from './keyContainer.js'
+import { getSymmetricProtector, getProtector } from './protector.js'
 import { base64ToArrayBuffer } from './utils.js'
 
 test.before(async (t) => {
@@ -138,5 +142,38 @@ test('Test wallet lock & unlock key container with asymmetric RSA 8K protector',
 
   t.assert(
     unlockedKeyContainer.privateWallet === t.context.wallet.privateWallet,
+  )
+})
+
+test('Test wallet lock key container with asymmetric RSA 8K protector and new symmetric HKDF protector', async (t) => {
+  const keyContainer = await lockKeyContainer(
+    t.context.keyPair.publicKey,
+    t.context.type,
+    t.context.wallet,
+    PROTECTOR_TYPES.asymmetric,
+  )
+  const protector = await getProtector(t.context.keyPair.privateKey)
+
+  const bufferedKey = base64ToArrayBuffer(t.context.key)
+  const newProtector = await getSymmetricProtector(bufferedKey)
+
+  const newKeyContainer = await replaceOrAddProtector(
+    t.context.type,
+    keyContainer,
+    protector,
+    keyContainer.keyProtectors[0],
+    newProtector,
+    PROTECTOR_TYPES.symmetric,
+  )
+
+  t.assert(
+    newKeyContainer.encryptedKey &&
+      newKeyContainer.protectType === 'AES-GCM-256' &&
+      newKeyContainer.keyProtectors[0].type === 'asymmetric' &&
+      newKeyContainer.keyProtectors[0].name === 'RSA-OAEP' &&
+      newKeyContainer.keyProtectors[0].hash === 'SHA-256' &&
+      newKeyContainer.keyProtectors[1].type === 'symmetric' &&
+      newKeyContainer.keyProtectors[1].name === 'HKDF' &&
+      newKeyContainer.keyProtectors[1].hash === 'SHA-256',
   )
 })
