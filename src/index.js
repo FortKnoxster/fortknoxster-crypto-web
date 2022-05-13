@@ -99,5 +99,5 @@ export {
   decryptWallet,
   encryptBeneficiary,
   reEncryptBeneficiary,
-  wrapItemKeyToBeneficiary,
+  encryptItemKeyToBeneficiary,
 } from './kryptos/wallets.js'
