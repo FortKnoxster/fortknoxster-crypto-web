@@ -87,7 +87,7 @@ test('Test Elliptic Curve key store setup with asymmetric protector', async (t) 
   t.assert(keyStore.keyContainers && keyStore.psk.privateKey)
 })
 
-test.skip('Test Identity key store unlock.', async (t) => {
+test('Test Identity key store unlock.', async (t) => {
   const service = SERVICES.identity
   const keyStore = await setupIdentityKeys(
     service,
@@ -124,7 +124,7 @@ test('Test RSA key store unlock', async (t) => {
   t.assert(unlockedKeyStore)
 })
 
-test.skip('Test Elliptic Curve key store unlock', async (t) => {
+test('Test Elliptic Curve key store unlock', async (t) => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
   const service = SERVICES.protocol
   const keyStore = await setupKeys(
@@ -144,7 +144,7 @@ test.skip('Test Elliptic Curve key store unlock', async (t) => {
   t.assert(unlockedKeyStore)
 })
 
-test.skip('Test unlock user key stores', async (t) => {
+test('Test unlock user key stores', async (t) => {
   const serviceKeyStores = await unlockKeyStores(
     keyStoresJson,
     'Test123456',
@@ -154,7 +154,7 @@ test.skip('Test unlock user key stores', async (t) => {
   t.assert(serviceKeyStores)
 })
 
-test.skip('Test init unlock user key stores with existing derived password protector', async (t) => {
+test('Test init unlock user key stores with existing derived password protector', async (t) => {
   const success = await initKeyStores(initKeyStoresJson)
   t.assert(success)
 })
