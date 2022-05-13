@@ -215,3 +215,58 @@ export async function unlockKeyContainer(
     return Promise.reject(e)
   }
 }
+
+/**
+ * Unlock the intermediate key of a key container with given protector, then re-wrap the interrmediate key
+ * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
+ * else the new protector will be added to the list of jey protectors.
+ *
+ * @param {String} keyType
+ * @param {Object} keyContainer
+ * @param {CryptoKey} protector
+ * @param {Object} keyProtector
+ * @param {CryptoKey} newProtectorKey
+ * @param {String} newType
+ * @param {String} protectorIdentifier
+ */
+export async function replaceOrAddProtector(
+  keyType,
+  keyContainer,
+  protector,
+  keyProtector,
+  newProtectorKey,
+  newType,
+  protectorIdentifier,
+) {
+  const clonedKeyContainer = { ...keyContainer }
+  const protectAlgorithm = algorithms.getAlgorithm(
+    clonedKeyContainer.protectType,
+  )
+  const intermediateKey = await unlockIntermediateKey(
+    keyProtector.encryptedKey,
+    protector.key,
+    protectAlgorithm,
+  )
+  const newProtector = await getProtector(newProtectorKey)
+  const wrappedIntermediateKey = await wrapKey(
+    intermediateKey,
+    newProtector.key,
+  )
+  const replaceProtector = packProtector(
+    wrappedIntermediateKey,
+    newProtector.algorithm,
+    newType,
+    protectorIdentifier,
+  )
+  // Clone keyProtectors
+  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+  // Todo: handler (type, identifier) as distinct protectors
+  const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
+  if (index !== -1) {
+    clonedKeyProtectors[index] = replaceProtector
+  } else {
+    clonedKeyProtectors.push(replaceProtector)
+  }
+  clonedKeyContainer.keyProtectors = clonedKeyProtectors
+  return { [keyType]: clonedKeyContainer }
+}
