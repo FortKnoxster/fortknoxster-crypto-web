@@ -7,6 +7,7 @@ import {
   RSA_PSS_4096,
   RSA_OAEP_8192,
   RSA_PSS_8192,
+  AES_GCM_256,
 } from './algorithms.js'
 
 export const DERIVE = ['deriveBits', 'deriveKey']
@@ -33,6 +34,8 @@ export function getUsage(algorithm) {
       return DECRYPT_UNWRAP
     case ECDH_P521:
       return DERIVE
+    case AES_GCM_256:
+      return DECRYPT_UNWRAP.concat(ENCRYPT_WRAP)
     case 'BIP39':
     case 'wallet':
     case 'beneficiary':

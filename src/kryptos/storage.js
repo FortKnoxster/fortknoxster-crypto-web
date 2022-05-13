@@ -32,6 +32,8 @@ import { PSK, PEK, PVK, PDK, SERVICES } from './constants.js'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils.js'
 import { AES_CBC_ALGO } from './algorithms.js'
 
+// Todo: Add support for AES_GCM_ALGO
+
 export async function encryptItem(data, key, publicKeys = []) {
   try {
     const sessionKey = await getSessionKey(AES_CBC_ALGO, key)

@@ -301,7 +301,7 @@ export function getKeyMode(keyType) {
     default:
       break
   }
-  throw new Error('Invalid key type.')
+  throw new Error('Invalid key mode.')
 }
 
 export function keyContainerType(algorithm) {
@@ -318,10 +318,12 @@ export function keyContainerType(algorithm) {
       return RSA_OAEP_8192
     case RSA_PSS_ALGO_8K:
       return RSA_PSS_8192
+    case AES_GCM_ALGO:
+      return AES_GCM_256
     default:
       break
   }
-  throw new Error('Invalid key mode.')
+  throw new Error('Invalid key container type.')
 }
 
 export function isEllipticCurve(algorithm) {

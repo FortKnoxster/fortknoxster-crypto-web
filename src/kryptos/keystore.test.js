@@ -360,7 +360,7 @@ test('Test Elliptic Curve key store lock with new asymmetric protector', async (
     keyPair.privateKey,
     algorithms.ECDSA_ALGO,
     algorithms.ECDH_ALGO,
-    PROTECTOR_TYPES.password
+    PROTECTOR_TYPES.password,
   )
   const newProtectorKeyPair = await generateEncryptionKeyPair(
     algorithms.RSA_OAEP_ALGO,

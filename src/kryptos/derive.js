@@ -90,6 +90,32 @@ export async function deriveKeyFromPassword(
   }
 }
 
+// For symmetric protector
+export async function deriveKeyFromSymmetric(
+  bufferedKey,
+  bufferedSalt,
+  extractable = EXTRACTABLE,
+) {
+  try {
+    const key = await kryptos.subtle.importKey(
+      RAW,
+      bufferedKey,
+      HKDF,
+      NONEXTRACTABLE,
+      DERIVE,
+    )
+    return kryptos.subtle.deriveKey(
+      deriveKeyHKDF(bufferedSalt),
+      key,
+      AES_KW_ALGO,
+      extractable,
+      WRAP,
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
 export async function deriveSessionKeyFromPassword(password, salt, iterations) {
   try {
     const bufferedPassword = stringToArrayBuffer(password)
