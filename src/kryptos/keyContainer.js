@@ -56,8 +56,14 @@ function newKeyContainer(wrappedKey, iv, keyType) {
 }
 
 function wrapKeyContainerKey(keyToEncrypt, iv, intermediateKey) {
-  if (keyToEncrypt.privateKey) {
-    return wrapPrivateKey(keyToEncrypt.privateKey, iv, intermediateKey)
+  if (keyToEncrypt.privateKey || keyToEncrypt.extractable) {
+    // private key or secret key
+
+    return wrapPrivateKey(
+      keyToEncrypt.privateKey || keyToEncrypt,
+      iv,
+      intermediateKey,
+    )
   }
   const arrayBuffer = objectToArrayBuffer(keyToEncrypt)
   return encrypt(arrayBuffer, iv, intermediateKey)
@@ -121,6 +127,7 @@ export async function setupKeyContainer(
     const intermediateKey = await generateWrapKey()
     const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
     const iv = nonce()
+    // console.log('keyToEncrypt', keyToEncrypt)
     const wrappedKey = await wrapKeyContainerKey(
       keyToEncrypt,
       iv,
