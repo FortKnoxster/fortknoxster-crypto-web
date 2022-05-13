@@ -228,6 +228,7 @@ export async function unlockKeyContainer(
  * @param {CryptoKey} newProtectorKey
  * @param {String} newType
  * @param {String} protectorIdentifier
+ * @return {Object}
  */
 export async function replaceOrAddProtector(
   keyType,

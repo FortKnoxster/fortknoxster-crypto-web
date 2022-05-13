@@ -26,12 +26,7 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import * as utils from './utils.js'
-import {
-  generateKeyPair,
-  exportPublicKey,
-  unwrapKey,
-  exportKey,
-} from './keys.js'
+import { generateKeyPair, exportPublicKey, exportKey } from './keys.js'
 import * as algorithms from './algorithms.js'
 import { signPublicKeys } from './signer.js'
 import { fingerprint } from './digest.js'
@@ -41,7 +36,7 @@ import {
   replaceOrAddProtector,
 } from './keyContainer.js'
 import { getProtector } from './protector.js'
-import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
+import { PROTECTOR_TYPES } from './constants.js'
 
 export async function setupKeyPair(
   derivedKey,
@@ -170,19 +165,6 @@ export async function setupKeys(
   } catch (e) {
     return Promise.reject(e)
   }
-}
-
-export function unlockIntermediateKey(
-  encryptedKey,
-  protectorKey,
-  protectAlgorithm,
-) {
-  return unwrapKey(
-    utils.base64ToArrayBuffer(encryptedKey),
-    protectorKey,
-    protectAlgorithm,
-    EXTRACTABLE,
-  )
 }
 
 export async function unlockPrivateKey(
