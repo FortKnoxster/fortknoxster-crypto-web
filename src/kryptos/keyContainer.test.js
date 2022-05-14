@@ -157,7 +157,7 @@ test('Test wallet lock key container with asymmetric RSA 8K protector and new sy
   const bufferedKey = base64ToArrayBuffer(t.context.key)
   const newProtector = await getSymmetricProtector(bufferedKey)
 
-  const result = await replaceOrAddProtector(
+  const { wallet: newKeyContainer } = await replaceOrAddProtector(
     t.context.type,
     keyContainer,
     protector,
@@ -165,8 +165,6 @@ test('Test wallet lock key container with asymmetric RSA 8K protector and new sy
     newProtector,
     PROTECTOR_TYPES.symmetric,
   )
-
-  const newKeyContainer = result.wallet
 
   t.assert(
     newKeyContainer.encryptedKey &&
@@ -177,5 +175,45 @@ test('Test wallet lock key container with asymmetric RSA 8K protector and new sy
       newKeyContainer.keyProtectors[1].type === 'symmetric' &&
       newKeyContainer.keyProtectors[1].name === 'HKDF' &&
       newKeyContainer.keyProtectors[1].hash === 'SHA-256',
+  )
+})
+
+test('Test wallet lock & unlock key container with asymmetric RSA 8K protector and new symmetric HKDF protector', async (t) => {
+  const keyContainer = await lockKeyContainer(
+    t.context.keyPair.publicKey,
+    t.context.type,
+    t.context.wallet,
+    PROTECTOR_TYPES.asymmetric,
+  )
+  const protector = await getProtector(t.context.keyPair.privateKey)
+
+  const bufferedKey = base64ToArrayBuffer(t.context.key)
+  const newProtector = await getSymmetricProtector(bufferedKey)
+
+  const { wallet: newKeyContainer } = await replaceOrAddProtector(
+    t.context.type,
+    keyContainer,
+    protector,
+    keyContainer.keyProtectors[0],
+    newProtector,
+    PROTECTOR_TYPES.symmetric,
+  )
+
+  const { privateKey: unlockedKeyContainer } = await unlockKeyContainer(
+    newKeyContainer,
+    t.context.keyPair.privateKey,
+    PROTECTOR_TYPES.asymmetric,
+  )
+
+  const { privateKey: symmetricUnlockedKeyContainer } =
+    await unlockKeyContainer(
+      newKeyContainer,
+      newProtector,
+      PROTECTOR_TYPES.symmetric,
+    )
+  t.assert(
+    unlockedKeyContainer.privateWallet === t.context.wallet.privateWallet &&
+      symmetricUnlockedKeyContainer.privateWallet ===
+        t.context.wallet.privateWallet,
   )
 })
