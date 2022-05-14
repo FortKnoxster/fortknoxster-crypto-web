@@ -262,8 +262,14 @@ export async function replaceOrAddProtector(
     )
     // Clone keyProtectors
     const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
-    // Todo: handler (type, identifier) as distinct protectors
-    const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
+    // If type and identifier match (if identifier present) or just type match if no identifier present
+    const index = clonedKeyProtectors.findIndex(
+      (p) =>
+        (p.type === newType &&
+          p.identifier &&
+          p.identifier === protectorIdentifier) ||
+        (p.type === newType && !p.identifier),
+    )
     if (index !== -1) {
       clonedKeyProtectors[index] = replaceProtector
     } else {
