@@ -215,3 +215,69 @@ export async function unlockKeyContainer(
     return Promise.reject(e)
   }
 }
+
+/**
+ * Unlock the intermediate key of a key container with given protector, then re-wrap the interrmediate key
+ * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
+ * else the new protector will be added to the list of jey protectors.
+ *
+ * @param {String} keyType key type of unlocking protector
+ * @param {Object} keyContainer given key container
+ * @param {CryptoKey} protector protector to unlock with key protector
+ * @param {Object} keyProtector key protector to unlock protector
+ * @param {CryptoKey} newProtectorKey new key protector to lock key container
+ * @param {String} newType new key protector type
+ * @param {String} protectorIdentifier optional identifier of key protector
+ * @return {Object} return new key container
+ */
+export async function replaceOrAddProtector(
+  keyType,
+  keyContainer,
+  protector,
+  keyProtector,
+  newProtectorKey,
+  newType,
+  protectorIdentifier,
+) {
+  try {
+    const clonedKeyContainer = { ...keyContainer }
+    const protectAlgorithm = algorithms.getAlgorithm(
+      clonedKeyContainer.protectType,
+    )
+    const intermediateKey = await unlockIntermediateKey(
+      keyProtector.encryptedKey,
+      protector.key,
+      protectAlgorithm,
+    )
+    const newProtector = await getProtector(newProtectorKey)
+    const wrappedIntermediateKey = await wrapKey(
+      intermediateKey,
+      newProtector.key,
+    )
+    const replaceProtector = packProtector(
+      wrappedIntermediateKey,
+      newProtector.algorithm,
+      newType,
+      protectorIdentifier,
+    )
+    // Clone keyProtectors
+    const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+    // If type and identifier match (if identifier present) or just type match if no identifier present
+    const index = clonedKeyProtectors.findIndex(
+      (p) =>
+        (p.type === newType &&
+          p.identifier &&
+          p.identifier === protectorIdentifier) ||
+        (p.type === newType && !p.identifier),
+    )
+    if (index !== -1) {
+      clonedKeyProtectors[index] = replaceProtector
+    } else {
+      clonedKeyProtectors.push(replaceProtector)
+    }
+    clonedKeyContainer.keyProtectors = clonedKeyProtectors
+    return { [keyType]: clonedKeyContainer }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}

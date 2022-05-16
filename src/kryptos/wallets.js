@@ -34,10 +34,14 @@ import {
 import { PVK, PEK, PDK, PSK, PROTECTOR_TYPES } from './constants.js'
 import { AES_GCM_ALGO, keyContainerType, getAlgorithm } from './algorithms.js'
 import { arrayBufferToHex, hexToArrayBuffer } from './utils.js'
-import { lockKeyContainer, unlockKeyContainer } from './keyContainer.js'
+import {
+  lockKeyContainer,
+  unlockKeyContainer,
+  replaceOrAddProtector,
+} from './keyContainer.js'
 import { signIt } from './signer.js'
 import { verifyIt } from './verifier.js'
-import { getSymmetricProtector } from './protector.js'
+import { getSymmetricProtector, getProtector } from './protector.js'
 
 export async function encryptDetails(wallet, service, protectType, dataType) {
   try {
@@ -49,7 +53,9 @@ export async function encryptDetails(wallet, service, protectType, dataType) {
       wallet,
       protectType,
     )
-    const signature = await signIt(keyContainer, privateKey)
+    const clonedKeyContainer = { ...keyContainer }
+    delete clonedKeyContainer.keyProtectors // sign without key protectors
+    const signature = await signIt(clonedKeyContainer, privateKey)
     keyContainer.signature = signature
     return keyContainer
   } catch (e) {
@@ -68,11 +74,12 @@ export async function decryptWallet(encryptedWallet, service, type) {
     const { signature } = encryptedWallet
     const clonedKeyContainer = { ...encryptedWallet }
     delete clonedKeyContainer.signature
+    delete clonedKeyContainer.keyProtectors
 
     await verifyIt(publicKey, signature, clonedKeyContainer)
 
     const { privateKey: unlockedWallet } = await unlockKeyContainer(
-      clonedKeyContainer,
+      encryptedWallet,
       privateKey,
       type,
     )
@@ -152,21 +159,34 @@ export async function reEncryptBeneficiary(
   }
 }
 
-// Todo: complete
 export async function encryptWalletToBeneficiary(
   encryptedWallet,
   encryptionBeneficiaryData,
   service,
   type,
+  beneficiaryIdentifier,
 ) {
   try {
-    const { protectorKey, algorithm } = await getBeneficiaryProtectorKey(
+    const { protectorKey } = await getBeneficiaryProtectorKey(
       encryptionBeneficiaryData,
       service,
       type,
     )
 
-    return { protectorKey, algorithm }
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+
+    const { wallet } = await replaceOrAddProtector(
+      'wallet',
+      encryptedWallet,
+      protector,
+      encryptedWallet.keyProtectors[0],
+      protectorKey,
+      PROTECTOR_TYPES.symmetric,
+      beneficiaryIdentifier,
+    )
+
+    return wallet
   } catch (e) {
     return Promise.reject(e)
   }
