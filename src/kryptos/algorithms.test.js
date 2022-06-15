@@ -27,6 +27,16 @@ test('Test get keyContainer RSA-OAEP-2048 keyType by algorithm', async (t) => {
   t.assert(keyType === algorithms.RSA_OAEP_2048)
 })
 
+test('Test get keyContainer RSA-OAEP-4096 keyType by algorithm', async (t) => {
+  const keyType = algorithms.keyContainerType(algorithms.RSA_OAEP_ALGO_4K)
+  t.assert(keyType === algorithms.RSA_OAEP_4096)
+})
+
+test('Test get keyContainer RSA-PSS-4096 keyType by algorithm', async (t) => {
+  const keyType = algorithms.keyContainerType(algorithms.RSA_PSS_ALGO_4K)
+  t.assert(keyType === algorithms.RSA_PSS_4096)
+})
+
 test('Test get keyContainer RSA-OAEP-8192 keyType by algorithm', async (t) => {
   const keyType = algorithms.keyContainerType(algorithms.RSA_OAEP_ALGO_8K)
   t.assert(keyType === algorithms.RSA_OAEP_8192)
