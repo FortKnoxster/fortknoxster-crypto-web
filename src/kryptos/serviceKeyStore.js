@@ -207,6 +207,7 @@ export function verifyKeyProtector(keys, password, type) {
 
 export function generateIdentityKeys(
   password,
+  protectorIterations,
   protectorType = PROTECTOR_TYPES.password,
 ) {
   return setupIdentityKeys(
@@ -214,6 +215,7 @@ export function generateIdentityKeys(
     password,
     ECDSA_ALGO,
     protectorType,
+    protectorIterations,
   )
 }
 
@@ -225,6 +227,7 @@ export function setupKeyStore(
   signAlgorithm,
   encryptAlgorithm,
   protectorIdentifier,
+  protectorIterations,
 ) {
   return setupKeys(
     service,
@@ -234,6 +237,7 @@ export function setupKeyStore(
     encryptAlgorithm,
     protectorType,
     protectorIdentifier,
+    protectorIterations,
   )
 }
 

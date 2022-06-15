@@ -10,6 +10,8 @@ import {
   ECDH_ALGO,
   RSASSA_PKCS1_V1_5_ALGO,
   RSA_OAEP_ALGO,
+  RSA_PSS_ALGO_4K,
+  RSA_OAEP_ALGO_4K,
   RSA_PSS_ALGO_8K,
   RSA_OAEP_ALGO_8K,
 } from './algorithms.js'
@@ -109,6 +111,7 @@ export async function generateServiceKeys(id, plainPassword, serviceKeys) {
           PROTECTOR_TYPES.password,
           serviceKey.signAlgorithm,
           serviceKey.encryptAlgorithm,
+          serviceKey.protectorIterations,
         ),
       ),
     )
@@ -150,17 +153,47 @@ export function generateUserKeys(id, plainPassword) {
   return generateServiceKeys(id, plainPassword, serviceKeys)
 }
 
-export function generateUserKeysV2(id, plainPassword) {
+// RSA 4096
+export function generateUserKeys4K(
+  id,
+  plainPassword,
+  protectorIterations = null,
+) {
   const serviceKeys = [
     {
       service: SERVICES.storage,
-      signAlgorithm: RSA_PSS_ALGO_8K,
-      encryptAlgorithm: RSA_OAEP_ALGO_8K,
+      signAlgorithm: RSA_PSS_ALGO_4K,
+      encryptAlgorithm: RSA_OAEP_ALGO_4K,
+      protectorIterations,
     },
     {
       service: SERVICES.protocol,
       signAlgorithm: ECDSA_ALGO,
       encryptAlgorithm: ECDH_ALGO,
+      protectorIterations,
+    },
+  ]
+  return generateServiceKeys(id, plainPassword, serviceKeys)
+}
+
+// RSA 8192
+export function generateUserKeys8K(
+  id,
+  plainPassword,
+  protectorIterations = null,
+) {
+  const serviceKeys = [
+    {
+      service: SERVICES.storage,
+      signAlgorithm: RSA_PSS_ALGO_8K,
+      encryptAlgorithm: RSA_OAEP_ALGO_8K,
+      protectorIterations,
+    },
+    {
+      service: SERVICES.protocol,
+      signAlgorithm: ECDSA_ALGO,
+      encryptAlgorithm: ECDH_ALGO,
+      protectorIterations,
     },
   ]
   return generateServiceKeys(id, plainPassword, serviceKeys)
