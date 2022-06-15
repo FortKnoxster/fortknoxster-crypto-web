@@ -111,6 +111,7 @@ export async function generateServiceKeys(id, plainPassword, serviceKeys) {
           PROTECTOR_TYPES.password,
           serviceKey.signAlgorithm,
           serviceKey.encryptAlgorithm,
+          null,
           serviceKey.protectorIterations,
         ),
       ),

@@ -6,8 +6,6 @@ import {
   LENGTH_2048,
   LENGTH_4096,
   LENGTH_8192,
-  PSK,
-  PDK,
 } from './constants.js'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
@@ -267,25 +265,6 @@ export function getImportAlgorithm(algo) {
   throw new Error('Invalid import algorithm.')
 }
 
-export function getKeyType(mode, type) {
-  if (type === PSK) {
-    if (mode === RSA) {
-      return RSASSA_PKCS1_V1_5_2048
-    }
-    if (mode === EC) {
-      return ECDSA_P521
-    }
-  } else if (type === PDK) {
-    if (mode === RSA) {
-      return RSA_OAEP_2048
-    }
-    if (mode === EC) {
-      return ECDH_P521
-    }
-  }
-  throw new Error('Invalid key mode.')
-}
-
 export function getKeyMode(keyType) {
   switch (keyType) {
     case ECDSA_P521:
@@ -314,6 +293,10 @@ export function keyContainerType(algorithm) {
       return RSASSA_PKCS1_V1_5_2048
     case RSA_OAEP_ALGO:
       return RSA_OAEP_2048
+    case RSA_OAEP_ALGO_4K:
+      return RSA_OAEP_4096
+    case RSA_PSS_ALGO_4K:
+      return RSA_PSS_4096
     case RSA_OAEP_ALGO_8K:
       return RSA_OAEP_8192
     case RSA_PSS_ALGO_8K:
