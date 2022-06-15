@@ -74,10 +74,15 @@ export async function setupIdentityKeys(
   protectorKey,
   algorithm,
   protectorType,
+  protectorIterations,
   protectorIdentifier,
 ) {
   try {
-    const protector = await getProtector(protectorKey)
+    const protector = await getProtector(
+      protectorKey,
+      null,
+      protectorIterations,
+    )
 
     const container = await setupKeyPair(
       protector.key,
@@ -116,9 +121,14 @@ export async function setupKeys(
   encryptAlgorithm,
   protectorType,
   protectorIdentifier,
+  protectorIterations,
 ) {
   try {
-    const protector = await getProtector(protectorKey)
+    const protector = await getProtector(
+      protectorKey,
+      null,
+      protectorIterations,
+    )
     const signContainer = await setupKeyPair(
       protector.key,
       signAlgorithm,
