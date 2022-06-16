@@ -96,6 +96,7 @@ export {
 export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
 
 export {
+  encryptBip39Wallet,
   encryptWallet,
   decryptWallet,
   encryptBeneficiary,

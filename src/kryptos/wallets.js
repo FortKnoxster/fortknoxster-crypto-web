@@ -67,6 +67,10 @@ export async function encryptWallet(wallet, service, type) {
   return encryptDetails(wallet, service, type, 'wallet')
 }
 
+export async function encryptBip39Wallet(wallet, service, type) {
+  return encryptDetails(wallet, service, type, 'BIP39')
+}
+
 export async function decryptWallet(encryptedWallet, service, type) {
   try {
     const publicKey = await importPublicVerifyKey(getPublicKey(service, PVK))
