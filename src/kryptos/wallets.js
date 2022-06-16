@@ -222,3 +222,19 @@ export async function encryptItemKeyToBeneficiary(
     return Promise.reject(e)
   }
 }
+
+export async function encryptNewInheritanceKey(service, type) {
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO) // unique inheritance key
+
+    const keyContainer = await encryptDetails(
+      sessionKey,
+      service,
+      type,
+      keyContainerType(getAlgorithm(AES_GCM_ALGO.name)),
+    )
+    return keyContainer
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
