@@ -67,6 +67,10 @@ export async function encryptWallet(wallet, service, type) {
   return encryptDetails(wallet, service, type, 'wallet')
 }
 
+export async function encryptBip39Wallet(wallet, service, type) {
+  return encryptDetails(wallet, service, type, 'BIP39')
+}
+
 export async function decryptWallet(encryptedWallet, service, type) {
   try {
     const publicKey = await importPublicVerifyKey(getPublicKey(service, PVK))
@@ -213,6 +217,22 @@ export async function encryptItemKeyToBeneficiary(
       PROTECTOR_TYPES.symmetric,
     )
 
+    return keyContainer
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function encryptNewInheritanceKey(service, type) {
+  try {
+    const sessionKey = await getSessionKey(AES_GCM_ALGO) // unique inheritance key
+
+    const keyContainer = await encryptDetails(
+      sessionKey,
+      service,
+      type,
+      keyContainerType(getAlgorithm(AES_GCM_ALGO.name)),
+    )
     return keyContainer
   } catch (e) {
     return Promise.reject(e)

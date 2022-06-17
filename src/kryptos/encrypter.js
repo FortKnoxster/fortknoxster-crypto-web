@@ -65,11 +65,13 @@ export async function encryptSessionKeys(sessionKey, publicKeys) {
  * @param {ArrayBuffer} arrayBuffer
  * @param {ArrayBuffer} iv
  * @param {CryptoKey} key
+ * @param {ArrayBuffer} additionalData
  */
-export function encrypt(arrayBuffer, iv, key) {
+export function encrypt(arrayBuffer, iv, key, additionalData) {
   const algorithm = { name: key.algorithm.name, iv }
   if (algorithm.name === AES_GCM.name) {
     algorithm.tagLength = LENGTH_128
+    if (additionalData) algorithm.additionalData = additionalData
   }
   return kryptos.subtle.encrypt(algorithm, key, arrayBuffer)
 }

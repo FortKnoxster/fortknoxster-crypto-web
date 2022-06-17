@@ -96,10 +96,12 @@ export {
 export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
 
 export {
+  encryptBip39Wallet,
   encryptWallet,
   decryptWallet,
   encryptBeneficiary,
   reEncryptBeneficiary,
   encryptWalletToBeneficiary,
   encryptItemKeyToBeneficiary,
+  encryptNewInheritanceKey,
 } from './kryptos/wallets.js'
