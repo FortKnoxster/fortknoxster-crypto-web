@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Copyright 2020 FortKnoxster Ltd.
  *
@@ -239,31 +240,6 @@ export async function encryptNewInheritanceKey(service, type) {
   }
 }
 
-export async function getInhertitanceKeyProtectorKey(
-  encryptionBeneficiaryData,
-  service,
-  type,
-) {
-  try {
-    const decryptedData = await decryptWallet(
-      encryptionBeneficiaryData,
-      service,
-      type,
-    )
-    // eslint-disable-next-line no-console
-    console.log('decryptedData', decryptedData)
-    const { key, algorithm } = decryptedData
-    const rawKey = hexToArrayBuffer(key)
-    const protectorKey = await getSymmetricProtector(rawKey)
-    return {
-      protectorKey,
-      algorithm,
-    }
-  } catch (e) {
-    return Promise.reject(e)
-  }
-}
-
 export async function encryptBeneficiaryToInheritanceKey(
   encryptionBeneficiaryData,
   encryptedInheritanceKey,
@@ -273,15 +249,20 @@ export async function encryptBeneficiaryToInheritanceKey(
 ) {
   try {
     // eslint-disable-next-line no-console
-    console.log('encryptBeneficiaryToInheritanceKey')
-    const { protectorKey } = await getInhertitanceKeyProtectorKey(
+    console.log('encryptBeneficiaryToInheritanceKey 1 ...')
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+    // eslint-disable-next-line no-console
+    console.log('protector', protector)
+
+    const { privateKey: protectorKey } = await unlockKeyContainer(
       encryptedInheritanceKey,
-      service,
+      privateKey,
       type,
     )
 
-    const privateKey = await getPrivateKey(service, PDK)
-    const protector = await getProtector(privateKey)
+    // eslint-disable-next-line no-console
+    console.log('encryptBeneficiaryToInheritanceKey 2', protectorKey)
 
     const { beneficiary } = await replaceOrAddProtector(
       'beneficiary',
@@ -292,7 +273,8 @@ export async function encryptBeneficiaryToInheritanceKey(
       PROTECTOR_TYPES.symmetric,
       beneficiaryIdentifier,
     )
-
+    // eslint-disable-next-line no-console
+    console.log('beneficiary', beneficiary)
     return beneficiary
   } catch (e) {
     return Promise.reject(e)
