@@ -238,3 +238,63 @@ export async function encryptNewInheritanceKey(service, type) {
     return Promise.reject(e)
   }
 }
+
+export async function getInhertitanceKeyProtectorKey(
+  encryptionBeneficiaryData,
+  service,
+  type,
+) {
+  try {
+    const decryptedData = await decryptWallet(
+      encryptionBeneficiaryData,
+      service,
+      type,
+    )
+    // eslint-disable-next-line no-console
+    console.log('decryptedData', decryptedData)
+    const { key, algorithm } = decryptedData
+    const rawKey = hexToArrayBuffer(key)
+    const protectorKey = await getSymmetricProtector(rawKey)
+    return {
+      protectorKey,
+      algorithm,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function encryptBeneficiaryToInheritanceKey(
+  encryptionBeneficiaryData,
+  encryptedInheritanceKey,
+  service,
+  type,
+  beneficiaryIdentifier,
+) {
+  try {
+    // eslint-disable-next-line no-console
+    console.log('encryptBeneficiaryToInheritanceKey')
+    const { protectorKey } = await getInhertitanceKeyProtectorKey(
+      encryptedInheritanceKey,
+      service,
+      type,
+    )
+
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+
+    const { beneficiary } = await replaceOrAddProtector(
+      'beneficiary',
+      encryptionBeneficiaryData,
+      protector,
+      encryptionBeneficiaryData.keyProtectors[0],
+      protectorKey,
+      PROTECTOR_TYPES.symmetric,
+      beneficiaryIdentifier,
+    )
+
+    return beneficiary
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
