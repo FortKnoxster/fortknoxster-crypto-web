@@ -174,26 +174,54 @@ export function generateWrapKey() {
   )
 }
 
-export function wrapKey(key, wrappingKey) {
-  return kryptos.subtle.wrapKey(formats.RAW, key, wrappingKey, {
-    name: wrappingKey.algorithm.name,
-  })
+export function wrapKey(key, wrappingKey, wrappingAlgorithm) {
+  const algorithm =
+    wrappingAlgorithm && wrappingAlgorithm.name === algorithms.AES_GCM.name
+      ? wrappingAlgorithm
+      : {
+          name: wrappingKey.algorithm.name,
+        }
+  return kryptos.subtle.wrapKey(formats.RAW, key, wrappingKey, algorithm)
 }
 
 export function unwrapKey(
   wrappedKey,
   unwrappingKey,
   wrappedKeyAlgorithm,
+  unwrappingKeyAlgorithm,
   extractable = NONEXTRACTABLE,
 ) {
+  const algorithm =
+    unwrappingKeyAlgorithm &&
+    unwrappingKeyAlgorithm.name === algorithms.AES_GCM.name
+      ? unwrappingKeyAlgorithm
+      : unwrappingKey.algorithm.name
   return kryptos.subtle.unwrapKey(
     formats.RAW,
     wrappedKey,
     unwrappingKey,
-    unwrappingKey.algorithm.name,
+    algorithm,
     wrappedKeyAlgorithm,
     extractable,
     usage.WRAP.concat(usage.ENCRYPT),
+  )
+}
+
+export function unwrapSecretKey(
+  wrappedKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+  usages,
+  extractable = NONEXTRACTABLE,
+) {
+  return kryptos.subtle.unwrapKey(
+    formats.JWK,
+    wrappedKey,
+    unwrappingKey,
+    wrappedKeyAlgorithm,
+    unwrappingKey.algorithm.name,
+    extractable,
+    usages,
   )
 }
 
