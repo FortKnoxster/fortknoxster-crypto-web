@@ -64,9 +64,9 @@
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^4.0.0",
-    "husky": "^7.0.4",
+    "husky": "^8.0.1",
     "jsdoc": "^3.6.7",
-    "lint-staged": "^12.3.7",
+    "lint-staged": "^13.0.3",
     "nyc": "^15.1.0",
     "prettier": "^2.2.0",
     "webcrypto-core": "^1.2.0"
