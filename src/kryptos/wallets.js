@@ -271,7 +271,6 @@ export async function encryptBeneficiaryToInheritanceKey(
       null,
       hexToArrayBuffer(identityHash),
     )
-    console.log('protectorKey', protectorKey)
 
     const { beneficiary } = await replaceOrAddProtector(
       'beneficiary',
