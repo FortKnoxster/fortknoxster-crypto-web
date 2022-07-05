@@ -10,13 +10,13 @@ export function fingerprint(key) {
   return kryptos.subtle.digest(SHA_256.name, objectToArrayBuffer(key))
 }
 
-export async function hashAnything(...objects) {
+export async function hashAnything(algorithm = SHA_256.name, ...objects) {
   const strBuffer = objects.reduce(
     (acc, object) => acc + JSON.stringify(object),
     '',
   )
   const hash = await kryptos.subtle.digest(
-    SHA_256.name,
+    algorithm,
     stringToArrayBuffer(strBuffer),
   )
   return arrayBufferToHex(hash)
