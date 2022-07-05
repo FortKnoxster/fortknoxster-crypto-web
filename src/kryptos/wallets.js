@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Copyright 2020 FortKnoxster Ltd.
  *
@@ -30,6 +31,7 @@ import {
   generateSessionKey,
   exportRawKey,
   getSessionKey,
+  generateWrapKey,
 } from './keys.js'
 import { PVK, PEK, PDK, PSK, PROTECTOR_TYPES } from './constants.js'
 import { AES_GCM_ALGO, keyContainerType, getAlgorithm } from './algorithms.js'
@@ -41,7 +43,11 @@ import {
 } from './keyContainer.js'
 import { signIt } from './signer.js'
 import { verifyIt } from './verifier.js'
-import { getSymmetricProtector, getProtector } from './protector.js'
+import {
+  getSymmetricHkdfProtector,
+  getProtector,
+  getSymmetricAesGcmProtector,
+} from './protector.js'
 
 export async function encryptDetails(wallet, service, protectType, dataType) {
   try {
@@ -125,7 +131,7 @@ export async function getBeneficiaryProtectorKey(
     )
     const { key, algorithm } = decryptedData
     const rawKey = hexToArrayBuffer(key)
-    const protectorKey = await getSymmetricProtector(rawKey)
+    const protectorKey = await getSymmetricHkdfProtector(rawKey)
     return {
       protectorKey,
       algorithm,
@@ -225,15 +231,48 @@ export async function encryptItemKeyToBeneficiary(
 
 export async function encryptNewInheritanceKey(service, type) {
   try {
-    const sessionKey = await getSessionKey(AES_GCM_ALGO) // unique inheritance key
-
+    const secretKey = await generateWrapKey() // unique inheritance key
     const keyContainer = await encryptDetails(
-      sessionKey,
+      secretKey,
       service,
       type,
       keyContainerType(getAlgorithm(AES_GCM_ALGO.name)),
     )
     return keyContainer
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function encryptBeneficiaryToInheritanceKey(
+  encryptionBeneficiaryData,
+  encryptedInheritanceKey,
+  service,
+  type,
+  identifier,
+) {
+  try {
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+
+    const cryptoKey = await decryptWallet(
+      encryptedInheritanceKey,
+      service,
+      type,
+    )
+
+    const protectorKey = await getSymmetricAesGcmProtector(cryptoKey)
+
+    const { beneficiary } = await replaceOrAddProtector(
+      'beneficiary',
+      encryptionBeneficiaryData,
+      protector,
+      encryptionBeneficiaryData.keyProtectors[0],
+      protectorKey,
+      PROTECTOR_TYPES.symmetric,
+      identifier,
+    )
+    return beneficiary
   } catch (e) {
     return Promise.reject(e)
   }

@@ -185,6 +185,13 @@ export const deriveKeyHKDF = (salt, hash = SHA_256.name, info = 0) => ({
   info: new ArrayBuffer(info),
 })
 
+export const aesGcmParams = (iv, additionalData, tagLength = 128) => ({
+  ...AES_GCM,
+  iv,
+  tagLength,
+  ...(additionalData && { additionalData }),
+})
+
 export function getAlgorithm(algo) {
   switch (algo) {
     case A256KW:
@@ -312,6 +319,20 @@ export function keyContainerType(algorithm) {
 export function isEllipticCurve(algorithm) {
   const { name } = algorithm
   switch (name) {
+    case ECDH_ALGO.name:
+    case ECDSA_ALGO.name:
+      return true
+    default:
+      return false
+  }
+}
+
+export function isAsymmetricKey(algorithm) {
+  const { name } = algorithm
+  switch (name) {
+    case RSA_OAEP_ALGO.name:
+    case RSASSA_PKCS1_V1_5_ALGO.name:
+    case RSA_PSS_4K.name:
     case ECDH_ALGO.name:
     case ECDSA_ALGO.name:
       return true
