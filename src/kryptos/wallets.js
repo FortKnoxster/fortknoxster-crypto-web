@@ -244,12 +244,17 @@ export async function encryptNewInheritanceKey(service, type) {
   }
 }
 
+// Encrypt beneficiary data to inheritance key
+// 1. Hash of (DOB|GENDER|NATIONALITY|SECURITYQ)
+// 2. Decrypt inheritance key
+// 3. Add protector to beneficiary data with identity hash as AAD
 export async function encryptBeneficiaryToInheritanceKey(
   encryptionBeneficiaryData,
   encryptedInheritanceKey,
   service,
   type,
   identifier,
+  identityHash,
 ) {
   try {
     const privateKey = await getPrivateKey(service, PDK)
@@ -261,7 +266,12 @@ export async function encryptBeneficiaryToInheritanceKey(
       type,
     )
 
-    const protectorKey = await getSymmetricAesGcmProtector(cryptoKey)
+    const protectorKey = await getSymmetricAesGcmProtector(
+      cryptoKey,
+      null,
+      hexToArrayBuffer(identityHash),
+    )
+    console.log('protectorKey', protectorKey)
 
     const { beneficiary } = await replaceOrAddProtector(
       'beneficiary',
@@ -272,6 +282,7 @@ export async function encryptBeneficiaryToInheritanceKey(
       PROTECTOR_TYPES.symmetric,
       identifier,
     )
+    // Todo: verify new inheritance/identity protector lock can be unlocked
     return beneficiary
   } catch (e) {
     return Promise.reject(e)
