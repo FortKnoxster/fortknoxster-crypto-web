@@ -30,6 +30,7 @@ import {
   importPublicVerifyKey,
   generateSessionKey,
   exportRawKey,
+  exportKey,
   getSessionKey,
   generateWrapKey,
 } from './keys.js'
@@ -239,6 +240,38 @@ export async function encryptNewInheritanceKey(service, type) {
       keyContainerType(getAlgorithm(AES_GCM_ALGO.name)),
     )
     return keyContainer
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export async function reEncryptInheritanceKey(
+  encryptedInheritanceKey,
+  service,
+) {
+  try {
+    const secretKey = await generateWrapKey()
+    const exportedKey = await exportRawKey(secretKey)
+    const exportedJwkKey = await exportKey(secretKey)
+
+    const protectorKey = await getSymmetricHkdfProtector(exportedKey)
+
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+
+    const { temp } = await replaceOrAddProtector(
+      'temp',
+      encryptedInheritanceKey,
+      protector,
+      encryptedInheritanceKey.keyProtectors[0],
+      protectorKey,
+      PROTECTOR_TYPES.symmetric,
+    )
+
+    return {
+      keyContainer: temp,
+      exportedKey: exportedJwkKey,
+    }
   } catch (e) {
     return Promise.reject(e)
   }

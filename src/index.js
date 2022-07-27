@@ -108,5 +108,6 @@ export {
   encryptWalletToBeneficiary,
   encryptItemKeyToBeneficiary,
   encryptNewInheritanceKey,
+  reEncryptInheritanceKey,
   encryptBeneficiaryToInheritanceKey,
 } from './kryptos/wallets.js'
