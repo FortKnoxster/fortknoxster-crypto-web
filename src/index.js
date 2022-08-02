@@ -93,7 +93,11 @@ export {
   verifyWithIdentity,
 } from './kryptos/identity.js'
 
-export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
+export {
+  lockKeyContainer,
+  unlockKeyContainer,
+  removeProtector,
+} from './kryptos/keyContainer.js'
 
 export {
   encryptBip39Wallet,
@@ -104,5 +108,6 @@ export {
   encryptWalletToBeneficiary,
   encryptItemKeyToBeneficiary,
   encryptNewInheritanceKey,
+  reEncryptInheritanceKey,
   encryptBeneficiaryToInheritanceKey,
 } from './kryptos/wallets.js'
