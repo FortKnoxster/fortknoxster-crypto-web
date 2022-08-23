@@ -306,3 +306,19 @@ export async function replaceOrAddProtector(
     return Promise.reject(e)
   }
 }
+
+export function removeProtector(keyContainer, type, identifier) {
+  const clonedKeyContainer = { ...keyContainer }
+  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+  // If type and identifier match (if identifier present) or just type match if no identifier present
+  const index = clonedKeyProtectors.findIndex(
+    (p) =>
+      (p.type === type && p.identifier && p.identifier === identifier) ||
+      (p.type === type && !p.identifier),
+  )
+  if (index !== -1) {
+    clonedKeyProtectors.splice(index, 1)
+  }
+  clonedKeyContainer.keyProtectors = clonedKeyProtectors
+  return clonedKeyContainer
+}

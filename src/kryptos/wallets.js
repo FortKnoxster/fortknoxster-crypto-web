@@ -30,6 +30,7 @@ import {
   importPublicVerifyKey,
   generateSessionKey,
   exportRawKey,
+  exportKey,
   getSessionKey,
   generateWrapKey,
 } from './keys.js'
@@ -244,12 +245,49 @@ export async function encryptNewInheritanceKey(service, type) {
   }
 }
 
+export async function reEncryptInheritanceKey(
+  encryptedInheritanceKey,
+  service,
+) {
+  try {
+    const secretKey = await generateWrapKey()
+    const exportedKey = await exportRawKey(secretKey)
+    const exportedJwkKey = await exportKey(secretKey)
+
+    const protectorKey = await getSymmetricHkdfProtector(exportedKey)
+
+    const privateKey = await getPrivateKey(service, PDK)
+    const protector = await getProtector(privateKey)
+
+    const { temp } = await replaceOrAddProtector(
+      'temp',
+      encryptedInheritanceKey,
+      protector,
+      encryptedInheritanceKey.keyProtectors[0],
+      protectorKey,
+      PROTECTOR_TYPES.symmetric,
+    )
+
+    return {
+      keyContainer: temp,
+      exportedKey: exportedJwkKey,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+// Encrypt beneficiary data to inheritance key
+// 1. Hash of (DOB|GENDER|NATIONALITY|SECURITYQ)
+// 2. Decrypt inheritance key
+// 3. Add protector to beneficiary data with identity hash as AAD
 export async function encryptBeneficiaryToInheritanceKey(
   encryptionBeneficiaryData,
   encryptedInheritanceKey,
   service,
   type,
   identifier,
+  identityHash,
 ) {
   try {
     const privateKey = await getPrivateKey(service, PDK)
@@ -261,7 +299,11 @@ export async function encryptBeneficiaryToInheritanceKey(
       type,
     )
 
-    const protectorKey = await getSymmetricAesGcmProtector(cryptoKey)
+    const protectorKey = await getSymmetricAesGcmProtector(
+      cryptoKey,
+      null,
+      hexToArrayBuffer(identityHash),
+    )
 
     const { beneficiary } = await replaceOrAddProtector(
       'beneficiary',
@@ -272,6 +314,7 @@ export async function encryptBeneficiaryToInheritanceKey(
       PROTECTOR_TYPES.symmetric,
       identifier,
     )
+    // Todo: verify new inheritance/identity protector lock can be unlocked
     return beneficiary
   } catch (e) {
     return Promise.reject(e)
