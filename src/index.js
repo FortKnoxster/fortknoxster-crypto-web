@@ -31,7 +31,7 @@ export {
 
 export * from './kryptos/utils.js'
 
-export { hashAnything, fingerprint } from './kryptos/digest.js'
+export { hashString, hashAnything, fingerprint } from './kryptos/digest.js'
 
 export {
   initProtocol,
