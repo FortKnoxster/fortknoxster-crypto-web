@@ -30,6 +30,7 @@ export {
 } from './kryptos/serviceKeyStore.js'
 
 export * from './kryptos/utils.js'
+export * from './kryptos/algorithms.js'
 
 export { hashString, hashAnything, fingerprint } from './kryptos/digest.js'
 
