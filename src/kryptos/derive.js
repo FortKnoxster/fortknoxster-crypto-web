@@ -3,6 +3,8 @@ import { stringToArrayBuffer, arrayBufferToHex, randomValue } from './utils.js'
 import {
   AES_KW_ALGO,
   AES_GCM_ALGO,
+  SHA_256,
+  SHA_512,
   PBKDF2,
   HKDF,
   ECDH_ALGO,
@@ -24,7 +26,13 @@ import {
   LENGTH_32,
 } from './constants.js'
 
-export async function deriveAccountPassword(username, password, domain) {
+export async function deriveAccountPassword(
+  username,
+  password,
+  domain,
+  iterations = 50000,
+  hash = SHA_256.name,
+) {
   try {
     const salt = stringToArrayBuffer(`${username.toLowerCase()}@${domain}`)
     const bufferedPassword = stringToArrayBuffer(password)
@@ -36,16 +44,18 @@ export async function deriveAccountPassword(username, password, domain) {
       NONEXTRACTABLE,
       DERIVE,
     )
-    const derivedKey = await kryptos.subtle.deriveKey(
-      deriveKeyPBKDF2(salt),
-      key,
-      AES_KW_ALGO,
-      EXTRACTABLE,
-      WRAP,
-    )
-    const exportedKey = await kryptos.subtle.exportKey(RAW, derivedKey)
 
-    return arrayBufferToHex(exportedKey)
+    let length = 256
+    if (hash === SHA_512.name) {
+      length = 512
+    }
+    const derivedKey = await kryptos.subtle.deriveBits(
+      deriveKeyPBKDF2(salt, iterations, hash),
+      key,
+      length,
+    )
+
+    return arrayBufferToHex(derivedKey)
   } catch (e) {
     return Promise.reject(e)
   }
@@ -70,6 +80,32 @@ export async function deriveKeyFromPassword(
     )
     return kryptos.subtle.deriveKey(
       deriveKeyPBKDF2(salt, iterations),
+      key,
+      AES_KW_ALGO,
+      extractable,
+      WRAP,
+    )
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+// For symmetric protector
+export async function deriveKeyFromSymmetric(
+  bufferedKey,
+  bufferedSalt,
+  extractable = EXTRACTABLE,
+) {
+  try {
+    const key = await kryptos.subtle.importKey(
+      RAW,
+      bufferedKey,
+      HKDF,
+      NONEXTRACTABLE,
+      DERIVE,
+    )
+    return kryptos.subtle.deriveKey(
+      deriveKeyHKDF(bufferedSalt),
       key,
       AES_KW_ALGO,
       extractable,

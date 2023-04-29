@@ -26,19 +26,17 @@
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
 import * as utils from './utils.js'
-import {
-  wrapKey,
-  generateKeyPair,
-  exportPublicKey,
-  unwrapKey,
-  exportKey,
-} from './keys.js'
+import { generateKeyPair, exportPublicKey, exportKey } from './keys.js'
 import * as algorithms from './algorithms.js'
 import { signPublicKeys } from './signer.js'
 import { fingerprint } from './digest.js'
-import { setupKeyContainer, unlockKeyContainer } from './keyContainer.js'
-import { getProtector, packProtector } from './protector.js'
-import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
+import {
+  setupKeyContainer,
+  unlockKeyContainer,
+  replaceOrAddProtector,
+} from './keyContainer.js'
+import { getProtector } from './protector.js'
+import { PROTECTOR_TYPES } from './constants.js'
 
 export async function setupKeyPair(
   derivedKey,
@@ -75,11 +73,16 @@ export async function setupIdentityKeys(
   id,
   protectorKey,
   algorithm,
-  protectorType = PROTECTOR_TYPES.password,
+  protectorType,
+  protectorIterations,
   protectorIdentifier,
 ) {
   try {
-    const protector = await getProtector(protectorKey)
+    const protector = await getProtector(
+      protectorKey,
+      null,
+      protectorIterations,
+    )
 
     const container = await setupKeyPair(
       protector.key,
@@ -116,11 +119,16 @@ export async function setupKeys(
   identityKey,
   signAlgorithm,
   encryptAlgorithm,
-  protectorType = PROTECTOR_TYPES.password,
+  protectorType,
   protectorIdentifier,
+  protectorIterations,
 ) {
   try {
-    const protector = await getProtector(protectorKey)
+    const protector = await getProtector(
+      protectorKey,
+      null,
+      protectorIterations,
+    )
     const signContainer = await setupKeyPair(
       protector.key,
       signAlgorithm,
@@ -136,7 +144,7 @@ export async function setupKeys(
       protectorIdentifier,
     )
     const signature = await signPublicKeys(
-      identityKey,
+      identityKey, // === null ? signContainer.privateKey : identityKey, // Self-sign if no identity key provided
       encryptContainer.publicKey,
       signContainer.publicKey,
     )
@@ -167,19 +175,6 @@ export async function setupKeys(
   } catch (e) {
     return Promise.reject(e)
   }
-}
-
-export function unlockIntermediateKey(
-  encryptedKey,
-  protectorKey,
-  protectAlgorithm,
-) {
-  return unwrapKey(
-    utils.base64ToArrayBuffer(encryptedKey),
-    protectorKey,
-    protectAlgorithm,
-    EXTRACTABLE,
-  )
 }
 
 export async function unlockPrivateKey(
@@ -279,60 +274,6 @@ export async function init(id, keyStore, type = PROTECTOR_TYPES.password) {
 }
 
 /**
- * Unlock the intermediate key of a key container with given protector, then re-wrap the interrmediate key
- * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
- * else the new protector will be added to the list of jey protectors.
- *
- * @param {String} keyType
- * @param {Object} keyContainer
- * @param {CryptoKey} protector
- * @param {Object} keyProtector
- * @param {CryptoKey} newProtectorKey
- * @param {String} newType
- */
-async function replaceOrAddProtector(
-  keyType,
-  keyContainer,
-  protector,
-  keyProtector,
-  newProtectorKey,
-  newType,
-  protectorIdentifier,
-) {
-  const clonedKeyContainer = { ...keyContainer }
-  const protectAlgorithm = algorithms.getAlgorithm(
-    clonedKeyContainer.protectType,
-  )
-  const intermediateKey = await unlockIntermediateKey(
-    keyProtector.encryptedKey,
-    protector.key,
-    protectAlgorithm,
-  )
-  const newProtector = await getProtector(newProtectorKey)
-  const wrappedIntermediateKey = await wrapKey(
-    intermediateKey,
-    newProtector.key,
-  )
-  const replaceProtector = packProtector(
-    wrappedIntermediateKey,
-    newProtector.algorithm,
-    newType,
-    protectorIdentifier,
-  )
-  // Clone keyProtectors
-  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
-  // Todo: handler (type, identifier) as distinct protectors
-  const index = clonedKeyProtectors.findIndex((p) => p.type === newType)
-  if (index !== -1) {
-    clonedKeyProtectors[index] = replaceProtector
-  } else {
-    clonedKeyProtectors.push(replaceProtector)
-  }
-  clonedKeyContainer.keyProtectors = clonedKeyProtectors
-  return { [keyType]: clonedKeyContainer }
-}
-
-/**
  * Lock key containers with a new protector. Key containers must first unlock the intermediate key
  * with current password protector. The new key protecter will replace an existing key protector
  * of the same time, or be added as a new key protector.
@@ -347,9 +288,9 @@ export async function lock(
   service,
   keyContainers,
   protectorKey,
-  type = PROTECTOR_TYPES.password,
+  type,
   newProtectorKey,
-  newType = PROTECTOR_TYPES.password,
+  newType,
   protectorIdentifier,
 ) {
   try {

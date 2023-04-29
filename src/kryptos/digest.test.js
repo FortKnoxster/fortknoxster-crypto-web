@@ -6,6 +6,6 @@ test('Test hash anything - mix of variables, objects, arrays, strings etc.', asy
   const b = [11, 22, 33]
   const c = { a: 1, b: [1, 2, 3], c: 'test' }
   const d = 123213
-  const hash = await hashAnything(a, b, c, d)
+  const hash = await hashAnything('SHA-256', a, b, c, d)
   t.is(hash.length, 64)
 })

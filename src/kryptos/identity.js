@@ -5,6 +5,16 @@ import {
   generateIdentityKeys,
 } from './serviceKeyStore.js'
 import { PSK, PVK, SERVICES, PROTECTOR_TYPES } from './constants.js'
+import {
+  ECDSA_ALGO,
+  ECDH_ALGO,
+  RSASSA_PKCS1_V1_5_ALGO,
+  RSA_OAEP_ALGO,
+  RSA_PSS_ALGO_4K,
+  RSA_OAEP_ALGO_4K,
+  RSA_PSS_ALGO_8K,
+  RSA_OAEP_ALGO_8K,
+} from './algorithms.js'
 import { importPublicVerifyKey } from './keys.js'
 import { signIt, sign } from './signer.js'
 import { verifyIt, verify } from './verifier.js'
@@ -82,13 +92,7 @@ export async function initIdentity(id) {
   }
 }
 
-const serviceKeys = [
-  { service: SERVICES.mail, rsa: true },
-  { service: SERVICES.storage, rsa: true },
-  { service: SERVICES.protocol, rsa: false },
-]
-
-export async function generateUserKeys(id, plainPassword) {
+export async function generateServiceKeys(id, plainPassword, serviceKeys) {
   try {
     const identityKeyStore = await generateIdentityKeys(plainPassword)
 
@@ -105,7 +109,10 @@ export async function generateUserKeys(id, plainPassword) {
           plainPassword,
           identityKeyStore.psk.privateKey,
           PROTECTOR_TYPES.password,
-          serviceKey.rsa,
+          serviceKey.signAlgorithm,
+          serviceKey.encryptAlgorithm,
+          null,
+          serviceKey.protectorIterations,
         ),
       ),
     )
@@ -124,4 +131,71 @@ export async function generateUserKeys(id, plainPassword) {
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+export function generateUserKeys(id, plainPassword) {
+  const serviceKeys = [
+    {
+      service: SERVICES.mail,
+      signAlgorithm: RSASSA_PKCS1_V1_5_ALGO,
+      encryptAlgorithm: RSA_OAEP_ALGO,
+    },
+    {
+      service: SERVICES.storage,
+      signAlgorithm: RSASSA_PKCS1_V1_5_ALGO,
+      encryptAlgorithm: RSA_OAEP_ALGO,
+    },
+    {
+      service: SERVICES.protocol,
+      signAlgorithm: ECDSA_ALGO,
+      encryptAlgorithm: ECDH_ALGO,
+    },
+  ]
+  return generateServiceKeys(id, plainPassword, serviceKeys)
+}
+
+// RSA 4096
+export function generateUserKeys4K(
+  id,
+  plainPassword,
+  protectorIterations = null,
+) {
+  const serviceKeys = [
+    {
+      service: SERVICES.storage,
+      signAlgorithm: RSA_PSS_ALGO_4K,
+      encryptAlgorithm: RSA_OAEP_ALGO_4K,
+      protectorIterations,
+    },
+    {
+      service: SERVICES.protocol,
+      signAlgorithm: ECDSA_ALGO,
+      encryptAlgorithm: ECDH_ALGO,
+      protectorIterations,
+    },
+  ]
+  return generateServiceKeys(id, plainPassword, serviceKeys)
+}
+
+// RSA 8192
+export function generateUserKeys8K(
+  id,
+  plainPassword,
+  protectorIterations = null,
+) {
+  const serviceKeys = [
+    {
+      service: SERVICES.storage,
+      signAlgorithm: RSA_PSS_ALGO_8K,
+      encryptAlgorithm: RSA_OAEP_ALGO_8K,
+      protectorIterations,
+    },
+    {
+      service: SERVICES.protocol,
+      signAlgorithm: ECDSA_ALGO,
+      encryptAlgorithm: ECDH_ALGO,
+      protectorIterations,
+    },
+  ]
+  return generateServiceKeys(id, plainPassword, serviceKeys)
 }

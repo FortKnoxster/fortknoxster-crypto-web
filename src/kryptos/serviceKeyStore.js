@@ -1,12 +1,6 @@
 import { setupIdentityKeys, setupKeys, unlock, init, lock } from './keystore.js'
 import { unwrapPrivateKeyPem } from './keys.js'
-import {
-  ECDSA_ALGO,
-  ECDH_ALGO,
-  RSASSA_PKCS1_V1_5_ALGO,
-  RSA_OAEP_ALGO,
-  RSA_OAEP,
-} from './algorithms.js'
+import { ECDSA_ALGO, RSA_OAEP } from './algorithms.js'
 import { DECRYPT_UNWRAP } from './usages.js'
 import { base64ToArrayBuffer } from './utils.js'
 import { SERVICES, PROTECTOR_TYPES, PDK, PSK } from './constants.js'
@@ -211,8 +205,18 @@ export function verifyKeyProtector(keys, password, type) {
   return Promise.all(promises)
 }
 
-export function generateIdentityKeys(password) {
-  return setupIdentityKeys(SERVICES.identity, password, ECDSA_ALGO)
+export function generateIdentityKeys(
+  password,
+  protectorIterations,
+  protectorType = PROTECTOR_TYPES.password,
+) {
+  return setupIdentityKeys(
+    SERVICES.identity,
+    password,
+    ECDSA_ALGO,
+    protectorType,
+    protectorIterations,
+  )
 }
 
 export function setupKeyStore(
@@ -220,28 +224,20 @@ export function setupKeyStore(
   protector,
   identityKeyStore,
   protectorType,
-  rsa = true,
+  signAlgorithm,
+  encryptAlgorithm,
   protectorIdentifier,
+  protectorIterations,
 ) {
-  if (rsa) {
-    return setupKeys(
-      service,
-      protector,
-      identityKeyStore,
-      RSASSA_PKCS1_V1_5_ALGO,
-      RSA_OAEP_ALGO,
-      protectorType,
-      protectorIdentifier,
-    )
-  }
   return setupKeys(
     service,
     protector,
     identityKeyStore,
-    ECDSA_ALGO,
-    ECDH_ALGO,
+    signAlgorithm,
+    encryptAlgorithm,
     protectorType,
     protectorIdentifier,
+    protectorIterations,
   )
 }
 

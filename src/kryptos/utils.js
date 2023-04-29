@@ -159,7 +159,8 @@ export function dataUrlToBlob(dataurl) {
 }
 
 export function objectToArrayBuffer(jwk) {
-  return stringToArrayBuffer(JSON.stringify(jwk))
+  const str = JSON.stringify(jwk)
+  return stringToArrayBuffer(str)
 }
 
 export function arrayBufferToObject(arrayBuffer) {

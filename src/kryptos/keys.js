@@ -174,26 +174,54 @@ export function generateWrapKey() {
   )
 }
 
-export function wrapKey(key, wrappingKey) {
-  return kryptos.subtle.wrapKey(formats.RAW, key, wrappingKey, {
-    name: wrappingKey.algorithm.name,
-  })
+export function wrapKey(key, wrappingKey, wrappingAlgorithm) {
+  const algorithm =
+    wrappingAlgorithm && wrappingAlgorithm.name === algorithms.AES_GCM.name
+      ? wrappingAlgorithm
+      : {
+          name: wrappingKey.algorithm.name,
+        }
+  return kryptos.subtle.wrapKey(formats.RAW, key, wrappingKey, algorithm)
 }
 
 export function unwrapKey(
   wrappedKey,
   unwrappingKey,
   wrappedKeyAlgorithm,
+  unwrappingKeyAlgorithm,
   extractable = NONEXTRACTABLE,
 ) {
+  const algorithm =
+    unwrappingKeyAlgorithm &&
+    unwrappingKeyAlgorithm.name === algorithms.AES_GCM.name
+      ? unwrappingKeyAlgorithm
+      : unwrappingKey.algorithm.name
   return kryptos.subtle.unwrapKey(
     formats.RAW,
     wrappedKey,
     unwrappingKey,
-    unwrappingKey.algorithm.name,
+    algorithm,
     wrappedKeyAlgorithm,
     extractable,
     usage.WRAP.concat(usage.ENCRYPT),
+  )
+}
+
+export function unwrapSecretKey(
+  wrappedKey,
+  unwrappingKey,
+  wrappedKeyAlgorithm,
+  usages,
+  extractable = NONEXTRACTABLE,
+) {
+  return kryptos.subtle.unwrapKey(
+    formats.JWK,
+    wrappedKey,
+    unwrappingKey,
+    wrappedKeyAlgorithm,
+    unwrappingKey.algorithm.name,
+    extractable,
+    usages,
   )
 }
 
@@ -290,9 +318,11 @@ export function exportRawKey(key) {
 export function generateKeyPair(algorithm) {
   switch (algorithm.name) {
     case algorithms.RSASSA_PKCS1_V1_5_ALGO.name:
+    case algorithms.RSA_PSS_ALGO_8K.name:
     case algorithms.ECDSA_ALGO.name:
       return generateSigningKeyPair(algorithm)
     case algorithms.RSA_OAEP_ALGO.name:
+    case algorithms.RSA_OAEP_ALGO_8K.name:
       return generateEncryptionKeyPair(algorithm)
     case algorithms.ECDH_ALGO.name:
       return generateDerivationKeyPair(algorithm)

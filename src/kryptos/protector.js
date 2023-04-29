@@ -24,13 +24,19 @@
  * Web Cryptography API. Kryptos supports symmetric keys and asymmetric key pair
  * generation, key derivation, key wrap/unwrap, encryption, decryption, signing and verification.
  */
-import { getAlgorithm, deriveKeyPBKDF2 } from './algorithms.js'
+import {
+  getAlgorithm,
+  deriveKeyPBKDF2,
+  deriveKeyHKDF,
+  aesGcmParams,
+} from './algorithms.js'
 import {
   randomValue,
   arrayBufferToBase64,
   base64ToArrayBuffer,
+  nonce,
 } from './utils.js'
-import { deriveKeyFromPassword } from './derive.js'
+import { deriveKeyFromPassword, deriveKeyFromSymmetric } from './derive.js'
 import { importWrapKey } from './keys.js'
 import { PROTECTOR_ITERATIONS, LENGTH_32 } from './constants.js'
 
@@ -39,14 +45,19 @@ export function packProtector(wrappedKey, algorithm, type, identifier) {
     encryptedKey: arrayBufferToBase64(wrappedKey),
     type,
     name: algorithm.name,
+    ...(algorithm.iv && { iv: arrayBufferToBase64(algorithm.iv) }),
     ...(algorithm.salt && { salt: arrayBufferToBase64(algorithm.salt) }),
     ...(algorithm.iterations && { iterations: algorithm.iterations }),
-    hash: algorithm.hash.name || algorithm.hash,
+    // hash: algorithm.hash.name || algorithm.hash,
+    ...(algorithm.hash &&
+      (algorithm.hash.name || algorithm.hash) && {
+        hash: algorithm.hash.name || algorithm.hash,
+      }),
     ...(identifier && { identifier }),
   }
 }
 
-export async function getSymmetricProtector(
+export async function getPasswordProtector(
   password,
   givenSalt,
   givenIterations,
@@ -60,6 +71,32 @@ export async function getSymmetricProtector(
   return {
     algorithm,
     key,
+  }
+}
+
+export async function getSymmetricHkdfProtector(bufferedKey, givenSalt) {
+  const salt = givenSalt
+    ? base64ToArrayBuffer(givenSalt)
+    : randomValue(LENGTH_32)
+  const algorithm = deriveKeyHKDF(salt)
+  const key = await deriveKeyFromSymmetric(bufferedKey, salt)
+  return {
+    algorithm,
+    key,
+  }
+}
+
+// Todo: add support for buffered key
+export async function getSymmetricAesGcmProtector(
+  cryptoKey,
+  givenIv,
+  additionalData,
+) {
+  const iv = givenIv ? base64ToArrayBuffer(givenIv) : nonce()
+  const algorithm = aesGcmParams(iv, additionalData)
+  return {
+    algorithm,
+    key: cryptoKey,
   }
 }
 
@@ -77,7 +114,7 @@ export function getProtector(protector, salt, iterations) {
     return protector
   }
   if (typeof protector === 'string') {
-    return getSymmetricProtector(protector, salt, iterations)
+    return getPasswordProtector(protector, salt, iterations)
   }
   if (typeof protector === 'object' && protector.algorithm) {
     return {
