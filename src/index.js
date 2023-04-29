@@ -31,7 +31,7 @@ export {
 
 export * from './kryptos/utils.js'
 
-export { hashAnything, fingerprint } from './kryptos/digest.js'
+export { hashString, hashAnything, fingerprint } from './kryptos/digest.js'
 
 export {
   initProtocol,
@@ -41,6 +41,7 @@ export {
 } from './kryptos/protocol.js'
 
 export {
+  initStorage,
   encryptNewItemAssignment,
   encryptItemAssignment,
   encryptItem,
@@ -83,10 +84,30 @@ export { decryptRawSessionKey } from './kryptos/decrypter.js'
 export {
   initIdentity,
   generateUserKeys,
+  generateServiceKeys,
+  generateUserKeys4K,
+  generateUserKeys8K,
   signData,
   verifyData,
   signWithIdentity,
   verifyWithIdentity,
 } from './kryptos/identity.js'
 
-export { lockKeyContainer, unlockKeyContainer } from './kryptos/keyContainer.js'
+export {
+  lockKeyContainer,
+  unlockKeyContainer,
+  removeProtector,
+} from './kryptos/keyContainer.js'
+
+export {
+  encryptBip39Wallet,
+  encryptWallet,
+  decryptWallet,
+  encryptBeneficiary,
+  reEncryptBeneficiary,
+  encryptWalletToBeneficiary,
+  encryptItemKeyToBeneficiary,
+  encryptNewInheritanceKey,
+  reEncryptInheritanceKey,
+  encryptBeneficiaryToInheritanceKey,
+} from './kryptos/wallets.js'

@@ -30,11 +30,23 @@ import { encryptSignEncrypt, encryptSessionKeys } from './encrypter.js'
 import { verifyDecrypt, decryptSessionKey } from './decrypter.js'
 import { PSK, PEK, PVK, PDK, SERVICES } from './constants.js'
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils.js'
-import { AES_CBC_ALGO } from './algorithms.js'
+import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms.js'
+
+const storage = {
+  symmetricAlgorithm: AES_CBC_ALGO,
+}
+
+/**
+ * Init symmetric mode AES-GCM mode, default AES-CBC mode for backward compatibility
+ */
+export function initStorage(symmetricAlgorithm = AES_GCM_ALGO) {
+  storage.symmetricAlgorithm = symmetricAlgorithm
+}
 
 export async function encryptItem(data, key, publicKeys = []) {
   try {
-    const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
+    const { symmetricAlgorithm } = storage
+    const sessionKey = await getSessionKey(symmetricAlgorithm, key)
     return encryptSignEncrypt(
       data,
       sessionKey,
@@ -58,7 +70,8 @@ export async function encryptNewItemAssignment(item) {
 
 export async function decryptItem(metaData, key, publicKey) {
   try {
-    const sessionKey = await getSessionKey(AES_CBC_ALGO, key)
+    const { symmetricAlgorithm } = storage
+    const sessionKey = await getSessionKey(symmetricAlgorithm, key)
     const json = await verifyDecrypt(
       base64ToArrayBuffer(metaData.d),
       sessionKey,

@@ -1,4 +1,12 @@
-import { LENGTH_256, LENGTH_2048, PSK, PDK } from './constants.js'
+/* eslint-disable max-lines */
+import {
+  LENGTH_32,
+  LENGTH_64,
+  LENGTH_256,
+  LENGTH_2048,
+  LENGTH_4096,
+  LENGTH_8192,
+} from './constants.js'
 
 export const EC_AES_GCM_256 = 'EC:AES-GCM-256'
 export const RSA = 'RSA'
@@ -16,6 +24,12 @@ export const RSA_OAEP_2048 = 'RSA-OAEP-2048'
 export const ES512 = 'ES512'
 export const ECDSA_P521 = 'ECDSA-P521'
 export const ECDH_P521 = 'ECDH-P521'
+export const RSA_OAEP_512 = 'RSA-OAEP-512'
+export const PS512 = 'PS512'
+export const RSA_OAEP_4096 = 'RSA-OAEP-4096'
+export const RSA_PSS_4096 = 'RSA-PSS-4096'
+export const RSA_OAEP_8192 = 'RSA-OAEP-8192'
+export const RSA_PSS_8192 = 'RSA-PSS-8192'
 
 export const PBKDF2 = {
   name: 'PBKDF2',
@@ -29,9 +43,35 @@ export const SHA_256 = {
   name: 'SHA-256',
 }
 
+export const SHA_512 = {
+  name: 'SHA-512',
+}
+
 export const RSA_OAEP = {
   name: 'RSA-OAEP',
   hash: SHA_256,
+}
+
+export const RSA_OAEP_4K = {
+  name: 'RSA-OAEP',
+  hash: SHA_512,
+}
+
+export const RSA_PSS_4K = {
+  name: 'RSA-PSS',
+  hash: SHA_512,
+  saltLength: LENGTH_32,
+}
+
+export const RSA_OAEP_8K = {
+  name: 'RSA-OAEP',
+  hash: SHA_512,
+}
+
+export const RSA_PSS_8K = {
+  name: 'RSA-PSS',
+  hash: SHA_512,
+  saltLength: LENGTH_64,
 }
 
 export const AES_CBC = {
@@ -69,6 +109,34 @@ export const RSA_OAEP_ALGO = {
   hash: SHA_256,
 }
 
+export const RSA_OAEP_ALGO_4K = {
+  name: 'RSA-OAEP',
+  modulusLength: LENGTH_4096,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
+export const RSA_PSS_ALGO_4K = {
+  name: 'RSA-PSS',
+  modulusLength: LENGTH_4096,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
+export const RSA_OAEP_ALGO_8K = {
+  name: 'RSA-OAEP',
+  modulusLength: LENGTH_8192,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
+export const RSA_PSS_ALGO_8K = {
+  name: 'RSA-PSS',
+  modulusLength: LENGTH_8192,
+  publicExponent: new Uint8Array([1, 0, 1]), // 24 bit representation of 65537
+  hash: SHA_512,
+}
+
 export const ECDH_ALGO = {
   name: 'ECDH',
   namedCurve: 'P-521',
@@ -99,18 +167,29 @@ export const HMAC_ALGO = {
   hash: SHA_256,
 }
 
-export const deriveKeyPBKDF2 = (salt, iterations = 50000) => ({
+export const deriveKeyPBKDF2 = (
+  salt,
+  iterations = 50000,
+  hash = SHA_256.name,
+) => ({
   ...PBKDF2,
   salt,
   iterations,
-  hash: SHA_256.name,
+  hash,
 })
 
-export const deriveKeyHKDF = (salt) => ({
+export const deriveKeyHKDF = (salt, hash = SHA_256.name, info = 0) => ({
   ...HKDF,
   salt,
-  hash: SHA_256.name,
-  info: new ArrayBuffer(0),
+  hash,
+  info: new ArrayBuffer(info),
+})
+
+export const aesGcmParams = (iv, additionalData, tagLength = 128) => ({
+  ...AES_GCM,
+  iv,
+  tagLength,
+  ...(additionalData && { additionalData }),
 })
 
 export function getAlgorithm(algo) {
@@ -134,6 +213,16 @@ export function getAlgorithm(algo) {
     case RSA_OAEP_2048:
     case RSA_OAEP.name:
       return RSA_OAEP
+    case RSA_OAEP_512:
+    case RSA_OAEP_8192:
+      return RSA_OAEP_8K
+    case RSA_OAEP_4096:
+      return RSA_OAEP_4K
+    case RSA_PSS_4096:
+      return RSA_PSS_4K
+    case PS512:
+    case RSA_PSS_8192:
+      return RSA_PSS_8K
     case ECDSA_ALGO.name:
     case ES512:
     case ECDSA_P521:
@@ -142,6 +231,8 @@ export function getAlgorithm(algo) {
     case ECDH_P521:
       return ECDH_ALGO
     case 'BIP39':
+    case 'wallet':
+    case 'beneficiary':
       return null
     default:
       break
@@ -153,6 +244,8 @@ export function getSignAlgorithm(algo) {
   switch (algo) {
     case RSASSA_PKCS1_V1_5.name:
       return RSASSA_PKCS1_V1_5
+    case RSA_PSS_8K.name:
+      return RSA_PSS_8K
     case ECDSA_ALGO.name:
       return { name: ECDSA_ALGO.name, hash: SHA_256 }
     case HMAC_ALGO.name:
@@ -179,25 +272,6 @@ export function getImportAlgorithm(algo) {
   throw new Error('Invalid import algorithm.')
 }
 
-export function getKeyType(mode, type) {
-  if (type === PSK) {
-    if (mode === RSA) {
-      return RSASSA_PKCS1_V1_5_2048
-    }
-    if (mode === EC) {
-      return ECDSA_P521
-    }
-  } else if (type === PDK) {
-    if (mode === RSA) {
-      return RSA_OAEP_2048
-    }
-    if (mode === EC) {
-      return ECDH_P521
-    }
-  }
-  throw new Error('Invalid key mode.')
-}
-
 export function getKeyMode(keyType) {
   switch (keyType) {
     case ECDSA_P521:
@@ -205,11 +279,15 @@ export function getKeyMode(keyType) {
       return EC
     case RSA_OAEP_2048:
     case RSASSA_PKCS1_V1_5_2048:
+    case RSA_OAEP_4096:
+    case RSA_PSS_4096:
+    case RSA_OAEP_8192:
+    case RSA_PSS_8192:
       return RSA
     default:
       break
   }
-  throw new Error('Invalid key type.')
+  throw new Error('Invalid key mode.')
 }
 
 export function keyContainerType(algorithm) {
@@ -222,15 +300,39 @@ export function keyContainerType(algorithm) {
       return RSASSA_PKCS1_V1_5_2048
     case RSA_OAEP_ALGO:
       return RSA_OAEP_2048
+    case RSA_OAEP_ALGO_4K:
+      return RSA_OAEP_4096
+    case RSA_PSS_ALGO_4K:
+      return RSA_PSS_4096
+    case RSA_OAEP_ALGO_8K:
+      return RSA_OAEP_8192
+    case RSA_PSS_ALGO_8K:
+      return RSA_PSS_8192
+    case AES_GCM_ALGO:
+      return AES_GCM_256
     default:
       break
   }
-  throw new Error('Invalid key mode.')
+  throw new Error('Invalid key container type.')
 }
 
 export function isEllipticCurve(algorithm) {
   const { name } = algorithm
   switch (name) {
+    case ECDH_ALGO.name:
+    case ECDSA_ALGO.name:
+      return true
+    default:
+      return false
+  }
+}
+
+export function isAsymmetricKey(algorithm) {
+  const { name } = algorithm
+  switch (name) {
+    case RSA_OAEP_ALGO.name:
+    case RSASSA_PKCS1_V1_5_ALGO.name:
+    case RSA_PSS_4K.name:
     case ECDH_ALGO.name:
     case ECDSA_ALGO.name:
       return true
