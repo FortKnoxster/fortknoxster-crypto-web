@@ -15,9 +15,13 @@ import { base64ToArrayBuffer, arrayBufferToBase64 } from './utils.js'
 import { PSK, PVK, PDK, SERVICES } from './constants.js'
 import { AES_CBC_ALGO, AES_GCM_ALGO } from './algorithms.js'
 
-export async function encryptChatMessage(plainText, publicKeys) {
+export async function encryptChatMessage(
+  plainText,
+  publicKeys,
+  algorithm = AES_CBC_ALGO,
+) {
   try {
-    const sessionKey = await generateSessionKey(AES_CBC_ALGO)
+    const sessionKey = await generateSessionKey(algorithm)
     const privateKey = getPrivateKey(SERVICES.mail, PSK)
     const result = await encryptSignEncrypt(
       plainText,
@@ -42,11 +46,16 @@ export async function encryptGroupChatMessage(plainText, sessionKey) {
   }
 }
 
-export async function decryptChatMessage(message, key, publicKey) {
+export async function decryptChatMessage(
+  message,
+  key,
+  publicKey,
+  algorithm = AES_CBC_ALGO,
+) {
   try {
     const rawKey = base64ToArrayBuffer(key)
     const privateKey = getPrivateKey(SERVICES.mail, PDK)
-    const sessionKey = await unwrapKey(rawKey, privateKey, AES_CBC_ALGO)
+    const sessionKey = await unwrapKey(rawKey, privateKey, algorithm)
     return verifyDecrypt(
       base64ToArrayBuffer(message.m),
       sessionKey,

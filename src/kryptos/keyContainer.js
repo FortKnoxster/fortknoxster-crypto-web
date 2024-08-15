@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Copyright 2021 FortKnoxster Ltd.
  *
@@ -38,12 +39,13 @@ import {
   unwrapKey,
   wrapPrivateKey,
   unwrapPrivateKey,
+  unwrapSecretKey,
 } from './keys.js'
 import { encrypt } from './encrypter.js'
 import * as algorithms from './algorithms.js'
 import { getUsage } from './usages.js'
 import { getProtector, packProtector } from './protector.js'
-import { PROTECTOR_TYPES, EXTRACTABLE } from './constants.js'
+import { EXTRACTABLE } from './constants.js'
 
 function newKeyContainer(wrappedKey, iv, keyType) {
   return {
@@ -56,8 +58,14 @@ function newKeyContainer(wrappedKey, iv, keyType) {
 }
 
 function wrapKeyContainerKey(keyToEncrypt, iv, intermediateKey) {
-  if (keyToEncrypt.privateKey) {
-    return wrapPrivateKey(keyToEncrypt.privateKey, iv, intermediateKey)
+  if (keyToEncrypt.privateKey || keyToEncrypt.extractable) {
+    // private key or secret key
+
+    return wrapPrivateKey(
+      keyToEncrypt.privateKey || keyToEncrypt,
+      iv,
+      intermediateKey,
+    )
   }
   const arrayBuffer = objectToArrayBuffer(keyToEncrypt)
   return encrypt(arrayBuffer, iv, intermediateKey)
@@ -67,11 +75,13 @@ export function unlockIntermediateKey(
   encryptedKey,
   protectorKey,
   protectAlgorithm,
+  protectorKeyAlgorithm,
 ) {
   return unwrapKey(
     base64ToArrayBuffer(encryptedKey),
     protectorKey,
     protectAlgorithm,
+    protectorKeyAlgorithm,
     EXTRACTABLE,
   )
 }
@@ -83,6 +93,15 @@ async function unwrapKeyContainerKey(
   unwrappedKeyAlgorithm,
   usages,
 ) {
+  if (!algorithms.isAsymmetricKey(unwrappedKeyAlgorithm)) {
+    return unwrapSecretKey(
+      wrappedPrivateKey,
+      unwrappingKey,
+      wrappedKeyAlgorithm,
+      // unwrappedKeyAlgorithm,
+      usages,
+    )
+  }
   return unwrapPrivateKey(
     wrappedPrivateKey,
     unwrappingKey,
@@ -119,8 +138,13 @@ export async function setupKeyContainer(
 ) {
   try {
     const intermediateKey = await generateWrapKey()
-    const wrappedIntermediateKey = await wrapKey(intermediateKey, derivedKey)
+    const wrappedIntermediateKey = await wrapKey(
+      intermediateKey,
+      derivedKey,
+      protectorAlgorithm,
+    )
     const iv = nonce()
+    // console.log('keyToEncrypt', keyToEncrypt)
     const wrappedKey = await wrapKeyContainerKey(
       keyToEncrypt,
       iv,
@@ -165,15 +189,20 @@ export async function lockKeyContainer(
 export async function unlockKeyContainer(
   keyContainer,
   protectorKey,
-  type = PROTECTOR_TYPES.password,
+  type,
   includeProtector,
 ) {
   try {
     const keyProtector = keyContainer.keyProtectors.find(
       (protector) => protector.type === type,
     )
-    const { salt, iterations } = keyProtector
-    const protector = await getProtector(protectorKey, salt, iterations)
+    const { salt, iterations, iv: wrappingIv } = keyProtector
+    const protector = await getProtector(
+      protectorKey,
+      salt,
+      iterations,
+      wrappingIv,
+    )
     const protectAlgorithm = algorithms.getAlgorithm(keyContainer.protectType)
     const encryptedKey = base64ToArrayBuffer(keyContainer.encryptedKey)
     const iv = base64ToArrayBuffer(keyContainer.iv)
@@ -181,6 +210,7 @@ export async function unlockKeyContainer(
       keyProtector.encryptedKey,
       protector.key,
       protectAlgorithm,
+      protector.algorithm,
     )
     const unwrappedKeyAlgorithm = algorithms.getAlgorithm(keyContainer.keyType)
     const usages = getUsage(keyContainer.keyType)
@@ -207,4 +237,88 @@ export async function unlockKeyContainer(
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+/**
+ * Unlock the intermediate key of a key container with given protector, then re-wrap the interrmediate key
+ * with a new protector. If any existing protector type equals the new protector type, it will be replaced,
+ * else the new protector will be added to the list of jey protectors.
+ *
+ * @param {String} keyType key type of unlocking protector
+ * @param {Object} keyContainer given key container
+ * @param {CryptoKey} protector protector to unlock with key protector
+ * @param {Object} keyProtector key protector to unlock protector
+ * @param {CryptoKey} newProtectorKey new key protector to lock key container
+ * @param {String} newType new key protector type
+ * @param {String} protectorIdentifier optional identifier of key protector
+ * @return {Object} return new key container
+ */
+export async function replaceOrAddProtector(
+  keyType,
+  keyContainer,
+  protector,
+  keyProtector,
+  newProtectorKey,
+  newType,
+  protectorIdentifier,
+) {
+  try {
+    const clonedKeyContainer = { ...keyContainer }
+    const protectAlgorithm = algorithms.getAlgorithm(
+      clonedKeyContainer.protectType,
+    )
+    const intermediateKey = await unlockIntermediateKey(
+      keyProtector.encryptedKey,
+      protector.key,
+      protectAlgorithm,
+      protector.algorithm,
+    )
+    const newProtector = await getProtector(newProtectorKey)
+    const wrappedIntermediateKey = await wrapKey(
+      intermediateKey,
+      newProtector.key,
+      newProtector.algorithm,
+    )
+    const replaceProtector = packProtector(
+      wrappedIntermediateKey,
+      newProtector.algorithm,
+      newType,
+      protectorIdentifier,
+    )
+    // Clone keyProtectors
+    const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+    // If type and identifier match (if identifier present) or just type match if no identifier present
+    const index = clonedKeyProtectors.findIndex(
+      (p) =>
+        (p.type === newType &&
+          p.identifier &&
+          p.identifier === protectorIdentifier) ||
+        (p.type === newType && !p.identifier),
+    )
+    if (index !== -1) {
+      clonedKeyProtectors[index] = replaceProtector
+    } else {
+      clonedKeyProtectors.push(replaceProtector)
+    }
+    clonedKeyContainer.keyProtectors = clonedKeyProtectors
+    return { [keyType]: clonedKeyContainer }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export function removeProtector(keyContainer, type, identifier) {
+  const clonedKeyContainer = { ...keyContainer }
+  const clonedKeyProtectors = [...clonedKeyContainer.keyProtectors]
+  // If type and identifier match (if identifier present) or just type match if no identifier present
+  const index = clonedKeyProtectors.findIndex(
+    (p) =>
+      (p.type === type && p.identifier && p.identifier === identifier) ||
+      (p.type === type && !p.identifier),
+  )
+  if (index !== -1) {
+    clonedKeyProtectors.splice(index, 1)
+  }
+  clonedKeyContainer.keyProtectors = clonedKeyProtectors
+  return clonedKeyContainer
 }

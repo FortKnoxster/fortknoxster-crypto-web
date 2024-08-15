@@ -1,8 +1,13 @@
 import test from 'ava'
-import { createIdentity, verifyIdentity } from './identity.js'
+import {
+  createIdentity,
+  verifyIdentity,
+  generateUserKeys4K,
+  generateUserKeys8K,
+} from './identity.js'
 import { generateSigningKeyPair, exportKey } from './keys.js'
 import * as algorithms from './algorithms.js'
-import { generateId } from './utils.js'
+import { generateId, randomString } from './utils.js'
 
 test('Test create signed Identity (createIdentity)', async (t) => {
   const keyPair = await generateSigningKeyPair(algorithms.ECDSA_ALGO)
@@ -62,4 +67,42 @@ test('Test create signed and failed verified Identity with incorrect signature (
   )
 
   t.is(error.message, 'Failed verification.')
+})
+
+test('Test generate user keys with RSA 4096 key pairs', async (t) => {
+  const id = generateId(32)
+  const password = randomString()
+  const protectorIterations = 424242
+
+  const serviceKeyContainers = await generateUserKeys4K(
+    id,
+    password,
+    protectorIterations,
+  )
+
+  t.assert(
+    serviceKeyContainers.keyContainers.storage.psk.keyProtectors[0]
+      .encryptedKey &&
+      serviceKeyContainers.keyContainers.storage.psk.keyProtectors[0]
+        .iterations === protectorIterations,
+  )
+})
+
+test('Test generate user keys with RSA 8192 key pairs', async (t) => {
+  const id = generateId(32)
+  const password = randomString()
+  const protectorIterations = 424242
+
+  const serviceKeyContainers = await generateUserKeys8K(
+    id,
+    password,
+    protectorIterations,
+  )
+
+  t.assert(
+    serviceKeyContainers.keyContainers.storage.psk.keyProtectors[0]
+      .encryptedKey &&
+      serviceKeyContainers.keyContainers.storage.psk.keyProtectors[0]
+        .iterations === protectorIterations,
+  )
 })

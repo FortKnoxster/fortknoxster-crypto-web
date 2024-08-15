@@ -9,7 +9,8 @@
     "lint": "eslint src/**/*.js",
     "test": "nyc ava --verbose --timeout=20s",
     "test:watch": "nyc ava --verbose --watch --timeout=20s",
-    "eslint": "eslint src/**/*.js"
+    "eslint": "eslint src/**/*.js",
+    "coverage": "c8 --reporter=html --reporter=text ava --verbose --timeout=20s"
   },
   "lint-staged": {
     "src/**/*.js": "eslint"
@@ -18,9 +19,9 @@
     "files": [
       "**/**.test.js"
     ],
-    "babel": true,
+    "verbose": true,
     "require": [
-      "@babel/polyfill",
+      "@babel/register",
       "./src/test/helpers/_setup-browser-env.js"
     ]
   },
@@ -44,30 +45,31 @@
     "end-to-end encryption"
   ],
   "devDependencies": {
-    "@ava/babel": "^1.0.1",
-    "@babel/core": "^7.14.0",
+    "@babel/core": "^7.21.5",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.14.0",
+    "@babel/preset-env": "^7.21.5",
     "@babel/register": "^7.12.1",
     "@istanbuljs/nyc-config-babel": "^3.0.0",
-    "ava": "^3.13.0",
+    "@peculiar/webcrypto": "^1.3.3",
+    "ava": "^5.2.0",
     "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.1",
+    "babel-loader": "^9.1.2",
     "babel-plugin-istanbul": "^6.0.0",
     "babel-register": "^6.26.0",
     "browser-env": "^3.3.0",
-    "eslint": "^7.26.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "c8": "^7.11.2",
+    "eslint": "^8.39.0",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-ava": "^12.0.0",
+    "eslint-plugin-ava": "^14.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-prettier": "^3.1.4",
-    "husky": "^4.3.0",
-    "jsdoc": "^3.6.7",
-    "lint-staged": "^10.5.1",
-    "node-webcrypto-ossl": "^2.1.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.1",
+    "jsdoc": "^4.0.2",
+    "jsdom": ">=16.5.0",
+    "lint-staged": "^13.2.2",
     "nyc": "^15.1.0",
-    "prettier": "^2.2.0",
+    "prettier": "^2.8.8",
     "webcrypto-core": "^1.2.0"
   },
   "husky": {

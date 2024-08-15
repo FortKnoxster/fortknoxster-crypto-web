@@ -3,6 +3,11 @@ import {
   ECDSA_P521,
   RSA_OAEP_2048,
   ECDH_P521,
+  RSA_OAEP_4096,
+  RSA_PSS_4096,
+  RSA_OAEP_8192,
+  RSA_PSS_8192,
+  AES_GCM_256,
 } from './algorithms.js'
 
 export const DERIVE = ['deriveBits', 'deriveKey']
@@ -20,12 +25,20 @@ export function getUsage(algorithm) {
   switch (algorithm) {
     case ECDSA_P521:
     case RSASSA_PKCS1_V1_5_2048:
+    case RSA_PSS_4096:
+    case RSA_PSS_8192:
       return SIGN_ONLY
     case RSA_OAEP_2048:
+    case RSA_OAEP_4096:
+    case RSA_OAEP_8192:
       return DECRYPT_UNWRAP
     case ECDH_P521:
       return DERIVE
+    case AES_GCM_256:
+      return DECRYPT_UNWRAP.concat(ENCRYPT_WRAP)
     case 'BIP39':
+    case 'wallet':
+    case 'beneficiary':
       return null
     default:
       break
