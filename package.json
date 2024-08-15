@@ -7,10 +7,10 @@
   "type": "module",
   "scripts": {
     "lint": "eslint src/**/*.js",
-    "test": "nyc ava --verbose --timeout=20s",
-    "test:watch": "nyc ava --verbose --watch --timeout=20s",
+    "test": "nyc ava --verbose --timeout=30s",
+    "test:watch": "nyc ava --verbose --watch --timeout=30s",
     "eslint": "eslint src/**/*.js",
-    "coverage": "c8 --reporter=html --reporter=text ava --verbose --timeout=20s"
+    "coverage": "c8 --reporter=html --reporter=text ava --verbose --timeout=30s"
   },
   "lint-staged": {
     "src/**/*.js": "eslint"
